@@ -1,3 +1,9 @@
+gnome-shell (43~beta-2) experimental; urgency=medium
+
+  * Build with libsoup3
+
+ -- Jeremy Bicha <jbicha@ubuntu.com>  Mon, 05 Sep 2022 17:40:40 -0400
+
 gnome-shell (43~beta-1) experimental; urgency=medium
 
   * New upstream release
