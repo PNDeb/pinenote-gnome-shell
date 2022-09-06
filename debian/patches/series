@@ -1,2 +1,3 @@
 debian/gnome-shell-extension-prefs-Give-Debian-specific-advice.patch
 Revert-build-Port-to-gcr4.patch
+quick-settings-Add-ellipses-to-Log-Out-string.patch
