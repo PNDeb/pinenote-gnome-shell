@@ -1,3 +1,9 @@
+gnome-shell (43~rc-1) UNRELEASED; urgency=medium
+
+  * New upstream release
+
+ -- Jeremy Bicha <jbicha@ubuntu.com>  Tue, 06 Sep 2022 14:12:35 -0400
+
 gnome-shell (43~beta-2) experimental; urgency=medium
 
   * Build with libsoup3
