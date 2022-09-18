@@ -1,8 +1,13 @@
-gnome-shell (43.0-1) UNRELEASED; urgency=medium
+gnome-shell (43.0-1) experimental; urgency=medium
 
+  * Team upload
   * New upstream release
+  * d/control.in: Bump minimum mutter version to 43.0 release
+  * d/p/quick-settings-Add-ellipses-to-Log-Out-string.patch:
+    Drop, applied upstream
+  * Standards-Version: 4.6.1 (no changes required)
 
- -- Simon McVittie <smcv@debian.org>  Sun, 18 Sep 2022 19:41:26 +0100
+ -- Simon McVittie <smcv@debian.org>  Sun, 18 Sep 2022 20:02:40 +0100
 
 gnome-shell (43~rc-1) experimental; urgency=medium
 
