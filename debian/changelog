@@ -1,3 +1,9 @@
+gnome-shell (43.0-2) unstable; urgency=medium
+
+  * Release to unstable
+
+ -- Jeremy Bicha <jbicha@ubuntu.com>  Tue, 27 Sep 2022 19:10:41 -0400
+
 gnome-shell (43.0-1) experimental; urgency=medium
 
   * Team upload
