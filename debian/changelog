@@ -1,4 +1,4 @@
-gnome-shell (43.0-3) UNRELEASED; urgency=medium
+gnome-shell (43.1-1) UNRELEASED; urgency=medium
 
   [ Jeremy Bicha ]
   * debian/source_gnome-shell.py: Don't try to report nonexistent mouse
@@ -28,7 +28,10 @@ gnome-shell (43.0-3) UNRELEASED; urgency=medium
       gnome-shell-extension-multi-monitors, gnome-shell-extension-pixelsaver
       and gnome-shell-pomodoro in Breaks.
 
- -- Simon McVittie <smcv@debian.org>  Fri, 04 Nov 2022 12:19:56 +0000
+  [ Simon McVittie ]
+  * New upstream release
+
+ -- Simon McVittie <smcv@debian.org>  Fri, 04 Nov 2022 14:58:43 +0000
 
 gnome-shell (43.0-2) unstable; urgency=medium
 
