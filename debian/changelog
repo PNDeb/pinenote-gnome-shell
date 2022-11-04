@@ -1,4 +1,6 @@
-gnome-shell (43.1-1) UNRELEASED; urgency=medium
+gnome-shell (43.1-1) unstable; urgency=medium
+
+  * Team upload
 
   [ Jeremy Bicha ]
   * debian/source_gnome-shell.py: Don't try to report nonexistent mouse
@@ -8,30 +10,15 @@ gnome-shell (43.1-1) UNRELEASED; urgency=medium
   * debian/control.in: Bump minimum gnome-bluetooth3 runtime to 42.3,
     required for AdapterState
 
-  [ Debian Janitor ]
-  * Remove constraints unnecessary since buster (oldstable)
-    * Build-Depends: Drop versioned constraint on gir1.2-gdm-1.0,
-      gnome-control-center-dev, gnome-pkg-tools, gobject-introspection,
-      libgcr-3-dev, libgirepository1.0-dev, libglib2.0-dev,
-      libgstreamer1.0-dev, libgtk-3-dev, libnm-dev, libpolkit-agent-1-dev,
-      libstartup-notification0-dev and pkg-config.
-    * gnome-shell: Drop versioned constraint on gir1.2-gcr-3,
-      gir1.2-gdesktopenums-3.0, gir1.2-gdm-1.0, gir1.2-glib-2.0,
-      gir1.2-gtk-3.0, gir1.2-upowerglib-1.0, gnome-backgrounds and
-      libglib2.0-bin in Depends.
-    * gnome-shell: Drop versioned constraint on gir1.2-telepathylogger-0.2
-      in Suggests.
-    * gnome-shell: Drop versioned constraint on bolt and gdm3 in
-      Recommends.
-    * gnome-shell: Drop versioned constraint on
-      gnome-shell-extension-autohidetopbar, gnome-shell-extension-caffeine,
-      gnome-shell-extension-multi-monitors, gnome-shell-extension-pixelsaver
-      and gnome-shell-pomodoro in Breaks.
-
   [ Simon McVittie ]
   * New upstream release
+  * Update URLs in upstream metadata
+  * Update Lintian overrides
 
- -- Simon McVittie <smcv@debian.org>  Fri, 04 Nov 2022 14:58:43 +0000
+  [ Debian Janitor ]
+  * Remove constraints unnecessary since buster (oldstable)
+
+ -- Simon McVittie <smcv@debian.org>  Fri, 04 Nov 2022 20:10:13 +0000
 
 gnome-shell (43.0-2) unstable; urgency=medium
 
