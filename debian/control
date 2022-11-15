@@ -10,7 +10,7 @@ Uploaders: Iain Lane <laney@debian.org>, Jeremy Bicha <jbicha@ubuntu.com>
 Build-Depends: appstream,
                asciidoc-base,
                bash-completion,
-               dbus <!nocheck>,
+               dbus-daemon <!nocheck>,
                debhelper-compat (= 13),
                dh-sequence-gir,
                dh-sequence-gnome,

@@ -6,7 +6,7 @@ Uploaders: @GNOME_TEAM@
 Build-Depends: appstream,
                asciidoc-base,
                bash-completion,
-               dbus <!nocheck>,
+               dbus-daemon <!nocheck>,
                debhelper-compat (= 13),
                dh-sequence-gir,
                dh-sequence-gnome,
