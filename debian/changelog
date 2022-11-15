@@ -1,3 +1,15 @@
+gnome-shell (43.1-2) unstable; urgency=medium
+
+  * Team upload
+  * d/.gitignore: Don't ignore patches, overriding upstream .gitignore
+  * Move patch reverting gcr4 transition into d/patches/debian subdirectory
+  * Add post-release patches from upstream gnome-43 branch
+    - Screencast bug fixes
+    - Update Russian translation
+  * d/control.in: Depend on dbus-daemon instead of dbus for dbus-run-session
+
+ -- Simon McVittie <smcv@debian.org>  Tue, 15 Nov 2022 10:32:15 +0000
+
 gnome-shell (43.1-1) unstable; urgency=medium
 
   * Team upload
