@@ -3,6 +3,8 @@ Date: Sun, 21 Aug 2022 10:30:55 -0400
 Subject: Revert "build: Port to gcr4"
 
 This reverts commit 5c935af7d3b3a3c9feb4e0d9ea214b6d25a7a2e7.
+
+Forwarded: not-needed
 ---
  js/ui/environment.js           | 2 +-
  meson.build                    | 4 ++--
