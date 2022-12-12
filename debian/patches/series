@@ -1,5 +1,2 @@
-dbusService-screencast-Hold-during-gstreamer-checks.patch
-screenshot-Cache-ScreencastSupported-property.patch
-Update-Russian-translation.patch
 debian/gnome-shell-extension-prefs-Give-Debian-specific-advice.patch
 debian/Revert-build-Port-to-gcr4.patch
