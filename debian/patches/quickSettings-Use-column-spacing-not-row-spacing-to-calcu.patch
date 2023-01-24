@@ -1,0 +1,29 @@
+From: Sebastian Keller <skeller@gnome.org>
+Date: Sun, 11 Dec 2022 18:27:05 +0100
+Subject: quickSettings: Use column spacing not row spacing to calculate width
+
+This did not have any not have any noticeable effect, because both are
+the same size in the default theme.
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2577>
+
+(cherry picked from commit 54f112fa59d4694ad67c81fc83d52378a6430273)
+
+Origin: upstream, 43.3, commit:c992a2fe40606e8e9bc6fe8f806df24df45b7215
+---
+ js/ui/quickSettings.js | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/js/ui/quickSettings.js b/js/ui/quickSettings.js
+index 19f9a3c..e3bbe21 100644
+--- a/js/ui/quickSettings.js
++++ b/js/ui/quickSettings.js
+@@ -542,7 +542,7 @@ const QuickSettingsLayout = GObject.registerClass({
+             ? this._overlay.get_preferred_height(-1)
+             : [0, 0];
+ 
+-        const availWidth = box.get_width() - (this.nColumns - 1) * this.row_spacing;
++        const availWidth = box.get_width() - (this.nColumns - 1) * this.column_spacing;
+         const childWidth = availWidth / this.nColumns;
+ 
+         this._overlay?.allocate_available_size(0, 0, box.get_width(), box.get_height());
