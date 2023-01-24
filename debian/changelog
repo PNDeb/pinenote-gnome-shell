@@ -1,3 +1,12 @@
+gnome-shell (43.2-2) UNRELEASED; urgency=medium
+
+  * d/patches: Sort closest-to-upstream first
+  * d/patches: Update to upstream gnome-43 branch commit 43.2-8-ga1b834297
+    - Ensure that buttons in quick settings menu are aligned to pixel grid
+    - Translation updates: ab, en_GB, ie, ka, ru
+
+ -- Simon McVittie <smcv@debian.org>  Tue, 24 Jan 2023 10:00:41 +0000
+
 gnome-shell (43.2-1) unstable; urgency=medium
 
   * New upstream release (Closes: #1028972)
