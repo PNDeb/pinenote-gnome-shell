@@ -29,6 +29,8 @@ gnome-shell (43.3-1) UNRELEASED; urgency=medium
       for basic functionality of desktops that use it
       (GNOME/gnome-shell!2582)
   * d/patches: Drop patches that were applied upstream
+  * d/patches: Add translation updates from upstream:
+    fi, id, ka, pt, sv, tr, uk
 
  -- Simon McVittie <smcv@debian.org>  Wed, 15 Feb 2023 10:12:03 +0000
 
