@@ -1,10 +1,2 @@
-Add-Interlingue-translation.patch
-Update-Georgian-translation.patch
-window-tracker-Emit-tracked-windows-changed-on-title-chan.patch
-Update-Russian-translation.patch
-Update-Abkhazian-translation.patch
-quickSettings-Use-column-spacing-not-row-spacing-to-calcu.patch
-quickSettings-Ensure-toggle-buttons-are-aligned-with-the-.patch
-Update-British-English-translation.patch
 debian/gnome-shell-extension-prefs-Give-Debian-specific-advice.patch
 debian/Revert-build-Port-to-gcr4.patch
