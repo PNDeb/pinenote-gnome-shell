@@ -1,5 +1,6 @@
-gnome-shell (43.3-1) UNRELEASED; urgency=medium
+gnome-shell (43.3-1) unstable; urgency=medium
 
+  * Team upload
   * New upstream release
     - Don't dereference symlinks when deleting extensions
       (GNOME/gnome-shell#6182, which can be a data loss bug)
@@ -31,8 +32,11 @@ gnome-shell (43.3-1) UNRELEASED; urgency=medium
   * d/patches: Drop patches that were applied upstream
   * d/patches: Add translation updates from upstream:
     fi, id, ka, pt, sv, tr, uk
+  * d/control.in, d/gbp.conf, d/watch: Set up branches for 43.x in bookworm.
+    This leaves the default branch available for GNOME 44 betas in
+    experimental and Ubuntu.
 
- -- Simon McVittie <smcv@debian.org>  Wed, 15 Feb 2023 10:12:03 +0000
+ -- Simon McVittie <smcv@debian.org>  Wed, 15 Feb 2023 17:02:45 +0000
 
 gnome-shell (43.2-2) unstable; urgency=medium
 
