@@ -1,6 +1,34 @@
 gnome-shell (43.3-1) UNRELEASED; urgency=medium
 
   * New upstream release
+    - Don't dereference symlinks when deleting extensions
+      (GNOME/gnome-shell#6182, which can be a data loss bug)
+    - Fix windows disappearing from Alt+Tab if their title changes at
+      just the wrong time (GNOME/gnome-shell#6385)
+    - Log warnings on invalid state transitions (GNOME/gnome-shell#4561)
+    - Fix some memory leaks in gdm (GNOME/gnome-shell#6395)
+    - gnome-extensions tool: Fix the ability to enable and disable
+      extensions while GNOME is installed but not running
+      (GNOME/gnome-shell#6127)
+    - Silence compiler warnings with newer GLib (GNOME/gnome-shell!2625)
+    - Add precondition checks to prevent some crashes
+      (GNOME/gnome-shell!2622)
+    - Provide context to IBus input method when the surrounding text
+      becomes empty (GNOME/gnome-shell#5895)
+    - Avoid warnings with audio streams on a device not corresponding
+      to a sound card, such as network sinks (GNOME/gnome-shell!2616)
+    - Avoid some strings being untranslatable by working around an xgettext
+      bug (GNOME/gnome-shell#5280)
+    - Fix drag-and-drop in the dash when animations are disabled
+      (GNOME/gnome-shell!2604)
+    - Avoid warnings when dragging an app from the dash to the grid
+      (GNOME/gnome-shell#6317)
+    - Save screencasts to home directory if the Videos directory has been
+      deleted, instead of failing to record (GNOME/gnome-shell!2594)
+    - Make Shell less susceptible to the OOM-killer, since it is required
+      for basic functionality of desktops that use it
+      (GNOME/gnome-shell!2582)
+  * d/patches: Drop patches that were applied upstream
 
  -- Simon McVittie <smcv@debian.org>  Wed, 15 Feb 2023 10:12:03 +0000
 
