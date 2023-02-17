@@ -1,9 +1,2 @@
-Update-Swedish-translation.patch
-Update-Turkish-translation.patch
-Update-Finnish-translation.patch
-Update-Georgian-translation.patch
-Update-Portuguese-translation.patch
-Update-Ukrainian-translation.patch
-Update-Indonesian-translation.patch
 debian/gnome-shell-extension-prefs-Give-Debian-specific-advice.patch
 debian/Revert-build-Port-to-gcr4.patch
