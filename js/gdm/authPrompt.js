@@ -7,8 +7,6 @@ const Animation = imports.ui.animation;
 const AuthList = imports.gdm.authList;
 const Batch = imports.gdm.batch;
 const GdmUtil = imports.gdm.util;
-const OVirt = imports.gdm.oVirt;
-const Vmware = imports.gdm.vmware;
 const Params = imports.misc.params;
 const ShellEntry = imports.ui.shellEntry;
 const UserWidget = imports.ui.userWidget;
@@ -142,7 +140,7 @@ var AuthPrompt = GObject.registerClass({
         this.add_child(this._mainBox);
 
         this.cancelButton = new St.Button({
-            style_class: 'modal-dialog-button button cancel-button',
+            style_class: 'login-dialog-button cancel-button',
             accessible_name: _('Cancel'),
             button_mask: St.ButtonMask.ONE | St.ButtonMask.THREE,
             reactive: this._hasCancelButton,
@@ -311,7 +309,7 @@ var AuthPrompt = GObject.registerClass({
         if (question === 'Password:' || question === 'Password: ')
             this.setQuestion(_('Password'));
         else
-            this.setQuestion(question.replace(/: *$/, '').trim());
+            this.setQuestion(question.replace(/[:：] *$/, '').trim());
 
         this.updateSensitivity(true);
         this.emit('prompted');
@@ -635,9 +633,7 @@ var AuthPrompt = GObject.registerClass({
             if (oldStatus === AuthPromptStatus.VERIFICATION_CANCELLED)
                 return;
             beginRequestType = BeginRequestType.PROVIDE_USERNAME;
-        } else if (this._userVerifier.serviceIsForeground(OVirt.SERVICE_NAME) ||
-                   this._userVerifier.serviceIsForeground(Vmware.SERVICE_NAME) ||
-                   this._userVerifier.serviceIsForeground(GdmUtil.SMARTCARD_SERVICE_NAME)) {
+        } else if (this._userVerifier.foregroundServiceDeterminesUsername()) {
             // We don't need to know the username if the user preempted the login screen
             // with a smartcard or with preauthenticated oVirt credentials
             beginRequestType = BeginRequestType.DONT_PROVIDE_USERNAME;
