@@ -643,6 +643,23 @@ on_startup_sequence_changed (MetaStartupNotification *sn,
 }
 
 static void
+on_shutdown (ShellGlobal        *shell_global,
+             ShellWindowTracker *tracker)
+{
+  g_autoptr (GList) windows;
+  GList *l;
+
+  windows = g_hash_table_get_keys (tracker->window_to_app);
+  for (l = windows; l; l = l->next)
+    {
+      MetaWindow *window = l->data;
+
+      disassociate_window (tracker, window);
+    }
+  g_assert (g_hash_table_size (tracker->window_to_app) == 0);
+}
+
+static void
 shell_window_tracker_init (ShellWindowTracker *self)
 {
   MetaDisplay *display = shell_global_get_display (shell_global_get ());
@@ -657,6 +674,9 @@ shell_window_tracker_init (ShellWindowTracker *self)
 
   load_initial_windows (self);
   init_window_tracking (self);
+
+  g_signal_connect (shell_global_get (),
+                    "shutdown", G_CALLBACK (on_shutdown), self);
 }
 
 static void
