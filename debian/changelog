@@ -1,8 +1,14 @@
 gnome-shell (44~beta-1) UNRELEASED; urgency=medium
 
   * New upstream release
+  * Drop translation patches: applied in new release
+  * Bump mutter dependency to 44~beta
+  * Update install files
+  * Build-Depend on mutter-12-tests instead of libmutter-test-12
+  * Build-Depend on gir1.2-nma-1.0 for build tests
+  * Temporarily disable change to make test warnings fail the build
 
- -- Jeremy Bicha <jbicha@ubuntu.com>  Fri, 17 Feb 2023 09:10:22 -0500
+ -- Jeremy Bicha <jbicha@ubuntu.com>  Fri, 17 Feb 2023 15:49:11 -0500
 
 gnome-shell (43.3-1) unstable; urgency=medium
 
