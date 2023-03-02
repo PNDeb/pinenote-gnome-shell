@@ -1,3 +1,12 @@
+gnome-shell (43.3-2) unstable; urgency=medium
+
+  * Team upload
+  * d/patches: Add more translation updates from upstream:
+    de, hu, lt, pl, sl, sr
+    (upstream gnome-43 branch up to commit 43.3-13-g6f7ff15ec)
+
+ -- Simon McVittie <smcv@debian.org>  Thu, 02 Mar 2023 09:14:28 +0000
+
 gnome-shell (43.3-1) unstable; urgency=medium
 
   * Team upload
