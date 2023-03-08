@@ -11,5 +11,7 @@ Update-Polish-translation.patch
 Update-Lithuanian-translation.patch
 Update-Serbian-translation.patch
 Update-Hungarian-translation.patch
+overview-Don-t-claim-to-be-SHOWN-when-HIDDEN-during-start.patch
+overview-Hide-when-failing-to-take-grab-at-end-of-startup.patch
 debian/gnome-shell-extension-prefs-Give-Debian-specific-advice.patch
 debian/Revert-build-Port-to-gcr4.patch
