@@ -1,3 +1,14 @@
+gnome-shell (43.3-3) unstable; urgency=medium
+
+  * Team upload
+  * d/p/overview-Don-t-claim-to-be-SHOWN-when-HIDDEN-during-start.patch,
+    d/p/overview-Hide-when-failing-to-take-grab-at-end-of-startup.patch:
+    Fix regression in 43.3 which could cause the shell to become
+    unresponsive, for example if a display is plugged or unplugged during
+    the startup animation. (Closes: #1032497)
+
+ -- Simon McVittie <smcv@debian.org>  Wed, 08 Mar 2023 11:09:54 +0000
+
 gnome-shell (43.3-2) unstable; urgency=medium
 
   * Team upload
