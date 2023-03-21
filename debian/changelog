@@ -1,3 +1,9 @@
+gnome-shell (44.0-1) UNRELEASED; urgency=medium
+
+  * New upstream release
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Tue, 21 Mar 2023 04:52:40 +0100
+
 gnome-shell (44~rc-1) experimental; urgency=medium
 
   [ Jeremy Bicha ]
