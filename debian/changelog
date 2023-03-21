@@ -1,8 +1,8 @@
-gnome-shell (44.0-2) UNRELEASED; urgency=medium
+gnome-shell (44.0-2) experimental; urgency=medium
 
   * debian/control: Bump dependency on mutter 44
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Tue, 21 Mar 2023 05:36:54 +0100
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Tue, 21 Mar 2023 05:37:22 +0100
 
 gnome-shell (44.0-1) experimental; urgency=medium
 
