@@ -1,8 +1,11 @@
 gnome-shell (44.0-1) UNRELEASED; urgency=medium
 
   * New upstream release
+  * debian/patches: Refresh
+  * debian/patches: Cherry-pick upstream fixes
+  * debian/rules: Create a cache home folder for dconf
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Tue, 21 Mar 2023 04:52:40 +0100
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Tue, 21 Mar 2023 05:15:47 +0100
 
 gnome-shell (44~rc-1) experimental; urgency=medium
 
