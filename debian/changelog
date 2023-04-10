@@ -8,6 +8,8 @@ gnome-shell (43.4-1) UNRELEASED; urgency=medium
     - Translation update: fr
     - All other changes were included in 43.3-2 and 43.3-3
   * Drop patches added by 43.3-2 and 43.3-3, included in upstream 43.4
+  * d/patches: Update to gnome-43 branch commit 43.4-1-g3499d2e87
+    - Translation update: ab
 
  -- Simon McVittie <smcv@debian.org>  Sat, 25 Mar 2023 13:38:44 +0000
 
