@@ -17,14 +17,14 @@ Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2684
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/src/tray/na-xembed.c b/src/tray/na-xembed.c
-index 5dbb372..7b6f0b7 100644
+index 2183c9f..7b6f0b7 100644
 --- a/src/tray/na-xembed.c
 +++ b/src/tray/na-xembed.c
 @@ -393,7 +393,7 @@ na_xembed_add_window (NaXembed  *xembed,
        priv->socket_window =
          XCreateWindow (xdisplay,
                         meta_x11_display_get_xroot (priv->x11_display),
--                       -100, -100, 1, 1, 0,
+-                       -1, -1, 1, 1, 0,
 +                       -101, -101, 1, 1, 0,
                         priv->xvisual_info->depth,
                         InputOutput,
