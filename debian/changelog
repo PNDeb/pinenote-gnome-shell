@@ -1,4 +1,4 @@
-gnome-shell (43.5-1) UNRELEASED; urgency=medium
+gnome-shell (43.5-0+deb12u1) UNRELEASED; urgency=medium
 
   * New upstream stable release
     - Fix a regression in 43~beta involving detection of hotplugged media
