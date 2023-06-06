@@ -1,4 +1,4 @@
-gnome-shell (43.5-0+deb12u1) UNRELEASED; urgency=medium
+gnome-shell (43.6-1) UNRELEASED; urgency=medium
 
   * New upstream stable release
     - Fix a regression in 43~beta involving detection of hotplugged media
@@ -37,8 +37,9 @@ gnome-shell (43.5-0+deb12u1) UNRELEASED; urgency=medium
   * d/patches: Drop ab translation patch, applied upstream
   * d/patches: Update to gnome-43 branch commit 43.5-1-g2936e966a
     - Translation update: pt_BR
+  * New upstream release
 
- -- Simon McVittie <smcv@debian.org>  Sat, 27 May 2023 16:03:49 +0100
+ -- Simon McVittie <smcv@debian.org>  Tue, 06 Jun 2023 18:33:01 +0100
 
 gnome-shell (43.4-1) unstable; urgency=medium
 
