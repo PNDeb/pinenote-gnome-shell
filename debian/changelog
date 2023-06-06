@@ -1,6 +1,6 @@
 gnome-shell (43.6-1) UNRELEASED; urgency=medium
 
-  * New upstream stable release
+  * New upstream stable release 43.5
     - Fix a regression in 43~beta involving detection of hotplugged media
       with autorunnable content (gnome-shell!2745)
     - Make search results fill unused space as intended (gnome-shell#5924)
@@ -32,12 +32,19 @@ gnome-shell (43.6-1) UNRELEASED; urgency=medium
       screenshots since mutter 43.1 (gnome-shell!2710)
     - Upstream CI fixes not relevant to Debian
     - Translation update: zh_CN
+  * New upstream stable release 43.6
+    - Fix a crash when a window preview is destroyed (gnome-shell#6570)
+    - When cancelling the polkit agent prompt while using
+      gnome-remote-desktop, don't break subsequent polkit prompts
+      (gnome-shell!2761)
+    - Fix "TypeError: this._dragActor is null" warnings related to
+      drag-and-drop (gnome-shell!2770)
+    - Fix input method popup getting stuck on screen during engine changes
+      (gnome-shell#6717)
+    - Translation update: pt_BR
   * d/control.in: Build-depend on mutter 43.5, for a newly-public utility
     function needed by gnome-shell!2710
   * d/patches: Drop ab translation patch, applied upstream
-  * d/patches: Update to gnome-43 branch commit 43.5-1-g2936e966a
-    - Translation update: pt_BR
-  * New upstream release
 
  -- Simon McVittie <smcv@debian.org>  Tue, 06 Jun 2023 18:33:01 +0100
 
