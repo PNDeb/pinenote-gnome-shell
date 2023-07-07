@@ -1,7 +1,11 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 /* exported addDragMonitor, removeDragMonitor, makeDraggable */
 
-const { Clutter, GLib, Meta, Shell, St } = imports.gi;
+const Clutter = imports.gi.Clutter;
+const GLib = imports.gi.GLib;
+const Meta = imports.gi.Meta;
+const Shell = imports.gi.Shell;
+const St = imports.gi.St;
 const Signals = imports.misc.signals;
 
 const Main = imports.ui.main;
@@ -117,6 +121,50 @@ var _Draggable = class _Draggable extends Signals.EventEmitter {
 
         this._animationInProgress = false; // The drag is over and the item is in the process of animating to its original position (snapping back or reverting).
         this._dragCancellable = true;
+    }
+
+    /**
+     * addClickAction:
+     *
+     * @param {Clutter.ClickAction} action - click action to add to draggable actor
+     *
+     * Add @action to the draggable's actor, and set it up so that it does not
+     * impede drag operations.
+     */
+    addClickAction(action) {
+        action.connect('clicked', () => (this._actionClicked = true));
+        action.connect('long-press', (a, actor, state) => {
+            if (state !== Clutter.LongPressState.CANCEL)
+                return true;
+
+            const event = Clutter.get_current_event();
+            this._dragTouchSequence = event.get_event_sequence();
+
+            if (this._longPressLater)
+                return true;
+
+            // A click cancels a long-press before any click handler is
+            // run - make sure to not start a drag in that case
+            const laters = global.compositor.get_laters();
+            this._longPressLater = laters.add(Meta.LaterType.BEFORE_REDRAW, () => {
+                delete this._longPressLater;
+                if (this._actionClicked) {
+                    delete this._actionClicked;
+                    return GLib.SOURCE_REMOVE;
+                }
+                action.release();
+                this.startDrag(
+                    ...action.get_coords(),
+                    event.get_time(),
+                    this._dragTouchSequence,
+                    event.get_device());
+
+                return GLib.SOURCE_REMOVE;
+            });
+            return true;
+        });
+
+        this.actor.add_action(action);
     }
 
     _onButtonPress(actor, event) {

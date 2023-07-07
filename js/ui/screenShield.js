@@ -1,10 +1,15 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 /* exported ScreenShield */
 
-const {
-    AccountsService, Clutter, Gio,
-    GLib, Graphene, Meta, Shell, St,
-} = imports.gi;
+const AccountsService = imports.gi.AccountsService;
+const Clutter = imports.gi.Clutter;
+const Gio = imports.gi.Gio;
+const GLib = imports.gi.GLib;
+const Graphene = imports.gi.Graphene;
+const Meta = imports.gi.Meta;
+const Shell = imports.gi.Shell;
+const St = imports.gi.St;
+
 const Signals = imports.misc.signals;
 
 const GnomeSession = imports.misc.gnomeSession;
@@ -89,10 +94,10 @@ var ScreenShield = class extends Signals.EventEmitter {
 
         this._smartcardManager = SmartcardManager.getSmartcardManager();
         this._smartcardManager.connect('smartcard-inserted',
-                                       (manager, token) => {
-                                           if (this._isLocked && token.UsedToLogin)
-                                               this._activateDialog();
-                                       });
+            (manager, token) => {
+                if (this._isLocked && token.UsedToLogin)
+                    this._activateDialog();
+            });
 
         this._credentialManagers = {};
         this.addCredentialManager(OVirt.SERVICE_NAME, OVirt.getOVirtCredentialsManager());

@@ -1,7 +1,14 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 /* exported WorkspaceThumbnail, ThumbnailsBox */
 
-const { Clutter, Gio, GLib, GObject, Graphene, Meta, Shell, St } = imports.gi;
+const Clutter = imports.gi.Clutter;
+const Gio = imports.gi.Gio;
+const GLib = imports.gi.GLib;
+const GObject = imports.gi.GObject;
+const Graphene = imports.gi.Graphene;
+const Meta = imports.gi.Meta;
+const Shell = imports.gi.Shell;
+const St = imports.gi.St;
 
 const DND = imports.ui.dnd;
 const Main = imports.ui.main;
@@ -87,6 +94,11 @@ var WindowClone = GObject.registerClass({
         this._draggable.connect('drag-end', this._onDragEnd.bind(this));
         this.inDrag = false;
 
+        const clickAction = new Clutter.ClickAction();
+        clickAction.connect('clicked',
+            () => this.emit('selected', Clutter.get_current_event_time()));
+        this._draggable.addClickAction(clickAction);
+
         let iter = win => {
             let actor = win.get_compositor_private();
 
@@ -168,25 +180,6 @@ var WindowClone = GObject.registerClass({
             this.emit('drag-end');
             this.inDrag = false;
         }
-    }
-
-    vfunc_button_press_event() {
-        return Clutter.EVENT_STOP;
-    }
-
-    vfunc_button_release_event(buttonEvent) {
-        this.emit('selected', buttonEvent.time);
-
-        return Clutter.EVENT_STOP;
-    }
-
-    vfunc_touch_event(touchEvent) {
-        if (touchEvent.type != Clutter.EventType.TOUCH_END ||
-            !global.display.is_pointer_emulating_sequence(touchEvent.sequence))
-            return Clutter.EVENT_PROPAGATE;
-
-        this.emit('selected', touchEvent.time);
-        return Clutter.EVENT_STOP;
     }
 
     _onDragBegin(_draggable, _time) {
@@ -637,6 +630,14 @@ var ThumbnailsBox = GObject.registerClass({
 
         this._thumbnails = [];
 
+        const clickAction = new Clutter.ClickAction();
+        clickAction.connect('clicked', () => {
+            this._activateThumbnailAtPoint(
+                ...clickAction.get_coords(),
+                Clutter.get_current_event_time());
+        });
+        this.add_action(clickAction);
+
         Main.overview.connectObject(
             'showing', () => this._createThumbnails(),
             'hidden', () => this._destroyThumbnails(),
@@ -719,22 +720,6 @@ var ThumbnailsBox = GObject.registerClass({
         const thumbnail = this._thumbnails.find(t => x >= t.x && x <= t.x + t.width);
         if (thumbnail)
             thumbnail.activate(time);
-    }
-
-    vfunc_button_release_event(buttonEvent) {
-        let { x, y } = buttonEvent;
-        this._activateThumbnailAtPoint(x, y, buttonEvent.time);
-        return Clutter.EVENT_STOP;
-    }
-
-    vfunc_touch_event(touchEvent) {
-        if (touchEvent.type == Clutter.EventType.TOUCH_END &&
-            global.display.is_pointer_emulating_sequence(touchEvent.sequence)) {
-            let { x, y } = touchEvent;
-            this._activateThumbnailAtPoint(x, y, touchEvent.time);
-        }
-
-        return Clutter.EVENT_STOP;
     }
 
     _onDragBegin() {

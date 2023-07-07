@@ -1,7 +1,11 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 /* exported Animation, AnimatedIcon, Spinner */
 
-const { Clutter, GLib, GObject, Gio, St } = imports.gi;
+const Clutter = imports.gi.Clutter;
+const GLib = imports.gi.GLib;
+const GObject = imports.gi.GObject;
+const Gio = imports.gi.Gio;
+const St = imports.gi.St;
 
 const Params = imports.misc.params;
 
@@ -72,12 +76,13 @@ class Animation extends St.Bin {
         let textureCache = St.TextureCache.get_default();
         let scaleFactor = St.ThemeContext.get_for_stage(global.stage).scale_factor;
         this._animations = textureCache.load_sliced_image(file, width, height,
-                                                          scaleFactor, resourceScale,
-                                                          this._animationsLoaded.bind(this));
+            scaleFactor, resourceScale,
+            () => this._loadFinished());
         this._animations.set({
             x_align: Clutter.ActorAlign.CENTER,
             y_align: Clutter.ActorAlign.CENTER,
         });
+
         this.set_child(this._animations);
 
         if (wasPlaying)
@@ -101,22 +106,10 @@ class Animation extends St.Bin {
         return GLib.SOURCE_CONTINUE;
     }
 
-    _syncAnimationSize() {
-        if (!this._isLoaded)
-            return;
-
-        let [width, height] = this.get_size();
-
-        for (let i = 0; i < this._animations.get_n_children(); ++i)
-            this._animations.get_child_at_index(i).set_size(width, height);
-    }
-
-    _animationsLoaded() {
+    _loadFinished() {
         this._isLoaded = this._animations.get_n_children() > 0;
 
-        this._syncAnimationSize();
-
-        if (this._isPlaying)
+        if (this._isLoaded && this._isPlaying)
             this.play();
     }
 

@@ -7,9 +7,15 @@
             kbdA11yDialog, introspectService, start, pushModal, popModal,
             activateWindow, moveWindowToMonitorAndWorkspace,
             createLookingGlass, initializeDeferredWork,
-            getThemeStylesheet, setThemeStylesheet, screenshotUI */
+            getStyleVariant, getThemeStylesheet, setThemeStylesheet, screenshotUI */
 
-const { Clutter, Gio, GLib, GObject, Meta, Shell, St } = imports.gi;
+const Clutter = imports.gi.Clutter;
+const Gio = imports.gi.Gio;
+const GLib = imports.gi.GLib;
+const GObject = imports.gi.GObject;
+const Meta = imports.gi.Meta;
+const Shell = imports.gi.Shell;
+const St = imports.gi.St;
 
 const AccessDialog = imports.ui.accessDialog;
 const AudioDeviceSelection = imports.ui.audioDeviceSelection;
@@ -179,6 +185,7 @@ function start() {
     sessionMode.connect('updated', _sessionUpdated);
 
     St.Settings.get().connect('notify::high-contrast', _loadDefaultStylesheet);
+    St.Settings.get().connect('notify::color-scheme', _loadDefaultStylesheet);
 
     // Initialize ParentalControlsManager before the UI
     ParentalControlsManager.getDefault();
@@ -419,6 +426,25 @@ function _getStylesheet(name) {
     return null;
 }
 
+/** @returns {string} */
+function getStyleVariant() {
+    const {colorScheme} = St.Settings.get();
+    switch (sessionMode.colorScheme) {
+    case 'force-dark':
+        return 'dark';
+    case 'force-light':
+        return 'light';
+    case 'prefer-dark':
+        return colorScheme === St.SystemColorScheme.PREFER_LIGHT
+            ? 'light' : 'dark';
+    case 'prefer-light':
+        return colorScheme === St.SystemColorScheme.PREFER_DARK
+            ? 'dark' : 'light';
+    default:
+        return '';
+    }
+}
+
 function _getDefaultStylesheet() {
     let stylesheet = null;
     let name = sessionMode.stylesheetName;
@@ -427,8 +453,11 @@ function _getDefaultStylesheet() {
     if (St.Settings.get().high_contrast)
         stylesheet = _getStylesheet(name.replace('.css', '-high-contrast.css'));
 
+    if (stylesheet === null)
+        stylesheet = _getStylesheet(name.replace('.css', `-${getStyleVariant()}.css`));
+
     if (stylesheet == null)
-        stylesheet = _getStylesheet(sessionMode.stylesheetName);
+        stylesheet = _getStylesheet(name);
 
     return stylesheet;
 }

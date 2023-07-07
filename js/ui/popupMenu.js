@@ -3,7 +3,13 @@
             PopupImageMenuItem, PopupMenu, PopupDummyMenu, PopupSubMenu,
             PopupMenuSection, PopupSubMenuMenuItem, PopupMenuManager */
 
-const { Atk, Clutter, Gio, GObject, Graphene, Shell, St } = imports.gi;
+const Atk = imports.gi.Atk;
+const Clutter = imports.gi.Clutter;
+const Gio = imports.gi.Gio;
+const GObject = imports.gi.GObject;
+const Graphene = imports.gi.Graphene;
+const Shell = imports.gi.Shell;
+const St = imports.gi.St;
 const Signals = imports.misc.signals;
 
 const BoxPointer = imports.ui.boxpointer;
@@ -89,13 +95,26 @@ var PopupBaseMenuItem = GObject.registerClass({
         this._delegate = this;
 
         this._ornament = Ornament.NONE;
-        this._ornamentLabel = new St.Label({ style_class: 'popup-menu-ornament' });
-        this.add(this._ornamentLabel);
+        this._ornamentIcon = new St.Icon({style_class: 'popup-menu-ornament'});
+        this.add(this._ornamentIcon);
 
         this._parent = null;
         this._active = false;
         this._activatable = params.reactive && params.activate;
         this._sensitive = true;
+
+        this._clickAction = new Clutter.ClickAction({
+            enabled: this._activatable,
+        });
+        this._clickAction.connect('clicked',
+            () => this.activate(Clutter.get_current_event()));
+        this._clickAction.connect('notify::pressed', () => {
+            if (this._clickAction.pressed)
+                this.add_style_pseudo_class('active');
+            else
+                this.remove_style_pseudo_class('active');
+        });
+        this.add_action(this._clickAction);
 
         if (!this._activatable)
             this.add_style_class_name('popup-inactive-menu-item');
@@ -122,44 +141,6 @@ var PopupBaseMenuItem = GObject.registerClass({
 
     _setParent(parent) {
         this._parent = parent;
-    }
-
-    vfunc_button_press_event() {
-        if (!this._activatable)
-            return Clutter.EVENT_PROPAGATE;
-
-        // This is the CSS active state
-        this.add_style_pseudo_class('active');
-        return Clutter.EVENT_PROPAGATE;
-    }
-
-    vfunc_button_release_event() {
-        if (!this._activatable)
-            return Clutter.EVENT_PROPAGATE;
-
-        this.remove_style_pseudo_class('active');
-
-        // Pointer left the item during the grab
-        if (!this.hover)
-            return Clutter.EVENT_PROPAGATE;
-
-        this.activate(Clutter.get_current_event());
-        return Clutter.EVENT_STOP;
-    }
-
-    vfunc_touch_event(touchEvent) {
-        if (!this._activatable)
-            return Clutter.EVENT_PROPAGATE;
-
-        if (touchEvent.type == Clutter.EventType.TOUCH_END) {
-            this.remove_style_pseudo_class('active');
-            this.activate(Clutter.get_current_event());
-            return Clutter.EVENT_STOP;
-        } else if (touchEvent.type == Clutter.EventType.TOUCH_BEGIN) {
-            // This is the CSS active state
-            this.add_style_pseudo_class('active');
-        }
-        return Clutter.EVENT_PROPAGATE;
     }
 
     vfunc_key_press_event(keyEvent) {
@@ -258,23 +239,23 @@ var PopupBaseMenuItem = GObject.registerClass({
     }
 
     setOrnament(ornament) {
-        if (ornament == this._ornament)
+        if (ornament === this._ornament)
             return;
 
         this._ornament = ornament;
 
         if (ornament == Ornament.DOT) {
-            this._ornamentLabel.text = '\u2022';
+            this._ornamentIcon.icon_name = 'ornament-dot-symbolic';
             this.add_accessible_state(Atk.StateType.CHECKED);
         } else if (ornament == Ornament.CHECK) {
-            this._ornamentLabel.text = '\u2713';
+            this._ornamentIcon.icon_name = 'ornament-check-symbolic';
             this.add_accessible_state(Atk.StateType.CHECKED);
         } else if (ornament == Ornament.NONE || ornament == Ornament.HIDDEN) {
-            this._ornamentLabel.text = '';
+            this._ornamentIcon.icon_name = '';
             this.remove_accessible_state(Atk.StateType.CHECKED);
         }
 
-        this._ornamentLabel.visible = ornament != Ornament.HIDDEN;
+        this._ornamentIcon.visible = ornament !== Ornament.HIDDEN;
     }
 });
 
@@ -473,7 +454,7 @@ class PopupImageMenuItem extends PopupBaseMenuItem {
         this.add_child(this.label);
         this.label_actor = this.label;
 
-        this.set_child_above_sibling(this._ornamentLabel, this.label);
+        this.set_child_above_sibling(this._ornamentIcon, this.label);
 
         this.setIcon(icon);
     }
@@ -1267,25 +1248,7 @@ class PopupSubMenuMenuItem extends PopupBaseMenuItem {
     }
 
     activate(_event) {
-        this._setOpenState(true);
-    }
-
-    vfunc_button_release_event() {
-        // Since we override the parent, we need to manage what the parent does
-        // with the active style class
-        this.remove_style_pseudo_class('active');
         this._setOpenState(!this._getOpenState());
-        return Clutter.EVENT_PROPAGATE;
-    }
-
-    vfunc_touch_event(touchEvent) {
-        if (touchEvent.type == Clutter.EventType.TOUCH_END) {
-            // Since we override the parent, we need to manage what the parent does
-            // with the active style class
-            this.remove_style_pseudo_class('active');
-            this._setOpenState(!this._getOpenState());
-        }
-        return Clutter.EVENT_PROPAGATE;
     }
 });
 

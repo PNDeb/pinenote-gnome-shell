@@ -1,16 +1,23 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 /* exported ModemBase, ModemGsm, ModemCdma, BroadbandModem  */
 
-const {Gio, GObject, NM, NMA4} = imports.gi;
+const Gio = imports.gi.Gio;
+const GObject = imports.gi.GObject;
+const NM = imports.gi.NM;
+const NMA4 = imports.gi.NMA4;
 
 const { loadInterfaceXML } = imports.misc.fileUtils;
 
-// _getMobileProvidersDatabase:
-//
-// Gets the database of mobile providers, with references between MCCMNC/SID and
-// operator name
-//
 let _mpd;
+
+/**
+ * _getMobileProvidersDatabase:
+ *
+ * Gets the database of mobile providers, with references between MCCMNC/SID and
+ * operator name
+ *
+ * @returns {NMA4.MobileProvidersDatabase | null}
+ */
 function _getMobileProvidersDatabase() {
     if (_mpd == null) {
         try {

@@ -1,10 +1,17 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 /* exported PadOsd, PadOsdService */
 
-const {
-    Atk, Clutter, GDesktopEnums, Gio,
-    GLib, GObject, Meta, Pango, Rsvg, St,
-} = imports.gi;
+const Atk = imports.gi.Atk;
+const Clutter = imports.gi.Clutter;
+const GDesktopEnums = imports.gi.GDesktopEnums;
+const Gio = imports.gi.Gio;
+const GLib = imports.gi.GLib;
+const GObject = imports.gi.GObject;
+const Meta = imports.gi.Meta;
+const Pango = imports.gi.Pango;
+const Rsvg = imports.gi.Rsvg;
+const St = imports.gi.St;
+
 const Signals = imports.misc.signals;
 
 const Main = imports.ui.main;
@@ -97,7 +104,7 @@ var KeybindingEntry = GObject.registerClass({
     Signals: { 'keybinding-edited': { param_types: [GObject.TYPE_STRING] } },
 }, class KeybindingEntry extends St.Entry {
     _init() {
-        super._init({ hint_text: _("New shortcut…"), style: 'width: 10em' });
+        super._init({hint_text: _('New shortcut…'), style: 'width: 10em'});
     }
 
     vfunc_captured_event(event) {

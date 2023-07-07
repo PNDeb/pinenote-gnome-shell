@@ -1,7 +1,12 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 /* exported Calendar, CalendarMessageList, DBusEventSource */
 
-const { Clutter, Gio, GLib, GObject, Shell, St } = imports.gi;
+const Clutter = imports.gi.Clutter;
+const Gio = imports.gi.Gio;
+const GLib = imports.gi.GLib;
+const GObject = imports.gi.GObject;
+const Shell = imports.gi.Shell;
+const St = imports.gi.St;
 
 const Main = imports.ui.main;
 const MessageList = imports.ui.messageList;
@@ -519,7 +524,7 @@ var Calendar = GObject.registerClass({
             // and we want, ideally, a single character for e.g. S M T W T F S
             let customDayAbbrev = _getCalendarDayAbbreviation(iter.getDay());
             let label = new St.Label({
-                style_class: 'calendar-day-base calendar-day-heading',
+                style_class: 'calendar-day calendar-day-heading',
                 text: customDayAbbrev,
                 can_focus: true,
             });
@@ -667,12 +672,12 @@ var Calendar = GObject.registerClass({
             });
 
             let hasEvents = this._eventSource.hasEvents(iter);
-            let styleClass = 'calendar-day-base calendar-day';
+            let styleClass = 'calendar-day';
 
             if (_isWorkDay(iter))
-                styleClass += ' calendar-work-day';
+                styleClass += ' calendar-weekday';
             else
-                styleClass += ' calendar-nonwork-day';
+                styleClass += ' calendar-weekend';
 
             // Hack used in lieu of border-collapse - see gnome-shell.css
             if (row == 2)
@@ -687,7 +692,7 @@ var Calendar = GObject.registerClass({
             if (sameDay(now, iter))
                 styleClass += ' calendar-today';
             else if (iter.getMonth() != this._selectedDate.getMonth())
-                styleClass += ' calendar-other-month-day';
+                styleClass += ' calendar-other-month';
 
             if (hasEvents)
                 styleClass += ' calendar-day-with-events';

@@ -1,7 +1,12 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 /* exported AuthPrompt */
 
-const { Clutter, GLib, GObject, Pango, Shell, St } = imports.gi;
+const Clutter = imports.gi.Clutter;
+const GLib = imports.gi.GLib;
+const GObject = imports.gi.GObject;
+const Pango = imports.gi.Pango;
+const Shell = imports.gi.Shell;
+const St = imports.gi.St;
 
 const Animation = imports.ui.animation;
 const AuthList = imports.gdm.authList;
@@ -183,10 +188,10 @@ var AuthPrompt = GObject.registerClass({
         this._entry = null;
 
         this._textEntry = new St.Entry(entryParams);
-        ShellEntry.addContextMenu(this._textEntry, { actionMode: Shell.ActionMode.NONE });
+        ShellEntry.addContextMenu(this._textEntry, {actionMode: Shell.ActionMode.NONE});
 
         this._passwordEntry = new St.PasswordEntry(entryParams);
-        ShellEntry.addContextMenu(this._passwordEntry, { actionMode: Shell.ActionMode.NONE });
+        ShellEntry.addContextMenu(this._passwordEntry, {actionMode: Shell.ActionMode.NONE});
 
         this._entry = this._passwordEntry;
         this._mainBox.add_child(this._entry);

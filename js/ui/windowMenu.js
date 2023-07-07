@@ -1,7 +1,9 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*
 /* exported WindowMenuManager */
 
-const {Clutter, Meta, St} = imports.gi;
+const Clutter = imports.gi.Clutter;
+const Meta = imports.gi.Meta;
+const St = imports.gi.St;
 
 const BoxPointer = imports.ui.boxpointer;
 const Main = imports.ui.main;
@@ -56,7 +58,7 @@ var WindowMenu = class extends PopupMenu.PopupMenu {
         if (!window.can_maximize())
             item.setSensitive(false);
 
-        item = this.addAction(_("Move"), event => {
+        item = this.addAction(_('Move'), event => {
             const device = event.get_device();
             const seat = device.get_seat();
             const deviceType = device.get_device_type();
@@ -75,7 +77,7 @@ var WindowMenu = class extends PopupMenu.PopupMenu {
         if (!window.allows_move())
             item.setSensitive(false);
 
-        item = this.addAction(_("Resize"), event => {
+        item = this.addAction(_('Resize'), event => {
             const device = event.get_device();
             const seat = device.get_seat();
             const deviceType = device.get_device_type();

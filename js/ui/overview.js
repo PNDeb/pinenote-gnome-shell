@@ -1,7 +1,13 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 /* exported Overview, ANIMATION_TIME */
 
-const { Clutter, Gio, GLib, GObject, Meta, Shell, St } = imports.gi;
+const Clutter = imports.gi.Clutter;
+const Gio = imports.gi.Gio;
+const GLib = imports.gi.GLib;
+const GObject = imports.gi.GObject;
+const Meta = imports.gi.Meta;
+const Shell = imports.gi.Shell;
+const St = imports.gi.St;
 const Signals = imports.misc.signals;
 
 // Time for initial animation going into Overview mode;
@@ -100,6 +106,10 @@ class OverviewActor extends St.BoxLayout {
 
     get dash() {
         return this._controls.dash;
+    }
+
+    get searchController() {
+        return this._controls.searchController;
     }
 
     get searchEntry() {
@@ -706,6 +716,10 @@ var Overview = class extends Signals.EventEmitter {
             'use \'dash.showAppsButton\' property instead'));
 
         return this.dash.showAppsButton;
+    }
+
+    get searchController() {
+        return this._overview.searchController;
     }
 
     get searchEntry() {

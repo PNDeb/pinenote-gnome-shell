@@ -1,7 +1,12 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 /* exported RemoteAccessApplet, ScreenRecordingIndicator, ScreenSharingIndicator */
 
-const { Atk, Clutter, GLib, GObject, Meta, St } = imports.gi;
+const Atk = imports.gi.Atk;
+const Clutter = imports.gi.Clutter;
+const GLib = imports.gi.GLib;
+const GObject = imports.gi.GObject;
+const Meta = imports.gi.Meta;
+const St = imports.gi.St;
 
 const Main = imports.ui.main;
 const PanelMenu = imports.ui.panelMenu;
@@ -83,7 +88,7 @@ var ScreenRecordingIndicator = GObject.registerClass({
         });
         this._box.add_child(this._label);
 
-        this._icon = new St.Icon({ icon_name: 'stop-symbolic' });
+        this._icon = new St.Icon({icon_name: 'screencast-stop-symbolic'});
         this._box.add_child(this._icon);
 
         this.hide();
@@ -150,7 +155,7 @@ var ScreenSharingIndicator = GObject.registerClass({
         let icon = new St.Icon({icon_name: 'screen-shared-symbolic'});
         this._box.add_child(icon);
 
-        icon = new St.Icon({icon_name: 'window-close-symbolic'});
+        icon = new St.Icon({icon_name: 'screencast-stop-symbolic'});
         this._box.add_child(icon);
 
         this._controller = global.backend.get_remote_access_controller();

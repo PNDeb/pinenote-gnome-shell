@@ -1,7 +1,11 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 /* exported init connect disconnect ExtensionManager */
 
-const { GLib, Gio, GObject, Shell, St } = imports.gi;
+const GLib = imports.gi.GLib;
+const Gio = imports.gi.Gio;
+const GObject = imports.gi.GObject;
+const Shell = imports.gi.Shell;
+const St = imports.gi.St;
 const Signals = imports.misc.signals;
 
 const ExtensionDownloader = imports.ui.extensionDownloader;
@@ -31,6 +35,9 @@ var ExtensionManager = class extends Signals.EventEmitter {
         this._enabledExtensions = [];
         this._extensionOrder = [];
         this._checkVersion = false;
+
+        St.Settings.get().connect('notify::color-scheme',
+            () => this._reloadExtensionStylesheets());
 
         Main.sessionMode.connect('updated', () => {
             this._sessionUpdated();
@@ -79,6 +86,63 @@ var ExtensionManager = class extends Signals.EventEmitter {
 
     getUuids() {
         return [...this._extensions.keys()];
+    }
+
+    _reloadExtensionStylesheets() {
+        for (const ext of this._extensions.values()) {
+            // No stylesheet, nothing to reload
+            if (!ext.stylesheet)
+                continue;
+
+            // No variants, so skip reloading
+            const path = ext.stylesheet.get_path();
+            if (!path.endsWith('-dark.css') && !path.endsWith('-light.css'))
+                continue;
+
+            try {
+                this._unloadExtensionStylesheet(ext);
+                this._loadExtensionStylesheet(ext);
+            } catch (e) {
+                this._callExtensionDisable(ext.uuid);
+                this.logExtensionError(ext.uuid, e);
+            }
+        }
+    }
+
+    _loadExtensionStylesheet(extension) {
+        if (extension.state !== ExtensionState.ENABLED &&
+            extension.state !== ExtensionState.ENABLING)
+            return;
+
+        const variant = Main.getStyleVariant();
+        const stylesheetNames = [
+            `${global.sessionMode}-${variant}.css`,
+            `stylesheet-${variant}.css`,
+            `${global.sessionMode}.css`,
+            'stylesheet.css',
+        ];
+        const theme = St.ThemeContext.get_for_stage(global.stage).get_theme();
+        for (const name of stylesheetNames) {
+            try {
+                const stylesheetFile = extension.dir.get_child(name);
+                theme.load_stylesheet(stylesheetFile);
+                extension.stylesheet = stylesheetFile;
+                break;
+            } catch (e) {
+                if (e.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.NOT_FOUND))
+                    continue; // not an error
+                throw e;
+            }
+        }
+    }
+
+    _unloadExtensionStylesheet(extension) {
+        if (!extension.stylesheet)
+            return;
+
+        const theme = St.ThemeContext.get_for_stage(global.stage).get_theme();
+        theme.unload_stylesheet(extension.stylesheet);
+        delete extension.stylesheet;
     }
 
     _extensionSupportsSessionMode(uuid) {
@@ -134,11 +198,7 @@ var ExtensionManager = class extends Signals.EventEmitter {
             this.logExtensionError(uuid, e);
         }
 
-        if (extension.stylesheet) {
-            let theme = St.ThemeContext.get_for_stage(global.stage).get_theme();
-            theme.unload_stylesheet(extension.stylesheet);
-            delete extension.stylesheet;
-        }
+        this._unloadExtensionStylesheet(extension);
 
         for (let i = 0; i < order.length; i++) {
             let otherUuid = order[i];
@@ -176,20 +236,11 @@ var ExtensionManager = class extends Signals.EventEmitter {
         extension.state = ExtensionState.ENABLING;
         this.emit('extension-state-changed', extension);
 
-        let stylesheetNames = [`${global.session_mode}.css`, 'stylesheet.css'];
-        let theme = St.ThemeContext.get_for_stage(global.stage).get_theme();
-        for (let i = 0; i < stylesheetNames.length; i++) {
-            try {
-                let stylesheetFile = extension.dir.get_child(stylesheetNames[i]);
-                theme.load_stylesheet(stylesheetFile);
-                extension.stylesheet = stylesheetFile;
-                break;
-            } catch (e) {
-                if (e.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.NOT_FOUND))
-                    continue; // not an error
-                this.logExtensionError(uuid, e);
-                return;
-            }
+        try {
+            this._loadExtensionStylesheet(extension);
+        } catch (e) {
+            this.logExtensionError(uuid, e);
+            return;
         }
 
         try {
@@ -198,10 +249,7 @@ var ExtensionManager = class extends Signals.EventEmitter {
             this._extensionOrder.push(uuid);
             this.emit('extension-state-changed', extension);
         } catch (e) {
-            if (extension.stylesheet) {
-                theme.unload_stylesheet(extension.stylesheet);
-                delete extension.stylesheet;
-            }
+            this._unloadExtensionStylesheet(extension);
             this.logExtensionError(uuid, e);
         }
     }

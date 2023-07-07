@@ -4,7 +4,9 @@
 */
 /* eslint camelcase: ["error", { properties: "never", allow: ["^script_"] }] */
 
-const {GLib, MetaTest, Shell} = imports.gi;
+const GLib = imports.gi.GLib;
+const MetaTest = imports.gi.MetaTest;
+const Shell = imports.gi.Shell;
 
 const Main = imports.ui.main;
 const Scripting = imports.ui.scripting;
@@ -23,15 +25,12 @@ function init() {
     global.connect('shutdown', () => {
         _testMonitor?.destroy();
     });
-    global.context.connect('started',
+    GLib.timeout_add_seconds(
+        GLib.PRIORITY_LOW, 2,
         () => {
-            GLib.timeout_add_seconds(
-                GLib.PRIORITY_LOW, 2,
-                () => {
-                    log('Connecting 1280x720 test monitor');
-                    _testMonitor = MetaTest.TestMonitor.new(
-                        global.context, 1280, 720, 60.0);
-                });
+            log('Connecting 1280x720 test monitor');
+            _testMonitor = MetaTest.TestMonitor.new(
+                global.context, 1280, 720, 60.0);
         });
     Scripting.defineScriptEvent('monitorsChanged', 'Monitors changed');
 

@@ -1,7 +1,9 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 /* exported SearchController */
 
-const { Clutter, GObject, St } = imports.gi;
+const Clutter = imports.gi.Clutter;
+const GObject = imports.gi.GObject;
+const St = imports.gi.St;
 
 const Main = imports.ui.main;
 const Search = imports.ui.search;
@@ -318,6 +320,28 @@ var SearchController = GObject.registerClass({
         }
 
         return Clutter.EVENT_PROPAGATE;
+    }
+
+    /**
+     * addProvider:
+     *
+     * Add a search provider to the controller.
+     *
+     * @param {object} provider - a search provider implementation
+     */
+    addProvider(provider) {
+        this._searchResults._registerProvider(provider);
+    }
+
+    /**
+     * removeProvider:
+     *
+     * Remove a search provider from the controller.
+     *
+     * @param {object} provider - a search provider implementation
+     */
+    removeProvider(provider) {
+        this._searchResults._unregisterProvider(provider);
     }
 
     get searchActive() {

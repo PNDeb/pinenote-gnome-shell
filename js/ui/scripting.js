@@ -3,7 +3,10 @@
             destroyTestWindows, defineScriptEvent, scriptEvent,
             collectStatistics, runPerfScript, disableHelperAutoExit */
 
-const { Gio, GLib, Meta, Shell } = imports.gi;
+const Gio = imports.gi.Gio;
+const GLib = imports.gi.GLib;
+const Meta = imports.gi.Meta;
+const Shell = imports.gi.Shell;
 
 const Config = imports.misc.config;
 const Main = imports.ui.main;
@@ -64,14 +67,13 @@ function waitLeisure() {
 
 const PerfHelperIface = loadInterfaceXML('org.gnome.Shell.PerfHelper');
 var PerfHelperProxy = Gio.DBusProxy.makeProxyWrapper(PerfHelperIface);
-function PerfHelper() {
-    return new PerfHelperProxy(Gio.DBus.session, 'org.gnome.Shell.PerfHelper', '/org/gnome/Shell/PerfHelper');
-}
 
 let _perfHelper = null;
-function _getPerfHelper() {
+/** private */
+async function _getPerfHelper() {
     if (_perfHelper == null) {
-        _perfHelper = new PerfHelper();
+        _perfHelper = await PerfHelperProxy.newAsync(
+            Gio.DBus.session, 'org.gnome.Shell.PerfHelper', '/org/gnome/Shell/PerfHelper');
         _perfHelper._autoExit = true;
     }
 
@@ -100,7 +102,7 @@ function _spawnPerfHelper() {
  * because of the normal X asynchronous mapping process, to actually wait
  * until the window has been mapped and exposed, use waitTestWindows().
  */
-function createTestWindow(params) {
+async function createTestWindow(params) {
     params = Params.parse(params, {
         width: 640,
         height: 480,
@@ -110,7 +112,7 @@ function createTestWindow(params) {
         textInput: false,
     });
 
-    let perfHelper = _getPerfHelper();
+    let perfHelper = await _getPerfHelper();
     perfHelper.CreateWindowAsync(
         params.width, params.height,
         params.alpha, params.maximized,
@@ -124,8 +126,8 @@ function createTestWindow(params) {
  * Used within an automation script to pause until all windows previously
  * created with createTestWindow have been mapped and exposed.
  */
-function waitTestWindows() {
-    let perfHelper = _getPerfHelper();
+async function waitTestWindows() {
+    let perfHelper = await _getPerfHelper();
     return perfHelper.WaitWindowsAsync().catch(logError);
 }
 
@@ -139,8 +141,8 @@ function waitTestWindows() {
  * this doesn't guarantee that Mutter has actually finished the destroy
  * process because of normal X asynchronicity.
  */
-function destroyTestWindows() {
-    let perfHelper = _getPerfHelper();
+async function destroyTestWindows() {
+    let perfHelper = await _getPerfHelper();
     return perfHelper.DestroyWindowsAsync().catch(logError);
 }
 
@@ -150,8 +152,8 @@ function destroyTestWindows() {
  * Don't exixt the perf helper after running the script. Instead it will remain
  * running until something else makes it exit, e.g. the Wayland socket closing.
  */
-function disableHelperAutoExit() {
-    let perfHelper = _getPerfHelper();
+async function disableHelperAutoExit() {
+    let perfHelper = await _getPerfHelper();
     perfHelper._autoExit = false;
 }
 
@@ -301,7 +303,7 @@ async function _runPerfScript(scriptModule, outputFile) {
     }
 
     try {
-        const perfHelper = _getPerfHelper();
+        const perfHelper = await _getPerfHelper();
         if (perfHelper._autoExit)
             perfHelper.ExitSync();
     } catch (err) {

@@ -1,7 +1,13 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 /* exported SearchResultsView */
 
-const { Clutter, Gio, GLib, GObject, Meta, Shell, St } = imports.gi;
+const Clutter = imports.gi.Clutter;
+const Gio = imports.gi.Gio;
+const GLib = imports.gi.GLib;
+const GObject = imports.gi.GObject;
+const Meta = imports.gi.Meta;
+const Shell = imports.gi.Shell;
+const St = imports.gi.St;
 
 const AppDisplay = imports.ui.appDisplay;
 const IconGrid = imports.ui.iconGrid;
@@ -534,7 +540,7 @@ class GridSearchResults extends SearchResultsBase {
 });
 
 var SearchResultsView = GObject.registerClass({
-    Signals: { 'terms-changed': {} },
+    Signals: {'terms-changed': {}},
 }, class SearchResultsView extends St.BoxLayout {
     _init() {
         super._init({

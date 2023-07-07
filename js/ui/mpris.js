@@ -1,5 +1,8 @@
 /* exported MediaSection */
-const { Gio, GObject, Shell, St } = imports.gi;
+const Gio = imports.gi.Gio;
+const GObject = imports.gi.GObject;
+const Shell = imports.gi.Shell;
+const St = imports.gi.St;
 const Signals = imports.misc.signals;
 
 const Main = imports.ui.main;
@@ -68,8 +71,11 @@ class MediaMessage extends MessageList.Message {
 
         if (this._player.trackCoverUrl) {
             let file = Gio.File.new_for_uri(this._player.trackCoverUrl);
-            this._icon.gicon = new Gio.FileIcon({ file });
+            this._icon.gicon = new Gio.FileIcon({file});
             this._icon.remove_style_class_name('fallback');
+        } else if (this._player.app) {
+            this._icon.gicon = this._player.app.icon;
+            this._icon.add_style_class_name('fallback');
         } else {
             this._icon.icon_name = 'audio-x-generic-symbolic';
             this._icon.add_style_class_name('fallback');
@@ -120,6 +126,10 @@ var MprisPlayer = class MprisPlayer extends Signals.EventEmitter {
         return this._trackCoverUrl;
     }
 
+    get app() {
+        return this._app;
+    }
+
     playPause() {
         this._playerProxy.PlayPauseAsync().catch(logError);
     }
@@ -143,14 +153,8 @@ var MprisPlayer = class MprisPlayer extends Signals.EventEmitter {
     raise() {
         // The remote Raise() method may run into focus stealing prevention,
         // so prefer activating the app via .desktop file if possible
-        let app = null;
-        if (this._mprisProxy.DesktopEntry) {
-            let desktopId = `${this._mprisProxy.DesktopEntry}.desktop`;
-            app = Shell.AppSystem.get_default().lookup_app(desktopId);
-        }
-
-        if (app)
-            app.activate();
+        if (this._app)
+            this._app.activate();
         else if (this._mprisProxy.CanRaise)
             this._mprisProxy.RaiseAsync().catch(logError);
     }
@@ -220,6 +224,13 @@ var MprisPlayer = class MprisPlayer extends Signals.EventEmitter {
                     this._trackCoverUrl} (${typeof this._trackCoverUrl})`);
             }
             this._trackCoverUrl = '';
+        }
+
+        if (this._mprisProxy.DesktopEntry) {
+            const desktopId = `${this._mprisProxy.DesktopEntry}.desktop`;
+            this._app = Shell.AppSystem.get_default().lookup_app(desktopId);
+        } else {
+            this._app = null;
         }
 
         this.emit('changed');

@@ -1,7 +1,15 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 /* exported ScreenshotService, ScreenshotUI, showScreenshotUI, captureScreenshot */
 
-const {Clutter, Cogl, Gio, GObject, GLib, Graphene, Meta, Shell, St} = imports.gi;
+const Clutter = imports.gi.Clutter;
+const Cogl = imports.gi.Cogl;
+const Gio = imports.gi.Gio;
+const GObject = imports.gi.GObject;
+const GLib = imports.gi.GLib;
+const Graphene = imports.gi.Graphene;
+const Meta = imports.gi.Meta;
+const Shell = imports.gi.Shell;
+const St = imports.gi.St;
 
 const GrabHelper = imports.ui.grabHelper;
 const Layout = imports.ui.layout;
@@ -1239,6 +1247,12 @@ var ScreenshotUI = GObject.registerClass({
             this._onShotButtonToggled.bind(this));
         this._shotCastContainer.add_child(this._shotButton);
 
+        this.add_child(new Tooltip(this._shotButton, {
+            text: _('Take Screenshot'),
+            style_class: 'screenshot-ui-tooltip',
+            visible: false,
+        }));
+
         this._castButton = new St.Button({
             style_class: 'screenshot-ui-shot-cast-button',
             icon_name: 'camera-web-symbolic',
@@ -1249,25 +1263,16 @@ var ScreenshotUI = GObject.registerClass({
             this._onCastButtonToggled.bind(this));
         this._shotCastContainer.add_child(this._castButton);
 
+        this.add_child(new Tooltip(this._castButton, {
+            text: _('Record Screen'),
+            style_class: 'screenshot-ui-tooltip',
+            visible: false,
+        }));
+
         this._shotButton.bind_property('checked', this._castButton, 'checked',
             GObject.BindingFlags.BIDIRECTIONAL | GObject.BindingFlags.INVERT_BOOLEAN);
 
-        this._shotCastTooltip = new Tooltip(this._shotCastContainer, {
-            text: _('Screenshot / Screencast'),
-            style_class: 'screenshot-ui-tooltip',
-            visible: false,
-        });
-        const shotCastCallback = () => {
-            if (this._shotButton.hover || this._castButton.hover)
-                this._shotCastTooltip.open();
-            else
-                this._shotCastTooltip.close();
-        };
-        this._shotButton.connect('notify::hover', shotCastCallback);
-        this._castButton.connect('notify::hover', shotCastCallback);
-        this.add_child(this._shotCastTooltip);
-
-        this._captureButton = new St.Button({ style_class: 'screenshot-ui-capture-button' });
+        this._captureButton = new St.Button({style_class: 'screenshot-ui-capture-button'});
         this._captureButton.set_child(new St.Widget({
             style_class: 'screenshot-ui-capture-button-circle',
         }));
@@ -1937,7 +1942,7 @@ var ScreenshotUI = GObject.registerClass({
         this._setScreencastInProgress(false);
 
         // Translators: notification title.
-        this._showNotification(_('Error'));
+        this._showNotification(_('Screencast ended unexpectedly'));
     }
 
     _showNotification(title) {

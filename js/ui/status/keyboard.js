@@ -1,7 +1,14 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 /* exported InputSourceIndicator */
 
-const { Clutter, Gio, GLib, GObject, IBus, Meta, Shell, St } = imports.gi;
+const Clutter = imports.gi.Clutter;
+const Gio = imports.gi.Gio;
+const GLib = imports.gi.GLib;
+const GObject = imports.gi.GObject;
+const IBus = imports.gi.IBus;
+const Meta = imports.gi.Meta;
+const Shell = imports.gi.Shell;
+const St = imports.gi.St;
 const Gettext = imports.gettext;
 const Signals = imports.misc.signals;
 
@@ -406,7 +413,7 @@ var InputSourceManager = class extends Signals.EventEmitter {
         // effect without considerable work to consolidate the usage
         // of pushModal/popModal and grabHelper. See
         // https://bugzilla.gnome.org/show_bug.cgi?id=695143 .
-        if (Main.actionMode == Shell.ActionMode.POPUP) {
+        if (Main.actionMode === Shell.ActionMode.POPUP) {
             this._modifiersSwitcher();
             return;
         }
