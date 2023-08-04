@@ -34,8 +34,20 @@ override_dh_shlibdeps:
 	# gnome-shell uses mutters private mutter-clutter-1.0.so etc.
 	dh_shlibdeps -l"usr/lib/$(DEB_HOST_MULTIARCH)/mutter"
 
+# Upstream test timeouts assume an otherwise unloaded system, but that
+# isn't necessarily the case for a porterbox or multiple parallel builds.
+# Keep the timeout reasonably short for architectures where interactive
+# debugging is more likely, but extend it a lot on architectures that might
+# be very slow or using qemu for buildds.
+ifneq ($(filter amd64 i386,$(DEB_HOST_ARCH_CPU)),)
+test_timeout_multiplier = 3
+else
+test_timeout_multiplier = 20
+endif
+
 override_dh_auto_test:
 ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
 	env XDG_CACHE_HOME="$(shell mktemp -d -t cache-XXXXXXXX)" \
-	dbus-run-session xvfb-run -a dh_auto_test
+	dbus-run-session xvfb-run -a dh_auto_test -- \
+		--timeout-multiplier $(test_timeout_multiplier)
 endif
