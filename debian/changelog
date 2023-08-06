@@ -1,3 +1,15 @@
+gnome-shell (44.3-2) UNRELEASED; urgency=medium
+
+  * Update to upstream gnome-44 branch commit 44.3-4-g1635c3713
+    - Fix ELF header parsing on mips64el and riscv64 (Helps: #1042980)
+    - Translation updates: be, cs, es
+  * d/rules: Increate arbitrary test timeouts.
+    The default test timeout is 30 seconds, but the perf-* tests take more
+    like 45 seconds on mips64el.
+    Helps: #1042980
+
+ -- Simon McVittie <smcv@debian.org>  Sun, 06 Aug 2023 17:03:58 +0100
+
 gnome-shell (44.3-1) experimental; urgency=medium
 
   * New upstream release
