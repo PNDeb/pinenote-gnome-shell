@@ -21,6 +21,12 @@ else
 CONFFLAGS += -Dtests=false
 endif
 
+ifneq ($(filter mips%,$(DEB_HOST_ARCH_CPU)),)
+$(info Disabling use of llvmpipe due to mips family CPU, see https://bugs.debian.org/993550)
+export GALLIUM_DRIVER=softpipe
+export LIBGL_ALWAYS_SOFTWARE=true
+endif
+
 override_dh_auto_configure:
 	dh_auto_configure -- \
 		--libdir=/usr/lib \
