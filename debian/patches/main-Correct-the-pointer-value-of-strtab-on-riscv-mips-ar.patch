@@ -16,9 +16,10 @@ Our solution is to detect when `strtab` is unreasonably low (below the
 address of our binary) and so it must be an unrelocated offset. In that
 case we just do the relocation manually.
 
-Fixes: https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/6528
-Bug-Debian: https://bugs.debian.org/1042980
+Bug: https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/6528
 Forwarded: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2718
+Bug-Debian: https://bugs.debian.org/1042980
+Applied-upstream: 44.4, commit:424c3f6417a43d2bac1c4cad3dbedb141366dd20
 ---
  src/main.c | 20 ++++++++++++++++++++
  1 file changed, 20 insertions(+)
