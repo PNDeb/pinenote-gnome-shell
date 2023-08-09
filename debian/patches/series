@@ -3,6 +3,7 @@ Updated-Spanish-translation.patch
 main-Correct-the-pointer-value-of-strtab-on-riscv-mips-ar.patch
 Update-Czech-translation.patch
 Updated-Spanish-translation-1.patch
+tests-Use-different-suites.patch
 debian/gnome-shell-extension-prefs-Give-Debian-specific-advice.patch
 debian/Revert-build-Port-to-gcr4.patch
 debian/Revert-tests-Fail-on-warnings-too.patch

@@ -1,0 +1,45 @@
+From: =?utf-8?q?Florian_M=C3=BCllner?= <fmuellner@gnome.org>
+Date: Fri, 14 Jul 2023 00:40:09 +0200
+Subject: tests: Use different suites
+
+This makes it easier to only run unit- or automation tests.
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2845
+Applied-upstream: 45~beta, commit:476bf230416aed7de05b8194451483ba12ace0be
+---
+ tests/meson.build | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/tests/meson.build b/tests/meson.build
+index 85339dd..235337e 100644
+--- a/tests/meson.build
++++ b/tests/meson.build
+@@ -18,7 +18,7 @@ dbus_runner = configure_file(
+   configuration: dbusrunnerconf,
+ )
+ 
+-tests = [
++unit_tests = [
+     'highlighter',
+     'insertSorted',
+     'jsParse',
+@@ -29,9 +29,10 @@ tests = [
+     'versionCompare',
+ ]
+ 
+-foreach test : tests
++foreach test : unit_tests
+   test(test, run_test,
+     args: 'unit/@0@.js'.format(test),
++    suite: 'unit',
+     workdir: meson.current_source_dir())
+ endforeach
+ 
+@@ -68,6 +69,7 @@ foreach perf_test : perf_tests
+   options = perf_test.get('options', [])
+ 
+   test('perf-' + test_name, dbus_runner,
++    suite: 'shell',
+     args: [
+       perf_tool,
+       '--headless',
