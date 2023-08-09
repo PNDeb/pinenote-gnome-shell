@@ -1,3 +1,17 @@
+gnome-shell (44.3-3) experimental; urgency=medium
+
+  * Team upload
+  * d/patches: Update to upstream gnome-44 branch commit 44.3-5-g29e6369e8
+    - Translation update: es
+  * d/p/tests-Use-different-suites.patch, d/rules:
+    Skip tests that would run the whole Shell on mips* architectures.
+    GNOME Shell is reported to work correctly on mips64el machines with an
+    AMD GPU, but crashes when using llvmpipe, which appears to be an LLVM
+    issue rather than a GNOME Shell issue; one test also crashes when using
+    softpipe. (Helps: #1042980)
+
+ -- Simon McVittie <smcv@debian.org>  Wed, 09 Aug 2023 11:18:11 +0100
+
 gnome-shell (44.3-2) experimental; urgency=medium
 
   * Team upload
