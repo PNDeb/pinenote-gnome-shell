@@ -21,12 +21,6 @@ else
 CONFFLAGS += -Dtests=false
 endif
 
-ifneq ($(filter mips%,$(DEB_HOST_ARCH_CPU)),)
-$(info Disabling use of llvmpipe due to mips family CPU, see https://bugs.debian.org/993550)
-export GALLIUM_DRIVER=softpipe
-export LIBGL_ALWAYS_SOFTWARE=true
-endif
-
 override_dh_auto_configure:
 	dh_auto_configure -- \
 		--libdir=/usr/lib \
@@ -51,9 +45,19 @@ else
 test_timeout_multiplier = 20
 endif
 
+meson_test_options = --timeout-multiplier $(test_timeout_multiplier)
+
+ifneq ($(filter mips%,$(DEB_HOST_ARCH_CPU)),)
+# gnome-shell on mips(64)el works on a real GPU (in practice usually an
+# AMD GPU), but crashes when using llvmpipe or softpipe, which is all that
+# is available on the buildds, so we only run the unit tests at build time
+# and skip the tests that would run the whole Shell. See discussion in
+# https://salsa.debian.org/gnome-team/gnome-shell/-/merge_requests/71
+meson_test_options += --no-suite shell
+endif
+
 override_dh_auto_test:
 ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
 	env XDG_CACHE_HOME="$(shell mktemp -d -t cache-XXXXXXXX)" \
-	dbus-run-session xvfb-run -a dh_auto_test -- \
-		--timeout-multiplier $(test_timeout_multiplier)
+	dbus-run-session xvfb-run -a dh_auto_test -- $(meson_test_options)
 endif
