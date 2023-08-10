@@ -1,6 +1,6 @@
 gnome-shell (44.3-3) UNRELEASED; urgency=medium
 
-  * Merge with version 43.6-1 from unstable.
+  * Merge with version 43.7-1 from unstable.
     All changes in 43.7 were also included in 44.3.
 
  -- Simon McVittie <smcv@debian.org>  Thu, 10 Aug 2023 10:31:26 +0100
