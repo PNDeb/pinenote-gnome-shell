@@ -8,6 +8,8 @@ gnome-shell (43.7-1) UNRELEASED; urgency=medium
       parental controls are disabled globally (gnome-shell#6749)
     - Keep rounded corners on the overview's view of the desktop, even
       after the background image changes (gnome-shell#4125)
+  * d/patches: Update to upstream gnome-43 branch commit 43.7-1-g0d51f199e
+    - Translation update: fa
   * d/gbp.conf, d/control.in: Use debian/trixie branch
 
  -- Simon McVittie <smcv@debian.org>  Thu, 10 Aug 2023 09:42:57 +0100
