@@ -1,8 +1,16 @@
 gnome-shell (43.7-1) UNRELEASED; urgency=medium
 
-  * New upstream release
+  * New upstream stable release
+    - Apply hotspot translation to mouse cursor while using magnifier,
+      fixing an offset between the visble pointer position and the actual
+      pointer (gnome-shell#4584)
+    - Don't log an error when AccountsService signals a change while
+      parental controls are disabled globally (gnome-shell#6749)
+    - Keep rounded corners on the overview's view of the desktop, even
+      after the background image changes (gnome-shell#4125)
+  * d/gbp.conf, d/control.in: Use debian/trixie branch
 
- -- Simon McVittie <smcv@debian.org>  Thu, 10 Aug 2023 09:40:54 +0100
+ -- Simon McVittie <smcv@debian.org>  Thu, 10 Aug 2023 09:42:57 +0100
 
 gnome-shell (43.6-1) unstable; urgency=medium
 
