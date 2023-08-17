@@ -1,9 +1,25 @@
 gnome-shell (44.3-3) UNRELEASED; urgency=medium
 
-  * Merge with version 43.7-1 from unstable.
+  * Merge with version 43.7-2 from unstable.
     All changes in 43.7 were also included in 44.3.
+    - d/p/main-Leak-the-GJS-context-and-ShellGlobal.patch:
+      Drop patch, not needed in 44.x
 
  -- Simon McVittie <smcv@debian.org>  Thu, 10 Aug 2023 10:31:26 +0100
+
+gnome-shell (43.7-2) unstable; urgency=medium
+
+  * Team upload
+  * d/p/main-Leak-the-GJS-context-and-ShellGlobal.patch:
+    Add patch from Fedora to skip final cleanup during exit.
+    This has been implicated in various crashes during exit, which cause
+    gnome-shell to disable extensions during the next startup. Leaking some
+    memory at this point does not matter since the process is exiting anyway.
+    The crashes during exit are believed to have been fixed in 44.beta, but
+    those changes are too intrusive to be suitable for a backport.
+    (Closes: #1038972)
+
+ -- Simon McVittie <smcv@debian.org>  Thu, 17 Aug 2023 10:46:44 +0100
 
 gnome-shell (43.7-1) unstable; urgency=medium
 
