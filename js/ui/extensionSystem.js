@@ -1,20 +1,18 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
-/* exported init connect disconnect ExtensionManager */
 
-const GLib = imports.gi.GLib;
-const Gio = imports.gi.Gio;
-const GObject = imports.gi.GObject;
-const Shell = imports.gi.Shell;
-const St = imports.gi.St;
-const Signals = imports.misc.signals;
+import GLib from 'gi://GLib';
+import Gio from 'gi://Gio';
+import GObject from 'gi://GObject';
+import St from 'gi://St';
+import Shell from 'gi://Shell';
+import * as Signals from '../misc/signals.js';
 
-const ExtensionDownloader = imports.ui.extensionDownloader;
-const ExtensionUtils = imports.misc.extensionUtils;
-const FileUtils = imports.misc.fileUtils;
-const Main = imports.ui.main;
-const MessageTray = imports.ui.messageTray;
-
-const { ExtensionState, ExtensionType } = ExtensionUtils;
+import * as Config from '../misc/config.js';
+import * as ExtensionDownloader from './extensionDownloader.js';
+import {ExtensionState, ExtensionType} from '../misc/extensionUtils.js';
+import * as FileUtils from '../misc/fileUtils.js';
+import * as Main from './main.js';
+import * as MessageTray from './messageTray.js';
 
 const ENABLED_EXTENSIONS_KEY = 'enabled-extensions';
 const DISABLED_EXTENSIONS_KEY = 'disabled-extensions';
@@ -23,7 +21,7 @@ const EXTENSION_DISABLE_VERSION_CHECK_KEY = 'disable-extension-version-validatio
 
 const UPDATE_CHECK_TIMEOUT = 24 * 60 * 60; // 1 day in seconds
 
-var ExtensionManager = class extends Signals.EventEmitter {
+export class ExtensionManager extends Signals.EventEmitter {
     constructor() {
         super();
 
@@ -57,7 +55,12 @@ var ExtensionManager = class extends Signals.EventEmitter {
             log(`Failed to create file ${disableFilename}: ${e.message}`);
         }
 
+        const shutdownId = global.connect('shutdown',
+            () => disableFile.delete(null));
+
         GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 60, () => {
+            global.disconnect(shutdownId);
+
             disableFile.delete(null);
             return GLib.SOURCE_REMOVE;
         });
@@ -398,7 +401,7 @@ var ExtensionManager = class extends Signals.EventEmitter {
                 throw new Error(`property "${prop}" is not of type ${typeName}`);
         }
 
-        if (uuid != meta.uuid)
+        if (uuid !== meta.uuid)
             throw new Error(`uuid "${meta.uuid}" from metadata.json does not match directory name "${uuid}"`);
 
         let extension = {
@@ -426,11 +429,16 @@ var ExtensionManager = class extends Signals.EventEmitter {
         return extension.metadata.version === version;
     }
 
+    _isOutOfDate(extension) {
+        const [major] = Config.PACKAGE_VERSION.split('.');
+        return !extension.metadata['shell-version'].some(v => v.startsWith(major));
+    }
+
     async loadExtension(extension) {
         // Default to error, we set success as the last step
         extension.state = ExtensionState.ERROR;
 
-        if (this._checkVersion && ExtensionUtils.isOutOfDate(extension)) {
+        if (this._checkVersion && this._isOutOfDate(extension)) {
             extension.state = ExtensionState.OUT_OF_DATE;
         } else if (!this._canLoad(extension)) {
             this.logExtensionError(extension.uuid, new Error(
@@ -456,7 +464,7 @@ var ExtensionManager = class extends Signals.EventEmitter {
     }
 
     async unloadExtension(extension) {
-        const { uuid, type } = extension;
+        const {uuid, type} = extension;
 
         // Try to disable it -- if it's ERROR'd, we can't guarantee that,
         // but it will be removed on next reboot, and hopefully nothing
@@ -477,7 +485,7 @@ var ExtensionManager = class extends Signals.EventEmitter {
     async reloadExtension(oldExtension) {
         // Grab the things we'll need to pass to createExtensionObject
         // to reload it.
-        let { uuid, dir, type } = oldExtension;
+        let {uuid, dir, type} = oldExtension;
 
         // Then unload the old extension.
         await this.unloadExtension(oldExtension);
@@ -500,7 +508,7 @@ var ExtensionManager = class extends Signals.EventEmitter {
 
         let extension = this.lookup(uuid);
         if (!extension)
-            throw new Error("Extension was not properly created. Call createExtensionObject first");
+            throw new Error('Extension was not properly created. Call createExtensionObject first');
 
         let dir = extension.dir;
         let extensionJs = dir.get_child('extension.js');
@@ -512,36 +520,27 @@ var ExtensionManager = class extends Signals.EventEmitter {
         let extensionModule;
         let extensionState = null;
 
-        // TODO: This function does not have an async operation but when ESM is
-        // merged there will be a dynamic import here instead of `installImporter`.
-        await 0;
-
-        ExtensionUtils.installImporter(extension);
-
-        // Extensions can only be imported once, so add a property to avoid
-        // attempting to re-import an extension.
-        extension.isImported = true;
-
         try {
-            extensionModule = extension.imports.extension;
+            extensionModule = await import(extensionJs.get_uri());
+
+            // Extensions can only be imported once, so add a property to avoid
+            // attempting to re-import an extension.
+            extension.isImported = true;
         } catch (e) {
             this.logExtensionError(uuid, e);
             return false;
         }
 
-        if (extensionModule.init) {
-            try {
-                extensionState = await extensionModule.init(extension);
-            } catch (e) {
-                this.logExtensionError(uuid, e);
-                return false;
-            }
+        try {
+            const {metadata, path} = extension;
+            extensionState =
+                new extensionModule.default({...metadata, dir, path});
+        } catch (e) {
+            this.logExtensionError(uuid, e);
+            return false;
         }
 
-        if (!extensionState)
-            extensionState = extensionModule;
         extension.stateObj = extensionState;
-
         extension.state = ExtensionState.DISABLED;
         this.emit('extension-loaded', uuid);
         return true;
@@ -765,7 +764,7 @@ var ExtensionManager = class extends Signals.EventEmitter {
         await this._onEnabledExtensionsChanged();
         await this._enableAllExtensions();
     }
-};
+}
 
 const ExtensionUpdateSource = GObject.registerClass(
 class ExtensionUpdateSource extends MessageTray.Source {

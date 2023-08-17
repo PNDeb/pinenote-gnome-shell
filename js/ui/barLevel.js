@@ -1,12 +1,11 @@
 /* -*- mode: js2; js2-basic-offset: 4; indent-tabs-mode: nil -*- */
-/* exported BarLevel */
 
-const Atk = imports.gi.Atk;
-const Clutter = imports.gi.Clutter;
-const GObject = imports.gi.GObject;
-const St = imports.gi.St;
+import Atk from 'gi://Atk';
+import Clutter from 'gi://Clutter';
+import GObject from 'gi://GObject';
+import St from 'gi://St';
 
-var BarLevel = GObject.registerClass({
+export const BarLevel = GObject.registerClass({
     Properties: {
         'value': GObject.ParamSpec.double(
             'value', 'value', 'value',
@@ -55,7 +54,7 @@ var BarLevel = GObject.registerClass({
     set value(value) {
         value = Math.max(Math.min(value, this._maxValue), 0);
 
-        if (this._value == value)
+        if (this._value === value)
             return;
 
         this._value = value;
@@ -70,7 +69,7 @@ var BarLevel = GObject.registerClass({
     set maximumValue(value) {
         value = Math.max(value, 1);
 
-        if (this._maxValue == value)
+        if (this._maxValue === value)
             return;
 
         this._maxValue = value;
@@ -84,7 +83,7 @@ var BarLevel = GObject.registerClass({
     }
 
     set overdriveStart(value) {
-        if (this._overdriveStart == value)
+        if (this._overdriveStart === value)
             return;
 
         if (value > this._maxValue) {
@@ -228,6 +227,6 @@ var BarLevel = GObject.registerClass({
     }
 
     _valueChanged() {
-        this._customAccessible.notify("accessible-value");
+        this._customAccessible.notify('accessible-value');
     }
 });

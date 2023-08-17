@@ -1,15 +1,14 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
-/* exported SearchController */
 
-const Clutter = imports.gi.Clutter;
-const GObject = imports.gi.GObject;
-const St = imports.gi.St;
+import Clutter from 'gi://Clutter';
+import GObject from 'gi://GObject';
+import St from 'gi://St';
 
-const Main = imports.ui.main;
-const Search = imports.ui.search;
-const ShellEntry = imports.ui.shellEntry;
+import * as Main from './main.js';
+import * as Search from './search.js';
+import * as ShellEntry from './shellEntry.js';
 
-var FocusTrap = GObject.registerClass(
+const FocusTrap = GObject.registerClass(
 class FocusTrap extends St.Widget {
     vfunc_navigate_focus(from, direction) {
         if (direction === St.DirectionType.TAB_FORWARD ||
@@ -26,7 +25,7 @@ function getTermsForSearchString(searchString) {
     return searchString.split(/\s+/);
 }
 
-var SearchController = GObject.registerClass({
+export const SearchController = GObject.registerClass({
     Properties: {
         'search-active': GObject.ParamSpec.boolean(
             'search-active', 'search-active', 'search-active',
@@ -92,7 +91,7 @@ var SearchController = GObject.registerClass({
         // Since the entry isn't inside the results container we install this
         // dummy widget as the last results container child so that we can
         // include the entry in the keynav tab path
-        this._focusTrap = new FocusTrap({ can_focus: true });
+        this._focusTrap = new FocusTrap({can_focus: true});
         this._focusTrap.connect('key-focus-in', () => {
             this._entry.grab_key_focus();
         });

@@ -313,7 +313,7 @@ StEntry {
 #LookingGlassDialog .notebook-tab, #LookingGlassDialog > #Toolbar .lg-toolbar-button, .screenshot-ui-show-pointer-button, .screenshot-ui-type-button {
   transition-duration: 100ms;
   color: #ffffff;
-  background-color: #333333;
+  background-color: rgba(255, 255, 255, 0.1);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.3); }
   #LookingGlassDialog .notebook-tab:insensitive, #LookingGlassDialog > #Toolbar .lg-toolbar-button:insensitive, .screenshot-ui-show-pointer-button:insensitive, .screenshot-ui-type-button:insensitive {
     transition-duration: 100ms;
@@ -322,30 +322,30 @@ StEntry {
   #LookingGlassDialog .notebook-tab:focus, #LookingGlassDialog > #Toolbar .lg-toolbar-button:focus, .screenshot-ui-show-pointer-button:focus, .screenshot-ui-type-button:focus {
     transition-duration: 100ms;
     color: #ffffff;
-    background-color: #333b45;
+    background-color: rgba(118, 172, 237, 0.19);
     box-shadow: inset 0 0 0 2px rgba(53, 132, 228, 0.6) !important; }
     #LookingGlassDialog .notebook-tab:focus:hover, #LookingGlassDialog > #Toolbar .lg-toolbar-button:focus:hover, .screenshot-ui-show-pointer-button:focus:hover, .screenshot-ui-type-button:focus:hover {
-      background-color: #3a424c;
+      background-color: rgba(118, 172, 237, 0.19);
       box-shadow: inset 0 0 0 2px rgba(53, 132, 228, 0.7) !important; }
     #LookingGlassDialog .notebook-tab:focus:active, #LookingGlassDialog > #Toolbar .lg-toolbar-button:focus:active, .screenshot-ui-show-pointer-button:focus:active, .screenshot-ui-type-button:focus:active {
-      background-color: #414952;
+      background-color: rgba(118, 172, 237, 0.19);
       box-shadow: inset 0 0 0 2px rgba(53, 132, 228, 0.7) !important; }
   #LookingGlassDialog .notebook-tab:hover, #LookingGlassDialog > #Toolbar .lg-toolbar-button:hover, .screenshot-ui-show-pointer-button:hover, .screenshot-ui-type-button:hover {
     transition-duration: 100ms;
     color: #ffffff;
-    background-color: #3b3b3b; }
+    background-color: rgba(255, 255, 255, 0.1); }
   #LookingGlassDialog .notebook-tab:active, #LookingGlassDialog > #Toolbar .lg-toolbar-button:active, .screenshot-ui-show-pointer-button:active, .screenshot-ui-type-button:active {
     transition-duration: 100ms;
     color: #ffffff;
-    background-color: #424242; }
+    background-color: rgba(255, 255, 255, 0.1); }
   #LookingGlassDialog .notebook-tab:outlined, #LookingGlassDialog > #Toolbar .lg-toolbar-button:outlined, .screenshot-ui-show-pointer-button:outlined, .screenshot-ui-type-button:outlined, #LookingGlassDialog .notebook-tab:checked, #LookingGlassDialog > #Toolbar .lg-toolbar-button:checked, .screenshot-ui-show-pointer-button:checked, .screenshot-ui-type-button:checked {
     transition-duration: 100ms;
     color: #ffffff;
-    background-color: #4a4a4a; }
+    background-color: rgba(255, 255, 255, 0.1); }
     #LookingGlassDialog .notebook-tab:outlined:hover, #LookingGlassDialog > #Toolbar .lg-toolbar-button:outlined:hover, .screenshot-ui-show-pointer-button:outlined:hover, .screenshot-ui-type-button:outlined:hover, #LookingGlassDialog .notebook-tab:checked:hover, #LookingGlassDialog > #Toolbar .lg-toolbar-button:checked:hover, .screenshot-ui-show-pointer-button:checked:hover, .screenshot-ui-type-button:checked:hover {
-      background-color: #525252; }
+      background-color: rgba(255, 255, 255, 0.1); }
     #LookingGlassDialog .notebook-tab:outlined:active, #LookingGlassDialog > #Toolbar .lg-toolbar-button:outlined:active, .screenshot-ui-show-pointer-button:outlined:active, .screenshot-ui-type-button:outlined:active, #LookingGlassDialog .notebook-tab:checked:active, #LookingGlassDialog > #Toolbar .lg-toolbar-button:checked:active, .screenshot-ui-show-pointer-button:checked:active, .screenshot-ui-type-button:checked:active {
-      background-color: #595959; }
+      background-color: rgba(255, 255, 255, 0.1); }
 
 .screenshot-ui-show-pointer-button, .screenshot-ui-type-button {
   transition-duration: 100ms;
@@ -353,22 +353,14 @@ StEntry {
   background-color: none;
   box-shadow: none; }
   .screenshot-ui-show-pointer-button:insensitive, .screenshot-ui-type-button:insensitive {
-    transition-duration: 100ms;
-    color: rgba(255, 255, 255, 0.5);
-    background-color: rgba(255, 255, 255, 0.05);
-    background-color: transparent;
-    color: rgba(255, 255, 255, 0.5); }
+    background-color: transparent; }
   .screenshot-ui-show-pointer-button:insensitive, .screenshot-ui-type-button:insensitive {
     transition-duration: 100ms;
     background-color: transparent;
     background-color: none;
     box-shadow: none; }
     .screenshot-ui-show-pointer-button:insensitive:insensitive, .screenshot-ui-type-button:insensitive:insensitive {
-      transition-duration: 100ms;
-      color: rgba(255, 255, 255, 0.5);
-      background-color: rgba(255, 255, 255, 0.05);
-      background-color: transparent;
-      color: rgba(255, 255, 255, 0.5); }
+      background-color: transparent; }
 
 /* System Elements */
 .login-dialog-prompt-entry, .search-entry {
@@ -381,8 +373,8 @@ StEntry {
     background-color: rgba(255, 255, 255, 0.25); }
   .login-dialog-prompt-entry:focus, .search-entry:focus {
     transition-duration: 100ms;
-    background-color: rgba(201, 222, 248, 0.2875);
-    box-shadow: inset 0 0 0 2px rgba(53, 132, 228, 0.7);
+    background-color: rgba(255, 255, 255, 0.2625);
+    box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.2);
     color: #ffffff; }
   .login-dialog-prompt-entry:insensitive, .search-entry:insensitive {
     transition-duration: 100ms;
@@ -562,11 +554,7 @@ StScrollBar {
   box-shadow: none !important;
   border-radius: 12px; }
   .popup-menu-item:insensitive {
-    transition-duration: 100ms;
-    color: rgba(255, 255, 255, 0.5);
-    background-color: rgba(255, 255, 255, 0.05);
-    background-color: transparent;
-    color: rgba(255, 255, 255, 0.5); }
+    background-color: transparent; }
   .popup-menu-item:focus, .popup-menu-item:hover {
     transition-duration: 100ms;
     color: #ffffff;
@@ -592,6 +580,12 @@ StScrollBar {
   .popup-menu-item .toggle-switch:rtl {
     margin-right: 4px; }
 
+.popup-ornamented-menu-item:ltr {
+  padding-left: 6px; }
+
+.popup-ornamented-menu-item:rtl {
+  padding-right: 6px; }
+
 .popup-inactive-menu-item {
   color: #ffffff; }
   .popup-inactive-menu-item:insensitive {
@@ -605,9 +599,6 @@ StScrollBar {
   border-radius: 0 0 13px 13px;
   margin-bottom: 6px;
   border: 1px solid rgba(255, 255, 255, 0.3); }
-  .popup-sub-menu .popup-menu-ornament {
-    icon-size: 1.09em !important;
-    width: 1.09em; }
   .popup-sub-menu .popup-menu-item {
     border-radius: 0;
     font-weight: normal;
@@ -652,8 +643,6 @@ StScrollBar {
   .popup-separator-menu-item .popup-separator-menu-item-separator {
     height: 1px;
     background-color: rgba(255, 255, 255, 0.3); }
-  .popup-separator-menu-item .popup-menu-ornament {
-    width: 0 !important; }
   .popup-sub-menu .popup-separator-menu-item {
     background-color: transparent; }
     .popup-sub-menu .popup-separator-menu-item:ltr {
@@ -669,8 +658,6 @@ StScrollBar {
 
 .app-menu {
   max-width: 27.25em; }
-  .app-menu .popup-menu-ornament {
-    width: 0 !important; }
   .app-menu .popup-inactive-menu-item:first-child > StLabel:ltr {
     margin-right: 8px; }
   .app-menu .popup-inactive-menu-item:first-child > StLabel:rtl {
@@ -700,11 +687,7 @@ StScrollBar {
   box-shadow: none !important;
   padding: 9px; }
   .datemenu-today-button:insensitive {
-    transition-duration: 100ms;
-    color: rgba(255, 255, 255, 0.5);
-    background-color: rgba(255, 255, 255, 0.05);
-    background-color: transparent;
-    color: rgba(255, 255, 255, 0.5); }
+    background-color: transparent; }
   .datemenu-today-button:hover {
     transition-duration: 100ms;
     color: #ffffff;
@@ -741,11 +724,7 @@ StScrollBar {
   box-shadow: none !important;
   margin-top: 0; }
   .calendar:insensitive {
-    transition-duration: 100ms;
-    color: rgba(255, 255, 255, 0.5);
-    background-color: rgba(255, 255, 255, 0.05);
-    background-color: transparent;
-    color: rgba(255, 255, 255, 0.5); }
+    background-color: transparent; }
   .calendar:hover {
     transition-duration: 100ms;
     color: #ffffff;
@@ -1162,7 +1141,7 @@ StScrollBar {
   min-height: 64px;
   width: 34em;
   box-shadow: 0 2px 4px 2px rgba(0, 0, 0, 0);
-  border-radius: 12px;
+  border-radius: 16px;
   margin: 4px; }
   .notification-banner .notification-actions {
     spacing: 0; }
@@ -1520,7 +1499,7 @@ StScrollBar {
     background-color: #a11722; }
 
 .screenshot-ui-shot-cast-container {
-  background-color: #0d0d0d;
+  background-color: rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   padding: 3px;
   spacing: 3px; }
@@ -1534,12 +1513,12 @@ StScrollBar {
   background-color: transparent;
   border-radius: 13px; }
   .screenshot-ui-shot-cast-button:hover, .screenshot-ui-shot-cast-button:focus {
-    background-color: #1a1a1a; }
+    background-color: rgba(255, 255, 255, 0.2); }
   .screenshot-ui-shot-cast-button:active {
-    background-color: #5e5e5e; }
+    background-color: rgba(255, 255, 255, 0.5); }
   .screenshot-ui-shot-cast-button:checked {
-    background-color: white;
-    color: black; }
+    background-color: #ffffff;
+    color: #000000; }
   .screenshot-ui-shot-cast-button:insensitive {
     color: rgba(255, 255, 255, 0.5); }
   .screenshot-ui-shot-cast-button StIcon {
@@ -1619,23 +1598,6 @@ StScrollBar {
   height: 2.2em;
   transition-duration: 250ms;
   box-shadow: inset 0 -1px 0 0 #000000; }
-  #panel.unlock-screen, #panel.login-screen, #panel:overview {
-    background-color: transparent;
-    box-shadow: none; }
-    #panel.unlock-screen .panel-button, #panel.login-screen .panel-button, #panel:overview .panel-button {
-      transition-duration: 150ms;
-      border: 3px solid transparent;
-      border-radius: 99px;
-      font-weight: bold;
-      background-color: transparent;
-      color: #f2f2f2;
-      box-shadow: none; }
-      #panel.unlock-screen .panel-button:active, #panel.unlock-screen .panel-button:overview, #panel.unlock-screen .panel-button:focus, #panel.unlock-screen .panel-button:checked, #panel.login-screen .panel-button:active, #panel.login-screen .panel-button:overview, #panel.login-screen .panel-button:focus, #panel.login-screen .panel-button:checked, #panel:overview .panel-button:active, #panel:overview .panel-button:overview, #panel:overview .panel-button:focus, #panel:overview .panel-button:checked {
-        box-shadow: inset 0 0 0 100px rgba(255, 255, 255, 0.25); }
-        #panel.unlock-screen .panel-button:active:hover, #panel.unlock-screen .panel-button:overview:hover, #panel.unlock-screen .panel-button:focus:hover, #panel.unlock-screen .panel-button:checked:hover, #panel.login-screen .panel-button:active:hover, #panel.login-screen .panel-button:overview:hover, #panel.login-screen .panel-button:focus:hover, #panel.login-screen .panel-button:checked:hover, #panel:overview .panel-button:active:hover, #panel:overview .panel-button:overview:hover, #panel:overview .panel-button:focus:hover, #panel:overview .panel-button:checked:hover {
-          box-shadow: inset 0 0 0 100px rgba(255, 255, 255, 0.35); }
-      #panel.unlock-screen .panel-button:hover, #panel.login-screen .panel-button:hover, #panel:overview .panel-button:hover {
-        box-shadow: inset 0 0 0 100px rgba(255, 255, 255, 0.2); }
   #panel .panel-button {
     transition-duration: 150ms;
     border: 3px solid transparent;
@@ -1646,9 +1608,9 @@ StScrollBar {
     box-shadow: none;
     -natural-hpadding: 12px;
     -minimum-hpadding: 6px; }
-    #panel .panel-button:active, #panel .panel-button:overview, #panel .panel-button:focus, #panel .panel-button:checked {
+    #panel .panel-button:active, #panel .panel-button:focus, #panel .panel-button:checked {
       box-shadow: inset 0 0 0 100px rgba(242, 242, 242, 0.25); }
-      #panel .panel-button:active:hover, #panel .panel-button:overview:hover, #panel .panel-button:focus:hover, #panel .panel-button:checked:hover {
+      #panel .panel-button:active:hover, #panel .panel-button:focus:hover, #panel .panel-button:checked:hover {
         box-shadow: inset 0 0 0 100px rgba(242, 242, 242, 0.35); }
     #panel .panel-button:hover {
       box-shadow: inset 0 0 0 100px rgba(242, 242, 242, 0.2); }
@@ -1675,9 +1637,9 @@ StScrollBar {
       background-color: transparent;
       color: #f2f2f2;
       box-shadow: inset 0 0 0 100px rgba(192, 28, 40, 0.8); }
-      #panel .panel-button.screen-recording-indicator:active, #panel .panel-button.screen-recording-indicator:overview, #panel .panel-button.screen-recording-indicator:focus, #panel .panel-button.screen-recording-indicator:checked {
+      #panel .panel-button.screen-recording-indicator:active, #panel .panel-button.screen-recording-indicator:focus, #panel .panel-button.screen-recording-indicator:checked {
         box-shadow: inset 0 0 0 100px #c01c28; }
-        #panel .panel-button.screen-recording-indicator:active:hover, #panel .panel-button.screen-recording-indicator:overview:hover, #panel .panel-button.screen-recording-indicator:focus:hover, #panel .panel-button.screen-recording-indicator:checked:hover {
+        #panel .panel-button.screen-recording-indicator:active:hover, #panel .panel-button.screen-recording-indicator:focus:hover, #panel .panel-button.screen-recording-indicator:checked:hover {
           box-shadow: inset 0 0 0 100px rgba(192, 28, 40, 0.95); }
       #panel .panel-button.screen-recording-indicator:hover {
         box-shadow: inset 0 0 0 100px rgba(192, 28, 40, 0.9); }
@@ -1687,14 +1649,14 @@ StScrollBar {
       border-radius: 99px;
       font-weight: bold;
       background-color: transparent;
-      color: rgba(0, 0, 0, 0.8);
-      box-shadow: inset 0 0 0 100px rgba(246, 211, 45, 0.8); }
-      #panel .panel-button.screen-sharing-indicator:active, #panel .panel-button.screen-sharing-indicator:overview, #panel .panel-button.screen-sharing-indicator:focus, #panel .panel-button.screen-sharing-indicator:checked {
-        box-shadow: inset 0 0 0 100px #f6d32d; }
-        #panel .panel-button.screen-sharing-indicator:active:hover, #panel .panel-button.screen-sharing-indicator:overview:hover, #panel .panel-button.screen-sharing-indicator:focus:hover, #panel .panel-button.screen-sharing-indicator:checked:hover {
-          box-shadow: inset 0 0 0 100px rgba(246, 211, 45, 0.95); }
+      color: #f2f2f2;
+      box-shadow: inset 0 0 0 100px rgba(255, 120, 0, 0.8); }
+      #panel .panel-button.screen-sharing-indicator:active, #panel .panel-button.screen-sharing-indicator:focus, #panel .panel-button.screen-sharing-indicator:checked {
+        box-shadow: inset 0 0 0 100px #ff7800; }
+        #panel .panel-button.screen-sharing-indicator:active:hover, #panel .panel-button.screen-sharing-indicator:focus:hover, #panel .panel-button.screen-sharing-indicator:checked:hover {
+          box-shadow: inset 0 0 0 100px rgba(255, 120, 0, 0.95); }
       #panel .panel-button.screen-sharing-indicator:hover {
-        box-shadow: inset 0 0 0 100px rgba(246, 211, 45, 0.9); }
+        box-shadow: inset 0 0 0 100px rgba(255, 120, 0, 0.9); }
     #panel .panel-button.clock-display {
       transition-duration: 150ms;
       border: 3px solid transparent;
@@ -1704,9 +1666,9 @@ StScrollBar {
       color: #f2f2f2;
       box-shadow: none;
       box-shadow: none !important; }
-      #panel .panel-button.clock-display:active, #panel .panel-button.clock-display:overview, #panel .panel-button.clock-display:focus, #panel .panel-button.clock-display:checked {
+      #panel .panel-button.clock-display:active, #panel .panel-button.clock-display:focus, #panel .panel-button.clock-display:checked {
         box-shadow: inset 0 0 0 100px rgba(242, 242, 242, 0.25); }
-        #panel .panel-button.clock-display:active:hover, #panel .panel-button.clock-display:overview:hover, #panel .panel-button.clock-display:focus:hover, #panel .panel-button.clock-display:checked:hover {
+        #panel .panel-button.clock-display:active:hover, #panel .panel-button.clock-display:focus:hover, #panel .panel-button.clock-display:checked:hover {
           box-shadow: inset 0 0 0 100px rgba(242, 242, 242, 0.35); }
       #panel .panel-button.clock-display:hover {
         box-shadow: inset 0 0 0 100px rgba(242, 242, 242, 0.2); }
@@ -1714,26 +1676,97 @@ StScrollBar {
         transition-duration: 150ms;
         border: 3px solid transparent;
         border-radius: 99px; }
-      #panel .panel-button.clock-display:active, #panel .panel-button.clock-display:overview, #panel .panel-button.clock-display:focus, #panel .panel-button.clock-display:checked {
+      #panel .panel-button.clock-display:active, #panel .panel-button.clock-display:focus, #panel .panel-button.clock-display:checked {
         box-shadow: none !important; }
-        #panel .panel-button.clock-display:active .clock, #panel .panel-button.clock-display:overview .clock, #panel .panel-button.clock-display:focus .clock, #panel .panel-button.clock-display:checked .clock {
+        #panel .panel-button.clock-display:active .clock, #panel .panel-button.clock-display:focus .clock, #panel .panel-button.clock-display:checked .clock {
           box-shadow: inset 0 0 0 100px rgba(242, 242, 242, 0.25); }
-        #panel .panel-button.clock-display:active:hover, #panel .panel-button.clock-display:overview:hover, #panel .panel-button.clock-display:focus:hover, #panel .panel-button.clock-display:checked:hover {
-          box-shadow: none !important; }
-          #panel .panel-button.clock-display:active:hover .clock, #panel .panel-button.clock-display:overview:hover .clock, #panel .panel-button.clock-display:focus:hover .clock, #panel .panel-button.clock-display:checked:hover .clock {
-            box-shadow: inset 0 0 0 100px rgba(242, 242, 242, 0.35); }
+          #panel .panel-button.clock-display:active .clock:hover, #panel .panel-button.clock-display:focus .clock:hover, #panel .panel-button.clock-display:checked .clock:hover {
+            box-shadow: inset 0 0 0 100px rgba(242, 242, 242, 0.35) !important; }
       #panel .panel-button.clock-display:hover {
         box-shadow: none !important; }
         #panel .panel-button.clock-display:hover .clock {
           box-shadow: inset 0 0 0 100px rgba(242, 242, 242, 0.2); }
+  #panel.unlock-screen, #panel.login-screen, #panel:overview {
+    background-color: transparent;
+    box-shadow: none; }
+    #panel.unlock-screen .panel-button, #panel.login-screen .panel-button, #panel:overview .panel-button {
+      transition-duration: 150ms;
+      border: 3px solid transparent;
+      border-radius: 99px;
+      font-weight: bold;
+      background-color: transparent;
+      color: #ffffff;
+      box-shadow: none; }
+      #panel.unlock-screen .panel-button:active, #panel.unlock-screen .panel-button:focus, #panel.unlock-screen .panel-button:checked, #panel.login-screen .panel-button:active, #panel.login-screen .panel-button:focus, #panel.login-screen .panel-button:checked, #panel:overview .panel-button:active, #panel:overview .panel-button:focus, #panel:overview .panel-button:checked {
+        box-shadow: inset 0 0 0 100px rgba(255, 255, 255, 0.25); }
+        #panel.unlock-screen .panel-button:active:hover, #panel.unlock-screen .panel-button:focus:hover, #panel.unlock-screen .panel-button:checked:hover, #panel.login-screen .panel-button:active:hover, #panel.login-screen .panel-button:focus:hover, #panel.login-screen .panel-button:checked:hover, #panel:overview .panel-button:active:hover, #panel:overview .panel-button:focus:hover, #panel:overview .panel-button:checked:hover {
+          box-shadow: inset 0 0 0 100px rgba(255, 255, 255, 0.35); }
+      #panel.unlock-screen .panel-button:hover, #panel.login-screen .panel-button:hover, #panel:overview .panel-button:hover {
+        box-shadow: inset 0 0 0 100px rgba(255, 255, 255, 0.2); }
+      #panel.unlock-screen .panel-button.clock-display, #panel.login-screen .panel-button.clock-display, #panel:overview .panel-button.clock-display {
+        transition-duration: 150ms;
+        border: 3px solid transparent;
+        border-radius: 99px;
+        font-weight: bold;
+        background-color: transparent;
+        color: #ffffff;
+        box-shadow: none;
+        box-shadow: none !important; }
+        #panel.unlock-screen .panel-button.clock-display:active, #panel.unlock-screen .panel-button.clock-display:focus, #panel.unlock-screen .panel-button.clock-display:checked, #panel.login-screen .panel-button.clock-display:active, #panel.login-screen .panel-button.clock-display:focus, #panel.login-screen .panel-button.clock-display:checked, #panel:overview .panel-button.clock-display:active, #panel:overview .panel-button.clock-display:focus, #panel:overview .panel-button.clock-display:checked {
+          box-shadow: inset 0 0 0 100px rgba(255, 255, 255, 0.25); }
+          #panel.unlock-screen .panel-button.clock-display:active:hover, #panel.unlock-screen .panel-button.clock-display:focus:hover, #panel.unlock-screen .panel-button.clock-display:checked:hover, #panel.login-screen .panel-button.clock-display:active:hover, #panel.login-screen .panel-button.clock-display:focus:hover, #panel.login-screen .panel-button.clock-display:checked:hover, #panel:overview .panel-button.clock-display:active:hover, #panel:overview .panel-button.clock-display:focus:hover, #panel:overview .panel-button.clock-display:checked:hover {
+            box-shadow: inset 0 0 0 100px rgba(255, 255, 255, 0.35); }
+        #panel.unlock-screen .panel-button.clock-display:hover, #panel.login-screen .panel-button.clock-display:hover, #panel:overview .panel-button.clock-display:hover {
+          box-shadow: inset 0 0 0 100px rgba(255, 255, 255, 0.2); }
+        #panel.unlock-screen .panel-button.clock-display .clock, #panel.login-screen .panel-button.clock-display .clock, #panel:overview .panel-button.clock-display .clock {
+          transition-duration: 150ms;
+          border: 3px solid transparent;
+          border-radius: 99px; }
+        #panel.unlock-screen .panel-button.clock-display:active, #panel.unlock-screen .panel-button.clock-display:focus, #panel.unlock-screen .panel-button.clock-display:checked, #panel.login-screen .panel-button.clock-display:active, #panel.login-screen .panel-button.clock-display:focus, #panel.login-screen .panel-button.clock-display:checked, #panel:overview .panel-button.clock-display:active, #panel:overview .panel-button.clock-display:focus, #panel:overview .panel-button.clock-display:checked {
+          box-shadow: none !important; }
+          #panel.unlock-screen .panel-button.clock-display:active .clock, #panel.unlock-screen .panel-button.clock-display:focus .clock, #panel.unlock-screen .panel-button.clock-display:checked .clock, #panel.login-screen .panel-button.clock-display:active .clock, #panel.login-screen .panel-button.clock-display:focus .clock, #panel.login-screen .panel-button.clock-display:checked .clock, #panel:overview .panel-button.clock-display:active .clock, #panel:overview .panel-button.clock-display:focus .clock, #panel:overview .panel-button.clock-display:checked .clock {
+            box-shadow: inset 0 0 0 100px rgba(255, 255, 255, 0.25); }
+            #panel.unlock-screen .panel-button.clock-display:active .clock:hover, #panel.unlock-screen .panel-button.clock-display:focus .clock:hover, #panel.unlock-screen .panel-button.clock-display:checked .clock:hover, #panel.login-screen .panel-button.clock-display:active .clock:hover, #panel.login-screen .panel-button.clock-display:focus .clock:hover, #panel.login-screen .panel-button.clock-display:checked .clock:hover, #panel:overview .panel-button.clock-display:active .clock:hover, #panel:overview .panel-button.clock-display:focus .clock:hover, #panel:overview .panel-button.clock-display:checked .clock:hover {
+              box-shadow: inset 0 0 0 100px rgba(255, 255, 255, 0.35) !important; }
+        #panel.unlock-screen .panel-button.clock-display:hover, #panel.login-screen .panel-button.clock-display:hover, #panel:overview .panel-button.clock-display:hover {
+          box-shadow: none !important; }
+          #panel.unlock-screen .panel-button.clock-display:hover .clock, #panel.login-screen .panel-button.clock-display:hover .clock, #panel:overview .panel-button.clock-display:hover .clock {
+            box-shadow: inset 0 0 0 100px rgba(255, 255, 255, 0.2); }
+      #panel.unlock-screen .panel-button.screen-recording-indicator, #panel.login-screen .panel-button.screen-recording-indicator, #panel:overview .panel-button.screen-recording-indicator {
+        transition-duration: 150ms;
+        border: 3px solid transparent;
+        border-radius: 99px;
+        font-weight: bold;
+        background-color: transparent;
+        color: #f2f2f2;
+        box-shadow: inset 0 0 0 100px rgba(192, 28, 40, 0.8); }
+        #panel.unlock-screen .panel-button.screen-recording-indicator:active, #panel.unlock-screen .panel-button.screen-recording-indicator:focus, #panel.unlock-screen .panel-button.screen-recording-indicator:checked, #panel.login-screen .panel-button.screen-recording-indicator:active, #panel.login-screen .panel-button.screen-recording-indicator:focus, #panel.login-screen .panel-button.screen-recording-indicator:checked, #panel:overview .panel-button.screen-recording-indicator:active, #panel:overview .panel-button.screen-recording-indicator:focus, #panel:overview .panel-button.screen-recording-indicator:checked {
+          box-shadow: inset 0 0 0 100px #c01c28; }
+          #panel.unlock-screen .panel-button.screen-recording-indicator:active:hover, #panel.unlock-screen .panel-button.screen-recording-indicator:focus:hover, #panel.unlock-screen .panel-button.screen-recording-indicator:checked:hover, #panel.login-screen .panel-button.screen-recording-indicator:active:hover, #panel.login-screen .panel-button.screen-recording-indicator:focus:hover, #panel.login-screen .panel-button.screen-recording-indicator:checked:hover, #panel:overview .panel-button.screen-recording-indicator:active:hover, #panel:overview .panel-button.screen-recording-indicator:focus:hover, #panel:overview .panel-button.screen-recording-indicator:checked:hover {
+            box-shadow: inset 0 0 0 100px rgba(192, 28, 40, 0.95); }
+        #panel.unlock-screen .panel-button.screen-recording-indicator:hover, #panel.login-screen .panel-button.screen-recording-indicator:hover, #panel:overview .panel-button.screen-recording-indicator:hover {
+          box-shadow: inset 0 0 0 100px rgba(192, 28, 40, 0.9); }
+      #panel.unlock-screen .panel-button.screen-sharing-indicator, #panel.login-screen .panel-button.screen-sharing-indicator, #panel:overview .panel-button.screen-sharing-indicator {
+        transition-duration: 150ms;
+        border: 3px solid transparent;
+        border-radius: 99px;
+        font-weight: bold;
+        background-color: transparent;
+        color: rgba(0, 0, 0, 0.8);
+        box-shadow: inset 0 0 0 100px rgba(246, 211, 45, 0.8); }
+        #panel.unlock-screen .panel-button.screen-sharing-indicator:active, #panel.unlock-screen .panel-button.screen-sharing-indicator:focus, #panel.unlock-screen .panel-button.screen-sharing-indicator:checked, #panel.login-screen .panel-button.screen-sharing-indicator:active, #panel.login-screen .panel-button.screen-sharing-indicator:focus, #panel.login-screen .panel-button.screen-sharing-indicator:checked, #panel:overview .panel-button.screen-sharing-indicator:active, #panel:overview .panel-button.screen-sharing-indicator:focus, #panel:overview .panel-button.screen-sharing-indicator:checked {
+          box-shadow: inset 0 0 0 100px #f6d32d; }
+          #panel.unlock-screen .panel-button.screen-sharing-indicator:active:hover, #panel.unlock-screen .panel-button.screen-sharing-indicator:focus:hover, #panel.unlock-screen .panel-button.screen-sharing-indicator:checked:hover, #panel.login-screen .panel-button.screen-sharing-indicator:active:hover, #panel.login-screen .panel-button.screen-sharing-indicator:focus:hover, #panel.login-screen .panel-button.screen-sharing-indicator:checked:hover, #panel:overview .panel-button.screen-sharing-indicator:active:hover, #panel:overview .panel-button.screen-sharing-indicator:focus:hover, #panel:overview .panel-button.screen-sharing-indicator:checked:hover {
+            box-shadow: inset 0 0 0 100px rgba(246, 211, 45, 0.95); }
+        #panel.unlock-screen .panel-button.screen-sharing-indicator:hover, #panel.login-screen .panel-button.screen-sharing-indicator:hover, #panel:overview .panel-button.screen-sharing-indicator:hover {
+          box-shadow: inset 0 0 0 100px rgba(246, 211, 45, 0.9); }
   #panel .panel-status-indicators-box,
   #panel .panel-status-menu-box {
     spacing: 2px; }
   #panel .power-status.panel-status-indicators-box {
     spacing: 0; }
-  #panel .screencast-indicator,
-  #panel .remote-access-indicator {
-    color: #f6d32d; }
+  #panel .privacy-indicator {
+    color: #ff7800; }
 
 #appMenu {
   spacing: 6px; }
@@ -1834,7 +1867,8 @@ StScrollBar {
 
 .quick-menu-toggle .quick-toggle-arrow {
   padding: 6px 10.5px;
-  border-width: 0; }
+  border-width: 0;
+  border-color: rgba(255, 255, 255, 0.25); }
   .quick-menu-toggle .quick-toggle-arrow:checked {
     transition-duration: 100ms;
     background-color: #3584e4;
@@ -1958,6 +1992,30 @@ StScrollBar {
 
 .device-subtitle {
   color: rgba(255, 255, 255, 0.5); }
+
+.keyboard-brightness-item .slider {
+  min-height: 16px; }
+
+.keyboard-brightness-level {
+  spacing: 6px; }
+  .keyboard-brightness-level .button:checked, .keyboard-brightness-level .icon-button:checked, .keyboard-brightness-level .login-dialog-button.cancel-button:checked, .keyboard-brightness-level .login-dialog-button.switch-user-button:checked, .keyboard-brightness-level .login-dialog-button.login-dialog-session-list-button:checked, .keyboard-brightness-level .background-app-item .close-button:checked, .background-app-item .keyboard-brightness-level .close-button:checked, .keyboard-brightness-level .calendar .calendar-month-header .pager-button:checked, .calendar .calendar-month-header .keyboard-brightness-level .pager-button:checked, .keyboard-brightness-level .calendar .calendar-day:checked, .calendar .keyboard-brightness-level .calendar-day:checked {
+    transition-duration: 100ms;
+    background-color: #3584e4;
+    color: #ffffff; }
+    .keyboard-brightness-level .button:checked:focus, .keyboard-brightness-level .icon-button:checked:focus, .keyboard-brightness-level .login-dialog-button.cancel-button:checked:focus, .keyboard-brightness-level .login-dialog-button.switch-user-button:checked:focus, .keyboard-brightness-level .login-dialog-button.login-dialog-session-list-button:checked:focus, .keyboard-brightness-level .background-app-item .close-button:checked:focus, .background-app-item .keyboard-brightness-level .close-button:checked:focus, .keyboard-brightness-level .calendar .calendar-month-header .pager-button:checked:focus, .calendar .calendar-month-header .keyboard-brightness-level .pager-button:checked:focus, .keyboard-brightness-level .calendar .calendar-day:checked:focus, .calendar .keyboard-brightness-level .calendar-day:checked:focus {
+      box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.6) !important; }
+    .keyboard-brightness-level .button:checked:hover, .keyboard-brightness-level .icon-button:checked:hover, .keyboard-brightness-level .login-dialog-button.cancel-button:checked:hover, .keyboard-brightness-level .login-dialog-button.switch-user-button:checked:hover, .keyboard-brightness-level .login-dialog-button.login-dialog-session-list-button:checked:hover, .keyboard-brightness-level .background-app-item .close-button:checked:hover, .background-app-item .keyboard-brightness-level .close-button:checked:hover, .keyboard-brightness-level .calendar .calendar-month-header .pager-button:checked:hover, .calendar .calendar-month-header .keyboard-brightness-level .pager-button:checked:hover, .keyboard-brightness-level .calendar .calendar-day:checked:hover, .calendar .keyboard-brightness-level .calendar-day:checked:hover, .keyboard-brightness-level .button:checked:focus, .keyboard-brightness-level .icon-button:checked:focus, .keyboard-brightness-level .login-dialog-button.cancel-button:checked:focus, .keyboard-brightness-level .login-dialog-button.switch-user-button:checked:focus, .keyboard-brightness-level .login-dialog-button.login-dialog-session-list-button:checked:focus, .keyboard-brightness-level .background-app-item .close-button:checked:focus, .background-app-item .keyboard-brightness-level .close-button:checked:focus, .keyboard-brightness-level .calendar .calendar-month-header .pager-button:checked:focus, .calendar .calendar-month-header .keyboard-brightness-level .pager-button:checked:focus, .keyboard-brightness-level .calendar .calendar-day:checked:focus, .calendar .keyboard-brightness-level .calendar-day:checked:focus {
+      background-color: #4b92e7;
+      color: white; }
+    .keyboard-brightness-level .button:checked:active, .keyboard-brightness-level .icon-button:checked:active, .keyboard-brightness-level .login-dialog-button.cancel-button:checked:active, .keyboard-brightness-level .login-dialog-button.switch-user-button:checked:active, .keyboard-brightness-level .login-dialog-button.login-dialog-session-list-button:checked:active, .keyboard-brightness-level .background-app-item .close-button:checked:active, .background-app-item .keyboard-brightness-level .close-button:checked:active, .keyboard-brightness-level .calendar .calendar-month-header .pager-button:checked:active, .calendar .calendar-month-header .keyboard-brightness-level .pager-button:checked:active, .keyboard-brightness-level .calendar .calendar-day:checked:active, .calendar .keyboard-brightness-level .calendar-day:checked:active {
+      background-color: #1d72d8;
+      color: #ededed; }
+    .keyboard-brightness-level .button:checked:insensitive, .keyboard-brightness-level .icon-button:checked:insensitive, .keyboard-brightness-level .login-dialog-button.cancel-button:checked:insensitive, .keyboard-brightness-level .login-dialog-button.switch-user-button:checked:insensitive, .keyboard-brightness-level .login-dialog-button.login-dialog-session-list-button:checked:insensitive, .keyboard-brightness-level .background-app-item .close-button:checked:insensitive, .background-app-item .keyboard-brightness-level .close-button:checked:insensitive, .keyboard-brightness-level .calendar .calendar-month-header .pager-button:checked:insensitive, .calendar .calendar-month-header .keyboard-brightness-level .pager-button:checked:insensitive, .keyboard-brightness-level .calendar .calendar-day:checked:insensitive, .calendar .keyboard-brightness-level .calendar-day:checked:insensitive {
+      transition-duration: 100ms;
+      color: rgba(255, 255, 255, 0.5);
+      background-color: rgba(255, 255, 255, 0.05);
+      background-color: rgba(53, 132, 228, 0.5);
+      color: rgba(255, 255, 255, 0.5); }
 
 .background-apps-quick-toggle {
   min-height: 40px;
@@ -2239,16 +2297,17 @@ StScrollBar {
 
 .app-folder-dialog {
   border-radius: 64px;
-  background-color: #1a1a1a;
+  background-color: #252525;
   padding: 12px;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.3);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
   box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.3); }
   .app-folder-dialog .folder-name-container {
     padding: 24px 36px 0;
     spacing: 12px;
     /* FIXME: this is to keep the label in sync with the entry */ }
     .app-folder-dialog .folder-name-container .folder-name-entry {
-      width: 12em; }
+      width: 12em;
+      color: #ffffff !important; }
     .app-folder-dialog .folder-name-container .folder-name-label {
       padding: 5px 7px;
       color: #ffffff; }
@@ -2340,11 +2399,7 @@ StScrollBar {
     background-color: none;
     box-shadow: none; }
     .page-navigation-arrow:insensitive:insensitive {
-      transition-duration: 100ms;
-      color: rgba(255, 255, 255, 0.5);
-      background-color: rgba(255, 255, 255, 0.05);
-      background-color: transparent;
-      color: rgba(255, 255, 255, 0.5); }
+      background-color: transparent; }
   .page-navigation-arrow:hover {
     transition-duration: 100ms;
     color: #ffffff;
@@ -2601,7 +2656,8 @@ StScrollBar {
 #LookingGlassDialog {
   background-color: rgba(0, 0, 0, 0.98);
   color: #ffffff;
-  border-radius: 0 0 16px 16px;
+  border-radius: 16px;
+  margin-top: 4px;
   border-top-width: 0;
   padding: 6px;
   spacing: 6px;

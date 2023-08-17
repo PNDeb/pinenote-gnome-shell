@@ -1,6 +1,8 @@
 /* Top Bar */
 // a.k.a. the panel
 
+$privacy_indicator_color: $orange_3;
+
 $panel_bg_color: if($variant == 'light', $light_3, $dark_5);
 $panel_fg_color: if($variant == 'light', $fg_color, darken($fg_color, 5%));
 $panel_border_color: if($variant == 'light', darken($panel_bg_color, 2%), $panel_bg_color);
@@ -16,18 +18,6 @@ $panel_transition_duration: 250ms; // same as the overview transition duration
   @extend %numeric;
   transition-duration: $panel_transition_duration;
   box-shadow: inset 0 -1px 0 0  $panel_border_color;
-
-  // transparent panel on lock & login screens
-  &.unlock-screen,
-  &.login-screen,
-  &:overview {
-    background-color: transparent;
-    box-shadow: none;
-
-    .panel-button {
-      @include panel_button($panel_system_fg_color);
-    }
-  }
 
   // panel menus
   .panel-button {
@@ -74,7 +64,7 @@ $panel_transition_duration: 250ms; // same as the overview transition duration
     }
 
     &.screen-sharing-indicator {
-      @include panel_button($warning_color, transparentize(black, 0.2), $flat: false);
+      @include panel_button($privacy_indicator_color, $flat: false);
     }
 
     // clock
@@ -90,6 +80,32 @@ $panel_transition_duration: 250ms; // same as the overview transition duration
     }
   }
 
+  // transparent panel on lock & login screens
+  &.unlock-screen,
+  &.login-screen,
+  &:overview {
+    background-color: transparent;
+    box-shadow: none;
+
+    .panel-button {
+      @include panel_button($panel_system_fg_color, $fg:$panel_system_fg_color);
+
+      // clock
+      &.clock-display {
+        @include panel_button($panel_system_fg_color, $fg:$panel_system_fg_color, $highlighted_child: true, $child_class:".clock");
+      }
+
+      // unfortunate duplication so these indicators have styles
+      &.screen-recording-indicator {
+        @include panel_button($screenshot_ui_button_red, $flat: false);
+      }
+
+      &.screen-sharing-indicator {
+        @include panel_button($warning_color, transparentize(black, 0.2), $flat: false);
+      }
+    }
+  }
+
   .panel-status-indicators-box,
   .panel-status-menu-box {
     spacing: 2px;
@@ -100,9 +116,8 @@ $panel_transition_duration: 250ms; // same as the overview transition duration
     spacing: 0;
   }
 
-  // indicator for active
-  .screencast-indicator,
-  .remote-access-indicator { color: $warning_color; }
+  // important privacy related indicators
+  .privacy-indicator { color: $privacy_indicator_color; }
 }
 
 // App Menu

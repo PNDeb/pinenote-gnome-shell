@@ -1,11 +1,5 @@
 extends:
  - ./lint/eslintrc-gjs.yml
  - ./lint/eslintrc-shell.yml
-overrides:
-  - files:
-      - js/ui/init.js
-      - js/dbusServices/**
-      - js/portalHelper/**
-      - subprojects/extensions-app/**
-    parserOptions:
-      sourceType: module
+parserOptions:
+    sourceType: module

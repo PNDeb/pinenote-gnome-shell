@@ -1,35 +1,34 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
-/* exported WindowPreview */
 
-const Atk = imports.gi.Atk;
-const Clutter = imports.gi.Clutter;
-const GLib = imports.gi.GLib;
-const GObject = imports.gi.GObject;
-const Graphene = imports.gi.Graphene;
-const Meta = imports.gi.Meta;
-const Pango = imports.gi.Pango;
-const Shell = imports.gi.Shell;
-const St = imports.gi.St;
+import Atk from 'gi://Atk';
+import Clutter from 'gi://Clutter';
+import GLib from 'gi://GLib';
+import GObject from 'gi://GObject';
+import Graphene from 'gi://Graphene';
+import Meta from 'gi://Meta';
+import Pango from 'gi://Pango';
+import Shell from 'gi://Shell';
+import St from 'gi://St';
 
-const DND = imports.ui.dnd;
-const OverviewControls = imports.ui.overviewControls;
+import * as DND from './dnd.js';
+import * as OverviewControls from './overviewControls.js';
 
-var WINDOW_DND_SIZE = 256;
+const WINDOW_DND_SIZE = 256;
 
-var WINDOW_OVERLAY_IDLE_HIDE_TIMEOUT = 750;
-var WINDOW_OVERLAY_FADE_TIME = 200;
+const WINDOW_OVERLAY_IDLE_HIDE_TIMEOUT = 750;
+const WINDOW_OVERLAY_FADE_TIME = 200;
 
-var WINDOW_SCALE_TIME = 200;
-var WINDOW_ACTIVE_SIZE_INC = 5; // in each direction
+const WINDOW_SCALE_TIME = 200;
+const WINDOW_ACTIVE_SIZE_INC = 5; // in each direction
 
-var DRAGGING_WINDOW_OPACITY = 100;
+const DRAGGING_WINDOW_OPACITY = 100;
 
 const ICON_SIZE = 64;
 const ICON_OVERLAP = 0.7;
 
 const ICON_TITLE_SPACING = 6;
 
-var WindowPreview = GObject.registerClass({
+export const WindowPreview = GObject.registerClass({
     Properties: {
         'overlay-enabled': GObject.ParamSpec.boolean(
             'overlay-enabled', 'overlay-enabled', 'overlay-enabled',
@@ -40,7 +39,7 @@ var WindowPreview = GObject.registerClass({
         'drag-begin': {},
         'drag-cancelled': {},
         'drag-end': {},
-        'selected': { param_types: [GObject.TYPE_UINT] },
+        'selected': {param_types: [GObject.TYPE_UINT]},
         'show-chrome': {},
         'size-changed': {},
     },
@@ -60,7 +59,7 @@ var WindowPreview = GObject.registerClass({
         });
 
         const windowContainer = new Clutter.Actor({
-            pivot_point: new Graphene.Point({ x: 0.5, y: 0.5 }),
+            pivot_point: new Graphene.Point({x: 0.5, y: 0.5}),
         });
         this.window_container = windowContainer;
 
@@ -137,7 +136,7 @@ var WindowPreview = GObject.registerClass({
         this._icon.add_style_class_name('icon-dropshadow');
         this._icon.set({
             reactive: true,
-            pivot_point: new Graphene.Point({ x: 0.5, y: 0.5 }),
+            pivot_point: new Graphene.Point({x: 0.5, y: 0.5}),
         });
         this._icon.add_constraint(new Clutter.BindConstraint({
             source: windowContainer,
@@ -151,11 +150,11 @@ var WindowPreview = GObject.registerClass({
         this._icon.add_constraint(new Clutter.AlignConstraint({
             source: windowContainer,
             align_axis: Clutter.AlignAxis.Y_AXIS,
-            pivot_point: new Graphene.Point({ x: -1, y: ICON_OVERLAP }),
+            pivot_point: new Graphene.Point({x: -1, y: ICON_OVERLAP}),
             factor: 1,
         }));
 
-        const { scaleFactor } = St.ThemeContext.get_for_stage(global.stage);
+        const {scaleFactor} = St.ThemeContext.get_for_stage(global.stage);
         this._title = new St.Label({
             visible: false,
             style_class: 'window-caption',
@@ -181,7 +180,7 @@ var WindowPreview = GObject.registerClass({
         this._title.add_constraint(new Clutter.AlignConstraint({
             source: windowContainer,
             align_axis: Clutter.AlignAxis.Y_AXIS,
-            pivot_point: new Graphene.Point({ x: -1, y: 0 }),
+            pivot_point: new Graphene.Point({x: -1, y: 0}),
             factor: 1,
         }));
         this._title.clutter_text.ellipsize = Pango.EllipsizeMode.END;
@@ -207,13 +206,13 @@ var WindowPreview = GObject.registerClass({
         this._closeButton.add_constraint(new Clutter.AlignConstraint({
             source: windowContainer,
             align_axis: Clutter.AlignAxis.X_AXIS,
-            pivot_point: new Graphene.Point({ x: 0.5, y: -1 }),
+            pivot_point: new Graphene.Point({x: 0.5, y: -1}),
             factor: this._closeButtonSide === St.Side.LEFT ? 0 : 1,
         }));
         this._closeButton.add_constraint(new Clutter.AlignConstraint({
             source: windowContainer,
             align_axis: Clutter.AlignAxis.Y_AXIS,
-            pivot_point: new Graphene.Point({ x: -1, y: 0.5 }),
+            pivot_point: new Graphene.Point({x: -1, y: 0.5}),
             factor: 0,
         }));
         this._closeButton.connect('clicked', () => this._deleteAll());
@@ -236,8 +235,8 @@ var WindowPreview = GObject.registerClass({
     }
 
     _updateIconScale() {
-        const { ControlsState } = OverviewControls;
-        const { currentState, initialState, finalState } =
+        const {ControlsState} = OverviewControls;
+        const {currentState, initialState, finalState} =
             this._overviewAdjustment.getStateTransitionParams();
         const visible =
             initialState === ControlsState.WINDOW_PICKER ||
@@ -277,7 +276,7 @@ var WindowPreview = GObject.registerClass({
     chromeHeights() {
         const [, closeButtonHeight] = this._closeButton.get_preferred_height(-1);
         const [, iconHeight] = this._icon.get_preferred_height(-1);
-        const { scaleFactor } = St.ThemeContext.get_for_stage(global.stage);
+        const {scaleFactor} = St.ThemeContext.get_for_stage(global.stage);
         const activeExtraSize = WINDOW_ACTIVE_SIZE_INC * scaleFactor;
 
         const topOversize = closeButtonHeight / 2;
@@ -291,7 +290,7 @@ var WindowPreview = GObject.registerClass({
 
     chromeWidths() {
         const [, closeButtonWidth] = this._closeButton.get_preferred_width(-1);
-        const { scaleFactor } = St.ThemeContext.get_for_stage(global.stage);
+        const {scaleFactor} = St.ThemeContext.get_for_stage(global.stage);
         const activeExtraSize = WINDOW_ACTIVE_SIZE_INC * scaleFactor;
 
         const leftOversize = this._closeButtonSide === St.Side.LEFT
@@ -340,7 +339,7 @@ var WindowPreview = GObject.registerClass({
         });
 
         const [width, height] = this.window_container.get_size();
-        const { scaleFactor } = St.ThemeContext.get_for_stage(global.stage);
+        const {scaleFactor} = St.ThemeContext.get_for_stage(global.stage);
         const activeExtraSize = WINDOW_ACTIVE_SIZE_INC * 2 * scaleFactor;
         const origSize = Math.max(width, height);
         const scale = (origSize + activeExtraSize) / origSize;
@@ -446,7 +445,7 @@ var WindowPreview = GObject.registerClass({
             parent = parent.get_transient_for();
 
         // Display dialog if it is attached to our metaWindow
-        if (win.is_attached_dialog() && parent == this.metaWindow)
+        if (win.is_attached_dialog() && parent === this.metaWindow)
             this._addWindow(win);
 
         // The dialog popped up after the user tried to close the window,
@@ -476,7 +475,7 @@ var WindowPreview = GObject.registerClass({
     }
 
     get boundingBox() {
-        return { ...this._cachedBoundingBox };
+        return {...this._cachedBoundingBox};
     }
 
     get windowCenter() {
@@ -558,18 +557,18 @@ var WindowPreview = GObject.registerClass({
         this.emit('selected', global.get_current_time());
     }
 
-    vfunc_enter_event(crossingEvent) {
+    vfunc_enter_event(event) {
         this.showOverlay(true);
-        return super.vfunc_enter_event(crossingEvent);
+        return super.vfunc_enter_event(event);
     }
 
-    vfunc_leave_event(crossingEvent) {
+    vfunc_leave_event(event) {
         if (this._destroyed)
-            return super.vfunc_leave_event(crossingEvent);
+            return super.vfunc_leave_event(event);
 
-        if ((crossingEvent.flags & Clutter.EventFlags.FLAG_GRAB_NOTIFY) !== 0 &&
+        if ((event.get_flags() & Clutter.EventFlags.FLAG_GRAB_NOTIFY) !== 0 &&
             global.stage.get_grab_actor() === this._closeButton)
-            return super.vfunc_leave_event(crossingEvent);
+            return super.vfunc_leave_event(event);
 
         if (this._idleHideOverlayId > 0)
             GLib.source_remove(this._idleHideOverlayId);
@@ -590,7 +589,7 @@ var WindowPreview = GObject.registerClass({
 
         GLib.Source.set_name_by_id(this._idleHideOverlayId, '[gnome-shell] this._idleHideOverlayId');
 
-        return super.vfunc_leave_event(crossingEvent);
+        return super.vfunc_leave_event(event);
     }
 
     vfunc_key_focus_in() {
@@ -605,15 +604,15 @@ var WindowPreview = GObject.registerClass({
             this.hideOverlay(true);
     }
 
-    vfunc_key_press_event(keyEvent) {
-        let symbol = keyEvent.keyval;
-        let isEnter = symbol == Clutter.KEY_Return || symbol == Clutter.KEY_KP_Enter;
+    vfunc_key_press_event(event) {
+        let symbol = event.get_key_symbol();
+        let isEnter = symbol === Clutter.KEY_Return || symbol === Clutter.KEY_KP_Enter;
         if (isEnter) {
             this._activate();
             return true;
         }
 
-        return super.vfunc_key_press_event(keyEvent);
+        return super.vfunc_key_press_event(event);
     }
 
     _restack() {

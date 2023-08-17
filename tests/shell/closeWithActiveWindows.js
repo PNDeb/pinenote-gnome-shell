@@ -1,14 +1,13 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
-/* exported run */
 /* eslint camelcase: ["error", { properties: "never", allow: ["^script_", "^malloc", "^glx", "^clutter"] }] */
 
-const Clutter = imports.gi.Clutter;
+import Clutter from 'gi://Clutter';
 
-const Main = imports.ui.main;
-const Scripting = imports.ui.scripting;
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import * as Scripting from 'resource:///org/gnome/shell/ui/scripting.js';
 
 /** Run test. */
-async function run() {
+export async function run() {
     /* eslint-disable no-await-in-loop */
 
     /* Make created windows remain visible during exit. */

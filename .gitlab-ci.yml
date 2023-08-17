@@ -26,7 +26,7 @@ default:
       - 'api_failure'
 
 variables:
-  MUTTER_CI_IMAGE: registry.gitlab.gnome.org/gnome/mutter/fedora/38:x86_64-2023-06-20.2
+  MUTTER_CI_IMAGE: registry.gitlab.gnome.org/gnome/mutter/fedora/38:x86_64-2023-08-01.0
   FDO_UPSTREAM_REPO: GNOME/gnome-shell
   BUNDLE: "extensions-git.flatpak"
   LINT_LOG: "eslint-report.xml"
@@ -142,27 +142,10 @@ eslint:
   stage: review
   script:
     - export NODE_PATH=$(npm root -g)
-    - ./.gitlab-ci/run-eslint --output-file ${LINT_LOG} --format junit
+    - ./.gitlab-ci/run-eslint --output-file ${LINT_LOG} --format junit --stdout
   artifacts:
     reports:
       junit: ${LINT_LOG}
-    when: always
-
-eslint_mr:
-  extends:
-    - .fdo.distribution-image@fedora
-    - .gnome-shell.fedora
-  stage: review
-  script:
-    - export NODE_PATH=$(npm root -g)
-    - ./.gitlab-ci/run-eslint --output-file ${LINT_MR_LOG} --format junit
-      --remote ${CI_MERGE_REQUEST_PROJECT_URL}.git
-      --branch ${CI_MERGE_REQUEST_TARGET_BRANCH_NAME}
-  only:
-    - merge_requests
-  artifacts:
-    reports:
-      junit: ${LINT_MR_LOG}
     when: always
 
 potfile_c_check:
@@ -194,7 +177,7 @@ build:
     - meson mutter mutter/build --prefix=/usr
     - meson install -C mutter/build
   script:
-    - meson . build -Dbuildtype=debugoptimized -Dman=false --werror
+    - meson setup . build -Dbuildtype=debugoptimized -Dman=false --werror --fatal-meson-warnings
     - meson compile -C build
     - meson install -C build
   artifacts:

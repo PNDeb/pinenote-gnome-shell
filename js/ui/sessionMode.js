@@ -1,13 +1,15 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
-/* exported SessionMode, listModes */
 
-const GLib = imports.gi.GLib;
-const Signals = imports.misc.signals;
+import GLib from 'gi://GLib';
+import * as Signals from '../misc/signals.js';
 
-const FileUtils = imports.misc.fileUtils;
-const Params = imports.misc.params;
+import * as FileUtils from '../misc/fileUtils.js';
+import * as Params from '../misc/params.js';
 
-const Config = imports.misc.config;
+import {LoginDialog}  from '../gdm/loginDialog.js';
+import {UnlockDialog} from '../ui/unlockDialog.js';
+
+import * as Config from '../misc/config.js';
 
 const DEFAULT_MODE = 'restrictive';
 
@@ -53,7 +55,7 @@ const _modes = {
         hasNotifications: true,
         isGreeter: true,
         isPrimary: true,
-        unlockDialog: imports.gdm.loginDialog.LoginDialog,
+        unlockDialog: LoginDialog,
         components: Config.HAVE_NETWORKMANAGER
             ? ['networkAgent', 'polkitAgent']
             : ['polkitAgent'],
@@ -90,7 +92,7 @@ const _modes = {
         hasNotifications: true,
         isLocked: false,
         isPrimary: true,
-        unlockDialog: imports.ui.unlockDialog.UnlockDialog,
+        unlockDialog: UnlockDialog,
         components: USER_SESSION_COMPONENTS,
         panel: {
             left: ['activities'],
@@ -103,7 +105,7 @@ const _modes = {
 function _loadMode(file, info) {
     let name = info.get_name();
     let suffix = name.indexOf('.json');
-    let modeName = suffix == -1 ? name : name.slice(name, suffix);
+    let modeName = suffix === -1 ? name : name.slice(name, suffix);
 
     if (Object.prototype.hasOwnProperty.call(_modes, modeName))
         return;
@@ -135,7 +137,7 @@ function _loadModes() {
         _loadMode(dir, info);
 }
 
-function listModes() {
+export function listModes() {
     _loadModes();
     let loop = new GLib.MainLoop(null, false);
     let id = GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
@@ -150,7 +152,7 @@ function listModes() {
     loop.run();
 }
 
-var SessionMode = class extends Signals.EventEmitter {
+export class SessionMode extends Signals.EventEmitter {
     constructor() {
         super();
 
@@ -169,8 +171,8 @@ var SessionMode = class extends Signals.EventEmitter {
     }
 
     popMode(mode) {
-        if (this.currentMode != mode || this._modeStack.length === 1)
-            throw new Error("Invalid SessionMode.popMode");
+        if (this.currentMode !== mode || this._modeStack.length === 1)
+            throw new Error('Invalid SessionMode.popMode');
 
         console.debug(`sessionMode: Popping mode ${mode}`);
         this._modeStack.pop();
@@ -178,7 +180,7 @@ var SessionMode = class extends Signals.EventEmitter {
     }
 
     switchMode(to) {
-        if (this.currentMode == to)
+        if (this.currentMode === to)
             return;
         this._modeStack[this._modeStack.length - 1] = to;
         this._sync();
@@ -192,8 +194,9 @@ var SessionMode = class extends Signals.EventEmitter {
         let params = _modes[this.currentMode];
         let defaults;
         if (params.parentMode) {
-            defaults = Params.parse(_modes[params.parentMode],
-                                    _modes[DEFAULT_MODE]);
+            defaults = Params.parse(
+                _modes[params.parentMode],
+                _modes[DEFAULT_MODE]);
         } else {
             defaults = _modes[DEFAULT_MODE];
         }
@@ -208,4 +211,4 @@ var SessionMode = class extends Signals.EventEmitter {
 
         this.emit('updated');
     }
-};
+}

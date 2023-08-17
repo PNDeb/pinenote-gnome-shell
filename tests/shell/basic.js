@@ -1,21 +1,18 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
-/* exported run, finish, script_topBarNavDone, script_notificationShowDone,
-   script_notificationCloseDone, script_overviewShowDone,
-   script_applicationsShowStart, script_applicationsShowDone, METRICS,
-*/
 /* eslint camelcase: ["error", { properties: "never", allow: ["^script_"] }] */
 
-const St = imports.gi.St;
+import St from 'gi://St';
 
-const Main = imports.ui.main;
-const MessageTray = imports.ui.messageTray;
-const Scripting = imports.ui.scripting;
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import * as MessageTray from 'resource:///org/gnome/shell/ui/messageTray.js';
+import * as Scripting from 'resource:///org/gnome/shell/ui/scripting.js';
 
 // This script tests the most important (basic) functionality of the shell.
 
-var METRICS = {};
+export var METRICS = {};
 
-async function run() {
+/** @returns {void} */
+export async function run() {
     console.debug('Running basic perf test');
 
     /* eslint-disable no-await-in-loop */
@@ -42,7 +39,7 @@ async function run() {
     Main.panel.statusArea.quickSettings.menu.open();
     await Scripting.sleep(400);
 
-    const { menuManager } = Main.panel;
+    const {menuManager} = Main.panel;
     while (menuManager.activeMenu &&
         Main.panel.navigate_focus(menuManager.activeMenu.sourceActor,
             St.DirectionType.TAB_BACKWARD, false))
@@ -122,27 +119,33 @@ let notificationClosed = false;
 let windowPickerShown = false;
 let appPickerShown = false;
 
-function script_topBarNavDone() {
+/** @returns {void} */
+export function script_topBarNavDone() {
     topBarNav = true;
 }
 
-function script_notificationShowDone() {
+/** @returns {void} */
+export function script_notificationShowDone() {
     notificationShown = true;
 }
 
-function script_notificationCloseDone() {
+/** @returns {void} */
+export function script_notificationCloseDone() {
     notificationClosed = true;
 }
 
-function script_overviewShowDone() {
+/** @returns {void} */
+export function script_overviewShowDone() {
     windowPickerShown = true;
 }
 
-function script_applicationsShowDone() {
+/** @returns {void} */
+export function script_applicationsShowDone() {
     appPickerShown = true;
 }
 
-function finish() {
+/** @returns {void} */
+export function finish() {
     if (!topBarNav)
         throw new Error('Failed to navigate top bar');
 

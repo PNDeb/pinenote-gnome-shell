@@ -59,12 +59,11 @@ export class ServiceImplementation {
     }
 
     /**
-     * _handleError:
-     * @param {Gio.DBusMethodInvocation}
-     * @param {Error}
-     *
      * Complete @invocation with an appropriate error if @error is set;
      * useful for implementing early returns from method implementations.
+     *
+     * @param {Gio.DBusMethodInvocation}
+     * @param {Error}
      *
      * @returns {bool} - true if @invocation was completed
      */
@@ -136,7 +135,7 @@ export class ServiceImplementation {
     }
 
     _injectTracking(methodName) {
-        const { prototype } = Gio.DBusMethodInvocation;
+        const {prototype} = Gio.DBusMethodInvocation;
         const origMethod = prototype[methodName];
         const that = this;
 
