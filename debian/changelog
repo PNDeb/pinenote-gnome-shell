@@ -1,6 +1,8 @@
-gnome-shell (43.7-2) UNRELEASED; urgency=medium
+gnome-shell (43.7-2) unstable; urgency=medium
 
-  * Add patch from Fedora to skip final cleanup during exit.
+  * Team upload
+  * d/p/main-Leak-the-GJS-context-and-ShellGlobal.patch:
+    Add patch from Fedora to skip final cleanup during exit.
     This has been implicated in various crashes during exit, which cause
     gnome-shell to disable extensions during the next startup. Leaking some
     memory at this point does not matter since the process is exiting anyway.
@@ -8,7 +10,7 @@ gnome-shell (43.7-2) UNRELEASED; urgency=medium
     those changes are too intrusive to be suitable for a backport.
     (Closes: #1038972)
 
- -- Simon McVittie <smcv@debian.org>  Thu, 17 Aug 2023 10:41:32 +0100
+ -- Simon McVittie <smcv@debian.org>  Thu, 17 Aug 2023 10:46:44 +0100
 
 gnome-shell (43.7-1) unstable; urgency=medium
 
