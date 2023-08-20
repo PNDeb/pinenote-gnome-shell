@@ -1,11 +1,13 @@
-gnome-shell (44.3-3) UNRELEASED; urgency=medium
+gnome-shell (44.3-4) unstable; urgency=medium
 
+  * Team upload
   * Merge with version 43.7-2 from unstable.
     All changes in 43.7 were also included in 44.3.
     - d/p/main-Leak-the-GJS-context-and-ShellGlobal.patch:
       Drop patch, not needed in 44.x
+  * Upload to unstable (part of transition: #1043144)
 
- -- Simon McVittie <smcv@debian.org>  Thu, 10 Aug 2023 10:31:26 +0100
+ -- Simon McVittie <smcv@debian.org>  Sun, 20 Aug 2023 22:58:15 +0100
 
 gnome-shell (43.7-2) unstable; urgency=medium
 
