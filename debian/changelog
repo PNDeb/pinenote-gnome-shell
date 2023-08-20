@@ -1,3 +1,36 @@
+gnome-shell (43.7-2) unstable; urgency=medium
+
+  * Team upload
+  * d/p/main-Leak-the-GJS-context-and-ShellGlobal.patch:
+    Add patch from Fedora to skip final cleanup during exit.
+    This has been implicated in various crashes during exit, which cause
+    gnome-shell to disable extensions during the next startup. Leaking some
+    memory at this point does not matter since the process is exiting anyway.
+    The crashes during exit are believed to have been fixed in 44.beta, but
+    those changes are too intrusive to be suitable for a backport.
+    (Closes: #1038972)
+
+ -- Simon McVittie <smcv@debian.org>  Thu, 17 Aug 2023 10:46:44 +0100
+
+gnome-shell (43.7-1) unstable; urgency=medium
+
+  * Team upload
+  * New upstream stable release
+    - Apply hotspot translation to mouse cursor while using magnifier,
+      fixing an offset between the visble pointer position and the actual
+      pointer (gnome-shell#4584, also fixed in 44.3)
+    - Don't log an error when AccountsService signals a change while
+      parental controls are disabled globally
+      (gnome-shell#6749, also fixed in 44.3)
+    - Keep rounded corners on the overview's view of the desktop, even
+      after the background image changes
+      (gnome-shell#4125, also fixed in 44.3)
+  * d/patches: Update to upstream gnome-43 branch commit 43.7-1-g0d51f199e
+    - Translation update: fa
+  * d/gbp.conf, d/control.in: Use debian/trixie branch
+
+ -- Simon McVittie <smcv@debian.org>  Thu, 10 Aug 2023 10:33:35 +0100
+
 gnome-shell (43.6-1~deb12u1) bookworm; urgency=medium
 
   * Rebuild for bookworm
