@@ -1,3 +1,9 @@
+gnome-shell (43.7-2~deb12u1) UNRELEASED; urgency=medium
+
+  * Rebuild for bookworm (Closes: #1038972)
+
+ -- Simon McVittie <smcv@debian.org>  Sun, 20 Aug 2023 13:20:00 +0100
+
 gnome-shell (43.7-2) unstable; urgency=medium
 
   * Team upload
