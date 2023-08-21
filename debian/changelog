@@ -1,3 +1,11 @@
+gnome-shell (44.3-5) unstable; urgency=medium
+
+  * Team upload
+  * Clean up obsolete gnome-shell-overrides-migration.desktop on upgrade
+    (Closes: #1050193)
+
+ -- Simon McVittie <smcv@debian.org>  Mon, 21 Aug 2023 21:08:56 +0100
+
 gnome-shell (44.3-4) unstable; urgency=medium
 
   * Team upload
