@@ -1,3 +1,9 @@
+gnome-shell (44.4-1) UNRELEASED; urgency=medium
+
+  * New upstream release
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Fri, 01 Sep 2023 11:06:44 -0400
+
 gnome-shell (44.3-5) unstable; urgency=medium
 
   * Team upload
