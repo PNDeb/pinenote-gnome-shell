@@ -1,7 +1,8 @@
-import Gio from 'gi://Gio';
-import GLib from 'gi://GLib';
+// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
+/* exported loadInterfaceXML, loadSubInterfaceXML */
 
-import * as Config from './config.js';
+const Config = imports.misc.config;
+const { Gio, GLib } = imports.gi;
 
 let _ifaceResource = null;
 
@@ -23,7 +24,7 @@ function _ensureIfaceResource() {
  * @param {string} iface the interface name
  * @returns {string | null} the XML string or null if it is not found
  */
-export function loadInterfaceXML(iface) {
+function loadInterfaceXML(iface) {
     _ensureIfaceResource();
 
     let uri = `resource:///org/gnome/shell/dbus-interfaces/${iface}.xml`;
@@ -44,7 +45,7 @@ export function loadInterfaceXML(iface) {
  * @param {string} ifaceFile the interface filename
  * @returns {string | null} the XML string or null if it is not found
  */
-export function loadSubInterfaceXML(iface, ifaceFile) {
+function loadSubInterfaceXML(iface, ifaceFile) {
     let xml = loadInterfaceXML(ifaceFile);
     if (!xml)
         return null;

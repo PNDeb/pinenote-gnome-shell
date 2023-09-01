@@ -1,11 +1,7 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
+/* exported Dialog, MessageDialogContent, ListSection, ListSectionItem */
 
-import Clutter from 'gi://Clutter';
-import GLib from 'gi://GLib';
-import GObject from 'gi://GObject';
-import Meta from 'gi://Meta';
-import Pango from 'gi://Pango';
-import St from 'gi://St';
+const { Clutter, GLib, GObject, Meta, Pango, St } = imports.gi;
 
 function _setLabel(label, value) {
     label.set({
@@ -14,7 +10,7 @@ function _setLabel(label, value) {
     });
 }
 
-export const Dialog = GObject.registerClass(
+var Dialog = GObject.registerClass(
 class Dialog extends St.Widget {
     _init(parentActor, styleClass) {
         super._init({
@@ -58,7 +54,7 @@ class Dialog extends St.Widget {
         this._dialog.add_child(this.contentLayout);
 
         this.buttonLayout = new St.Widget({
-            layout_manager: new Clutter.BoxLayout({homogeneous: true}),
+            layout_manager: new Clutter.BoxLayout({ homogeneous: true }),
         });
         this._dialog.add_child(this.buttonLayout);
     }
@@ -72,21 +68,21 @@ class Dialog extends St.Widget {
     }
 
     vfunc_event(event) {
-        if (event.type() === Clutter.EventType.KEY_PRESS) {
+        if (event.type() == Clutter.EventType.KEY_PRESS) {
             this._pressedKey = event.get_key_symbol();
-        } else if (event.type() === Clutter.EventType.KEY_RELEASE) {
+        } else if (event.type() == Clutter.EventType.KEY_RELEASE) {
             let pressedKey = this._pressedKey;
             this._pressedKey = null;
 
             let symbol = event.get_key_symbol();
-            if (symbol !== pressedKey)
+            if (symbol != pressedKey)
                 return Clutter.EVENT_PROPAGATE;
 
             let buttonInfo = this._buttonKeys[symbol];
             if (!buttonInfo)
                 return Clutter.EVENT_PROPAGATE;
 
-            let {button, action} = buttonInfo;
+            let { button, action } = buttonInfo;
 
             if (action && button.reactive) {
                 action();
@@ -111,7 +107,7 @@ class Dialog extends St.Widget {
     }
 
     addButton(buttonInfo) {
-        let {label, action, key} = buttonInfo;
+        let { label, action, key } = buttonInfo;
         let isDefault = buttonInfo['default'];
         let keys;
 
@@ -155,7 +151,7 @@ class Dialog extends St.Widget {
     }
 });
 
-export const MessageDialogContent = GObject.registerClass({
+var MessageDialogContent = GObject.registerClass({
     Properties: {
         'title': GObject.ParamSpec.string(
             'title', 'title', 'title',
@@ -170,8 +166,8 @@ export const MessageDialogContent = GObject.registerClass({
     },
 }, class MessageDialogContent extends St.BoxLayout {
     _init(params) {
-        this._title = new St.Label({style_class: 'message-dialog-title'});
-        this._description = new St.Label({style_class: 'message-dialog-description'});
+        this._title = new St.Label({ style_class: 'message-dialog-title' });
+        this._description = new St.Label({ style_class: 'message-dialog-description' });
 
         this._description.clutter_text.ellipsize = Pango.EllipsizeMode.NONE;
         this._description.clutter_text.line_wrap = true;
@@ -247,7 +243,7 @@ export const MessageDialogContent = GObject.registerClass({
     }
 });
 
-export const ListSection = GObject.registerClass({
+var ListSection = GObject.registerClass({
     Properties: {
         'title': GObject.ParamSpec.string(
             'title', 'title', 'title',
@@ -257,7 +253,7 @@ export const ListSection = GObject.registerClass({
     },
 }, class ListSection extends St.BoxLayout {
     _init(params) {
-        this._title = new St.Label({style_class: 'dialog-list-title'});
+        this._title = new St.Label({ style_class: 'dialog-list-title' });
 
         this._listScrollView = new St.ScrollView({
             style_class: 'dialog-list-scrollview',
@@ -292,7 +288,7 @@ export const ListSection = GObject.registerClass({
     }
 });
 
-export const ListSectionItem = GObject.registerClass({
+var ListSectionItem = GObject.registerClass({
     Properties: {
         'icon-actor':  GObject.ParamSpec.object(
             'icon-actor', 'icon-actor', 'Icon actor',
@@ -319,7 +315,7 @@ export const ListSectionItem = GObject.registerClass({
             y_align: Clutter.ActorAlign.CENTER,
         });
 
-        this._title = new St.Label({style_class: 'dialog-list-item-title'});
+        this._title = new St.Label({ style_class: 'dialog-list-item-title' });
 
         this._description = new St.Label({
             style_class: 'dialog-list-item-title-description',
@@ -328,7 +324,7 @@ export const ListSectionItem = GObject.registerClass({
         textLayout.add_child(this._title);
         textLayout.add_child(this._description);
 
-        let defaultParams = {style_class: 'dialog-list-item'};
+        let defaultParams = { style_class: 'dialog-list-item' };
         super._init(Object.assign(defaultParams, params));
 
         this.label_actor = this._title;

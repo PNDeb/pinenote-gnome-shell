@@ -3,21 +3,17 @@
 // Test cases for MessageList markup parsing
 
 const JsUnit = imports.jsUnit;
-import Pango from 'gi://Pango';
+const Pango = imports.gi.Pango;
 
-import 'resource:///org/gnome/shell/ui/environment.js';
-import 'resource:///org/gnome/shell/ui/main.js';
+const Environment = imports.ui.environment;
+Environment.init();
 
-import * as MessageList from 'resource:///org/gnome/shell/ui/messageList.js';
+const Main = imports.ui.main; // unused, but needed to break dependency loop
+const MessageList = imports.ui.messageList;
 
-/**
- * Assert that `input`, assumed to be markup, gets "fixed" to `output`,
- * which is valid markup. If `output` is null, `input` is expected to
- * convert to itself
- *
- * @param {string} input the input
- * @param {string} output the output
- */
+// Assert that @input, assumed to be markup, gets "fixed" to @output,
+// which is valid markup. If @output is null, @input is expected to
+// convert to itself
 function assertConverts(input, output) {
     if (!output)
         output = input;
@@ -32,14 +28,8 @@ function assertConverts(input, output) {
     JsUnit.assertEquals(true, parsed);
 }
 
-
-/**
- * Assert that `input`, assumed to be plain text, gets escaped to `output`,
- * which is valid markup.
- *
- * @param {string} input the input
- * @param {string} output the output
- */
+// Assert that @input, assumed to be plain text, gets escaped to @output,
+// which is valid markup.
 function assertEscapes(input, output) {
     let fixed = MessageList._fixMarkup(input, false);
     JsUnit.assertEquals(output, fixed);

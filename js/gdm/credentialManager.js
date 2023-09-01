@@ -1,8 +1,9 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
+/* exported CredentialManager */
 
-import * as Signals from '../misc/signals.js';
+const Signals = imports.misc.signals;
 
-export class CredentialManager extends Signals.EventEmitter {
+var CredentialManager = class CredentialManager extends Signals.EventEmitter {
     constructor(service) {
         super();
 
@@ -23,4 +24,4 @@ export class CredentialManager extends Signals.EventEmitter {
     get service() {
         return this._service;
     }
-}
+};

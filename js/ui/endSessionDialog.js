@@ -1,4 +1,5 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
+/* exported init, EndSessionDialog */
 /*
  * Copyright 2010-2016 Red Hat, Inc
  *
@@ -16,25 +17,19 @@
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
-import AccountsService from 'gi://AccountsService';
-import Clutter from 'gi://Clutter';
-import Gio from 'gi://Gio';
-import GLib from 'gi://GLib';
-import GObject from 'gi://GObject';
-import Pango from 'gi://Pango';
-import Polkit from 'gi://Polkit';
-import Shell from 'gi://Shell';
-import St from 'gi://St';
-import UPower from 'gi://UPowerGlib';
+const {
+    AccountsService, Clutter, Gio, GLib, GObject,
+    Pango, Polkit, Shell, St, UPowerGlib: UPower,
+} = imports.gi;
 
-import * as CheckBox from './checkBox.js';
-import * as Dialog from './dialog.js';
-import * as GnomeSession from '../misc/gnomeSession.js';
-import * as LoginManager from '../misc/loginManager.js';
-import * as ModalDialog from './modalDialog.js';
-import * as UserWidget from './userWidget.js';
+const CheckBox = imports.ui.checkBox;
+const Dialog = imports.ui.dialog;
+const GnomeSession = imports.misc.gnomeSession;
+const LoginManager = imports.misc.loginManager;
+const ModalDialog = imports.ui.modalDialog;
+const UserWidget = imports.ui.userWidget;
 
-import {loadInterfaceXML} from '../misc/fileUtils.js';
+const { loadInterfaceXML } = imports.misc.fileUtils;
 
 const _ITEM_ICON_SIZE = 64;
 
@@ -43,8 +38,8 @@ const LOW_BATTERY_THRESHOLD = 30;
 const EndSessionDialogIface = loadInterfaceXML('org.gnome.SessionManager.EndSessionDialog');
 
 const logoutDialogContent = {
-    subjectWithUser: C_('title', 'Log Out %s'),
-    subject: C_('title', 'Log Out'),
+    subjectWithUser: C_("title", "Log Out %s"),
+    subject: C_("title", "Log Out"),
     descriptionWithUser(user, seconds) {
         return ngettext(
             '%s will be logged out automatically in %d second.',
@@ -66,15 +61,15 @@ const logoutDialogContent = {
 };
 
 const shutdownDialogContent = {
-    subject: C_('title', 'Power Off'),
-    subjectWithUpdates: C_('title', 'Install Updates & Power Off'),
+    subject: C_("title", "Power Off"),
+    subjectWithUpdates: C_("title", "Install Updates & Power Off"),
     description(seconds) {
         return ngettext(
             'The system will power off automatically in %d second.',
             'The system will power off automatically in %d seconds.',
             seconds).format(seconds);
     },
-    checkBoxText: C_('checkbox', 'Install pending software updates'),
+    checkBoxText: C_("checkbox", "Install pending software updates"),
     showBatteryWarning: true,
     confirmButtons: [{
         signal: 'ConfirmedShutdown',
@@ -85,7 +80,7 @@ const shutdownDialogContent = {
 };
 
 const restartDialogContent = {
-    subject: C_('title', 'Restart'),
+    subject: C_("title", "Restart"),
     subjectWithUpdates: C_('title', 'Install Updates & Restart'),
     description(seconds) {
         return ngettext(
@@ -105,7 +100,7 @@ const restartDialogContent = {
 
 const restartUpdateDialogContent = {
 
-    subject: C_('title', 'Restart & Install Updates'),
+    subject: C_("title", "Restart & Install Updates"),
     description(seconds) {
         return ngettext(
             'The system will automatically restart and install updates in %d second.',
@@ -117,20 +112,20 @@ const restartUpdateDialogContent = {
         signal: 'ConfirmedReboot',
         label: C_('button', 'Restart &amp; Install'),
     }],
-    unusedFutureButtonForTranslation: C_('button', 'Install &amp; Power Off'),
-    unusedFutureCheckBoxForTranslation: C_('checkbox', 'Power off after updates are installed'),
+    unusedFutureButtonForTranslation: C_("button", "Install &amp; Power Off"),
+    unusedFutureCheckBoxForTranslation: C_("checkbox", "Power off after updates are installed"),
     iconName: 'view-refresh-symbolic',
     showOtherSessions: true,
 };
 
 const restartUpgradeDialogContent = {
 
-    subject: C_('title', 'Restart & Install Upgrade'),
+    subject: C_("title", "Restart & Install Upgrade"),
     upgradeDescription(distroName, distroVersion) {
         /* Translators: This is the text displayed for system upgrades in the
            shut down dialog. First %s gets replaced with the distro name and
            second %s with the distro version to upgrade to */
-        return _('%s %s will be installed after restart. Upgrade installation can take a long time: ensure that you have backed up and that the computer is plugged in.').format(distroName, distroVersion);
+        return _("%s %s will be installed after restart. Upgrade installation can take a long time: ensure that you have backed up and that the computer is plugged in.").format(distroName, distroVersion);
     },
     disableTimer: true,
     showBatteryWarning: false,
@@ -158,7 +153,7 @@ const DialogContent = {
     4 /* DialogType.UPGRADE_RESTART */: restartUpgradeDialogContent,
 };
 
-const MAX_USERS_IN_SESSION_DIALOG = 5;
+var MAX_USERS_IN_SESSION_DIALOG = 5;
 
 const LogindSessionIface = loadInterfaceXML('org.freedesktop.login1.Session');
 const LogindSession = Gio.DBusProxy.makeProxyWrapper(LogindSessionIface);
@@ -223,14 +218,14 @@ function _setCheckBoxLabel(checkBox, text) {
     }
 }
 
-export function init() {
+function init() {
     // This always returns the same singleton object
     // By instantiating it initially, we register the
     // bus object, etc.
     new EndSessionDialog();
 }
 
-const EndSessionDialog = GObject.registerClass(
+var EndSessionDialog = GObject.registerClass(
 class EndSessionDialog extends ModalDialog.ModalDialog {
     _init() {
         super._init({
@@ -247,22 +242,22 @@ class EndSessionDialog extends ModalDialog.ModalDialog {
         this._updatesPermission = null;
 
         this._pkOfflineProxy = new PkOfflineProxy(Gio.DBus.system,
-            'org.freedesktop.PackageKit',
-            '/org/freedesktop/PackageKit',
-            this._onPkOfflineProxyCreated.bind(this));
+                                                  'org.freedesktop.PackageKit',
+                                                  '/org/freedesktop/PackageKit',
+                                                  this._onPkOfflineProxyCreated.bind(this));
 
         this._powerProxy = new UPowerProxy(Gio.DBus.system,
-            'org.freedesktop.UPower',
-            '/org/freedesktop/UPower/devices/DisplayDevice',
-            (proxy, error) => {
-                if (error) {
-                    log(error.message);
-                    return;
-                }
-                this._powerProxy.connect('g-properties-changed',
-                    this._sync.bind(this));
-                this._sync();
-            });
+                                           'org.freedesktop.UPower',
+                                           '/org/freedesktop/UPower/devices/DisplayDevice',
+                                           (proxy, error) => {
+                                               if (error) {
+                                                   log(error.message);
+                                                   return;
+                                               }
+                                               this._powerProxy.connect('g-properties-changed',
+                                                                        this._sync.bind(this));
+                                               this._sync();
+                                           });
 
         this._secondsLeft = 0;
         this._totalSecondsToStayOpen = 0;
@@ -272,7 +267,8 @@ class EndSessionDialog extends ModalDialog.ModalDialog {
         this._rebootButton = null;
         this._rebootButtonAlt = null;
 
-        this.connect('opened', this._onOpened.bind(this));
+        this.connect('opened',
+                     this._onOpened.bind(this));
 
         this._user.connectObject(
             'notify::is-loaded', this._sync.bind(this),
@@ -363,7 +359,7 @@ class EndSessionDialog extends ModalDialog.ModalDialog {
     }
 
     _sync() {
-        let open = this.state === ModalDialog.State.OPENING || this.state === ModalDialog.State.OPENED;
+        let open = this.state == ModalDialog.State.OPENING || this.state == ModalDialog.State.OPENED;
         if (!open)
             return;
 
@@ -378,8 +374,9 @@ class EndSessionDialog extends ModalDialog.ModalDialog {
         this._batteryWarning.visible = this._shouldShowLowBatteryWarning(dialogContent);
 
         let description;
-        let displayTime = _roundSecondsToInterval(
-            this._totalSecondsToStayOpen, this._secondsLeft, 10);
+        let displayTime = _roundSecondsToInterval(this._totalSecondsToStayOpen,
+                                                  this._secondsLeft,
+                                                  10);
 
         if (this._user.is_loaded) {
             let realName = this._user.get_real_name();
@@ -396,7 +393,7 @@ class EndSessionDialog extends ModalDialog.ModalDialog {
         // Use a different description when we are installing a system upgrade
         // if the PackageKit proxy is available (i.e. PackageKit is available).
         if (dialogContent.upgradeDescription) {
-            const {name, version} = this._updateInfo.PreparedUpgrade;
+            const { name, version } = this._updateInfo.PreparedUpgrade;
             if (name != null && version != null)
                 description = dialogContent.upgradeDescription(name, version);
         }
@@ -732,7 +729,7 @@ class EndSessionDialog extends ModalDialog.ModalDialog {
         }
 
         // Only consider updates and upgrades if PackageKit is available.
-        if (this._pkOfflineProxy && this._type === DialogType.RESTART) {
+        if (this._pkOfflineProxy && this._type == DialogType.RESTART) {
             if (this._updateInfo.UpdateTriggered)
                 this._type = DialogType.UPDATE_RESTART;
             else if (this._updateInfo.UpgradeTriggered)
@@ -746,9 +743,8 @@ class EndSessionDialog extends ModalDialog.ModalDialog {
         this._sessionSection.list.destroy_all_children();
 
         if (!(this._type in DialogContent)) {
-            invocation.return_dbus_error(
-                'org.gnome.Shell.ModalDialog.TypeError',
-                'Unknown dialog type requested');
+            invocation.return_dbus_error('org.gnome.Shell.ModalDialog.TypeError',
+                                         "Unknown dialog type requested");
             return;
         }
 
@@ -780,9 +776,8 @@ class EndSessionDialog extends ModalDialog.ModalDialog {
         this._updateButtons();
 
         if (!this.open(timestamp)) {
-            invocation.return_dbus_error(
-                'org.gnome.Shell.ModalDialog.GrabError',
-                'Cannot grab pointer and keyboard');
+            invocation.return_dbus_error('org.gnome.Shell.ModalDialog.GrabError',
+                                         "Cannot grab pointer and keyboard");
             return;
         }
 

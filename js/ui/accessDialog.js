@@ -1,31 +1,25 @@
-import Clutter from 'gi://Clutter';
-import Gio from 'gi://Gio';
-import GLib from 'gi://GLib';
-import GObject from 'gi://GObject';
-import Pango from 'gi://Pango';
-import Shell from 'gi://Shell';
-import St from 'gi://St';
+/* exported AccessDialogDBus */
+const { Clutter, Gio, GLib, GObject, Pango, Shell, St } = imports.gi;
 
-import * as CheckBox from './checkBox.js';
-import * as Dialog from './dialog.js';
-import * as ModalDialog from './modalDialog.js';
+const CheckBox = imports.ui.checkBox;
+const Dialog = imports.ui.dialog;
+const ModalDialog = imports.ui.modalDialog;
 
-import {loadInterfaceXML} from '../misc/fileUtils.js';
+const { loadInterfaceXML } = imports.misc.fileUtils;
 
 const RequestIface = loadInterfaceXML('org.freedesktop.impl.portal.Request');
 const AccessIface = loadInterfaceXML('org.freedesktop.impl.portal.Access');
 
-/** @enum {number} */
-const DialogResponse = {
+var DialogResponse = {
     OK: 0,
     CANCEL: 1,
     CLOSED: 2,
 };
 
-const AccessDialog = GObject.registerClass(
+var AccessDialog = GObject.registerClass(
 class AccessDialog extends ModalDialog.ModalDialog {
     _init(invocation, handle, title, description, body, options) {
-        super._init({styleClass: 'access-dialog'});
+        super._init({ styleClass: 'access-dialog' });
 
         this._invocation = invocation;
         this._handle = handle;
@@ -46,7 +40,7 @@ class AccessDialog extends ModalDialog.ModalDialog {
         let grantLabel = options['grant_label'] || _('Allow');
         let choices = options['choices'] || [];
 
-        let content = new Dialog.MessageDialogContent({title, description});
+        let content = new Dialog.MessageDialogContent({ title, description });
         this.contentLayout.add_actor(content);
 
         this._choices = new Map();
@@ -58,7 +52,7 @@ class AccessDialog extends ModalDialog.ModalDialog {
 
             let check = new CheckBox.CheckBox();
             check.getLabelActor().text = name;
-            check.checked = selected === 'true';
+            check.checked = selected == "true";
             content.add_child(check);
 
             this._choices.set(id, check);
@@ -95,11 +89,10 @@ class AccessDialog extends ModalDialog.ModalDialog {
     }
 
     CloseAsync(invocation, _params) {
-        if (this._invocation.get_sender() !== invocation.get_sender()) {
-            invocation.return_error_literal(
-                Gio.DBusError,
-                Gio.DBusError.ACCESS_DENIED,
-                '');
+        if (this._invocation.get_sender() != invocation.get_sender()) {
+            invocation.return_error_literal(Gio.DBusError,
+                                            Gio.DBusError.ACCESS_DENIED,
+                                            '');
             return;
         }
 
@@ -112,7 +105,7 @@ class AccessDialog extends ModalDialog.ModalDialog {
         this._requestExported = false;
 
         let results = {};
-        if (response === DialogResponse.OK) {
+        if (response == DialogResponse.OK) {
             for (let [id, check] of this._choices) {
                 let checked = check.checked ? 'true' : 'false';
                 results[id] = new GLib.Variant('s', checked);
@@ -121,14 +114,14 @@ class AccessDialog extends ModalDialog.ModalDialog {
 
         // Delay actual response until the end of the close animation (if any)
         this.connect('closed', () => {
-            this._invocation.return_value(
-                new GLib.Variant('(ua{sv})', [response, results]));
+            this._invocation.return_value(new GLib.Variant('(ua{sv})',
+                                                           [response, results]));
         });
         this.close();
     }
 });
 
-export class AccessDialogDBus {
+var AccessDialogDBus = class {
     constructor() {
         this._accessDialog = null;
 
@@ -142,10 +135,9 @@ export class AccessDialogDBus {
 
     AccessDialogAsync(params, invocation) {
         if (this._accessDialog) {
-            invocation.return_error_literal(
-                Gio.DBusError,
-                Gio.DBusError.LIMITS_EXCEEDED,
-                'Already showing a system access dialog');
+            invocation.return_error_literal(Gio.DBusError,
+                                            Gio.DBusError.LIMITS_EXCEEDED,
+                                            'Already showing a system access dialog');
             return;
         }
 
@@ -153,10 +145,9 @@ export class AccessDialogDBus {
         // We probably want to use parentWindow and global.display.focus_window
         // for this check in the future
         if (appId && `${appId}.desktop` !== this._windowTracker.focus_app.id) {
-            invocation.return_error_literal(
-                Gio.DBusError,
-                Gio.DBusError.ACCESS_DENIED,
-                'Only the focused app is allowed to show a system access dialog');
+            invocation.return_error_literal(Gio.DBusError,
+                                            Gio.DBusError.ACCESS_DENIED,
+                                            'Only the focused app is allowed to show a system access dialog');
             return;
         }
 
@@ -168,4 +159,4 @@ export class AccessDialogDBus {
 
         this._accessDialog = dialog;
     }
-}
+};

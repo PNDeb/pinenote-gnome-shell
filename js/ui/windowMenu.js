@@ -1,15 +1,14 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*
+/* exported WindowMenuManager */
 
-import Clutter from 'gi://Clutter';
-import Meta from 'gi://Meta';
-import St from 'gi://St';
+const {Clutter, Meta, St} = imports.gi;
 
-import * as BoxPointer from './boxpointer.js';
-import * as Main from './main.js';
-import * as PopupMenu from './popupMenu.js';
-import * as Screenshot from './screenshot.js';
+const BoxPointer = imports.ui.boxpointer;
+const Main = imports.ui.main;
+const PopupMenu = imports.ui.popupMenu;
+const Screenshot = imports.ui.screenshot;
 
-export class WindowMenu extends PopupMenu.PopupMenu {
+var WindowMenu = class extends PopupMenu.PopupMenu {
     constructor(window, sourceActor) {
         super(sourceActor, 0, St.Side.TOP);
 
@@ -50,14 +49,14 @@ export class WindowMenu extends PopupMenu.PopupMenu {
                 window.unmaximize(Meta.MaximizeFlags.BOTH);
             });
         } else {
-            item = this.addAction(_('Maximize'), () => {
+            item = this.addAction(_("Maximize"), () => {
                 window.maximize(Meta.MaximizeFlags.BOTH);
             });
         }
         if (!window.can_maximize())
             item.setSensitive(false);
 
-        item = this.addAction(_('Move'), event => {
+        item = this.addAction(_("Move"), event => {
             const device = event.get_device();
             const seat = device.get_seat();
             const deviceType = device.get_device_type();
@@ -76,7 +75,7 @@ export class WindowMenu extends PopupMenu.PopupMenu {
         if (!window.allows_move())
             item.setSensitive(false);
 
-        item = this.addAction(_('Resize'), event => {
+        item = this.addAction(_("Resize"), event => {
             const device = event.get_device();
             const seat = device.get_seat();
             const deviceType = device.get_device_type();
@@ -95,13 +94,13 @@ export class WindowMenu extends PopupMenu.PopupMenu {
         if (!window.allows_resize())
             item.setSensitive(false);
 
-        if (!window.titlebar_is_onscreen() && type !== Meta.WindowType.DOCK && type !== Meta.WindowType.DESKTOP) {
-            this.addAction(_('Move Titlebar Onscreen'), () => {
+        if (!window.titlebar_is_onscreen() && type != Meta.WindowType.DOCK && type != Meta.WindowType.DESKTOP) {
+            this.addAction(_("Move Titlebar Onscreen"), () => {
                 window.shove_titlebar_onscreen();
             });
         }
 
-        item = this.addAction(_('Always on Top'), () => {
+        item = this.addAction(_("Always on Top"), () => {
             if (window.is_above())
                 window.unmake_above();
             else
@@ -109,10 +108,10 @@ export class WindowMenu extends PopupMenu.PopupMenu {
         });
         if (window.is_above())
             item.setOrnament(PopupMenu.Ornament.CHECK);
-        if (window.get_maximized() === Meta.MaximizeFlags.BOTH ||
-            type === Meta.WindowType.DOCK ||
-            type === Meta.WindowType.DESKTOP ||
-            type === Meta.WindowType.SPLASHSCREEN)
+        if (window.get_maximized() == Meta.MaximizeFlags.BOTH ||
+            type == Meta.WindowType.DOCK ||
+            type == Meta.WindowType.DESKTOP ||
+            type == Meta.WindowType.SPLASHSCREEN)
             item.setSensitive(false);
 
         if (Main.sessionMode.hasWorkspaces &&
@@ -120,7 +119,7 @@ export class WindowMenu extends PopupMenu.PopupMenu {
              window.is_on_primary_monitor())) {
             let isSticky = window.is_on_all_workspaces();
 
-            item = this.addAction(_('Always on Visible Workspace'), () => {
+            item = this.addAction(_("Always on Visible Workspace"), () => {
                 if (isSticky)
                     window.unstick();
                 else
@@ -133,26 +132,26 @@ export class WindowMenu extends PopupMenu.PopupMenu {
 
             if (!isSticky) {
                 let workspace = window.get_workspace();
-                if (workspace !== workspace.get_neighbor(Meta.MotionDirection.LEFT)) {
-                    this.addAction(_('Move to Workspace Left'), () => {
+                if (workspace != workspace.get_neighbor(Meta.MotionDirection.LEFT)) {
+                    this.addAction(_("Move to Workspace Left"), () => {
                         let dir = Meta.MotionDirection.LEFT;
                         window.change_workspace(workspace.get_neighbor(dir));
                     });
                 }
-                if (workspace !== workspace.get_neighbor(Meta.MotionDirection.RIGHT)) {
-                    this.addAction(_('Move to Workspace Right'), () => {
+                if (workspace != workspace.get_neighbor(Meta.MotionDirection.RIGHT)) {
+                    this.addAction(_("Move to Workspace Right"), () => {
                         let dir = Meta.MotionDirection.RIGHT;
                         window.change_workspace(workspace.get_neighbor(dir));
                     });
                 }
-                if (workspace !== workspace.get_neighbor(Meta.MotionDirection.UP)) {
-                    this.addAction(_('Move to Workspace Up'), () => {
+                if (workspace != workspace.get_neighbor(Meta.MotionDirection.UP)) {
+                    this.addAction(_("Move to Workspace Up"), () => {
                         let dir = Meta.MotionDirection.UP;
                         window.change_workspace(workspace.get_neighbor(dir));
                     });
                 }
-                if (workspace !== workspace.get_neighbor(Meta.MotionDirection.DOWN)) {
-                    this.addAction(_('Move to Workspace Down'), () => {
+                if (workspace != workspace.get_neighbor(Meta.MotionDirection.DOWN)) {
+                    this.addAction(_("Move to Workspace Down"), () => {
                         let dir = Meta.MotionDirection.DOWN;
                         window.change_workspace(workspace.get_neighbor(dir));
                     });
@@ -169,8 +168,8 @@ export class WindowMenu extends PopupMenu.PopupMenu {
             let dir = Meta.DisplayDirection.UP;
             let upMonitorIndex =
                 display.get_monitor_neighbor_index(monitorIndex, dir);
-            if (upMonitorIndex !== -1) {
-                this.addAction(_('Move to Monitor Up'), () => {
+            if (upMonitorIndex != -1) {
+                this.addAction(_("Move to Monitor Up"), () => {
                     window.move_to_monitor(upMonitorIndex);
                 });
             }
@@ -178,8 +177,8 @@ export class WindowMenu extends PopupMenu.PopupMenu {
             dir = Meta.DisplayDirection.DOWN;
             let downMonitorIndex =
                 display.get_monitor_neighbor_index(monitorIndex, dir);
-            if (downMonitorIndex !== -1) {
-                this.addAction(_('Move to Monitor Down'), () => {
+            if (downMonitorIndex != -1) {
+                this.addAction(_("Move to Monitor Down"), () => {
                     window.move_to_monitor(downMonitorIndex);
                 });
             }
@@ -187,8 +186,8 @@ export class WindowMenu extends PopupMenu.PopupMenu {
             dir = Meta.DisplayDirection.LEFT;
             let leftMonitorIndex =
                 display.get_monitor_neighbor_index(monitorIndex, dir);
-            if (leftMonitorIndex !== -1) {
-                this.addAction(_('Move to Monitor Left'), () => {
+            if (leftMonitorIndex != -1) {
+                this.addAction(_("Move to Monitor Left"), () => {
                     window.move_to_monitor(leftMonitorIndex);
                 });
             }
@@ -196,8 +195,8 @@ export class WindowMenu extends PopupMenu.PopupMenu {
             dir = Meta.DisplayDirection.RIGHT;
             let rightMonitorIndex =
                 display.get_monitor_neighbor_index(monitorIndex, dir);
-            if (rightMonitorIndex !== -1) {
-                this.addAction(_('Move to Monitor Right'), () => {
+            if (rightMonitorIndex != -1) {
+                this.addAction(_("Move to Monitor Right"), () => {
                     window.move_to_monitor(rightMonitorIndex);
                 });
             }
@@ -205,19 +204,19 @@ export class WindowMenu extends PopupMenu.PopupMenu {
 
         this.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
-        item = this.addAction(_('Close'), event => {
+        item = this.addAction(_("Close"), event => {
             window.delete(event.get_time());
         });
         if (!window.can_close())
             item.setSensitive(false);
     }
-}
+};
 
-export class WindowMenuManager {
+var WindowMenuManager = class {
     constructor() {
         this._manager = new PopupMenu.PopupMenuManager(Main.layoutManager.dummyCursor);
 
-        this._sourceActor = new St.Widget({reactive: true, visible: false});
+        this._sourceActor = new St.Widget({ reactive: true, visible: false });
         this._sourceActor.connect('button-press-event', () => {
             this._manager.activeMenu.toggle();
         });
@@ -228,7 +227,7 @@ export class WindowMenuManager {
         if (!Main.sessionMode.hasWmMenus)
             return;
 
-        if (type !== Meta.WindowMenuType.WM)
+        if (type != Meta.WindowMenuType.WM)
             throw new Error('Unsupported window menu type');
         let menu = new WindowMenu(window, this._sourceActor);
 
@@ -256,4 +255,4 @@ export class WindowMenuManager {
             window.disconnect(destroyId);
         });
     }
-}
+};

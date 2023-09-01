@@ -1,9 +1,10 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
+/* exported getSmartcardManager */
 
-import Gio from 'gi://Gio';
-import * as Signals from './signals.js';
+const Gio = imports.gi.Gio;
+const Signals = imports.misc.signals;
 
-import * as ObjectManager from './objectManager.js';
+const ObjectManager = imports.misc.objectManager;
 
 const SmartcardTokenIface = `
 <node>
@@ -17,17 +18,14 @@ const SmartcardTokenIface = `
 
 let _smartcardManager = null;
 
-/**
- * @returns {SmartcardManager}
- */
-export function getSmartcardManager() {
+function getSmartcardManager() {
     if (_smartcardManager == null)
         _smartcardManager = new SmartcardManager();
 
     return _smartcardManager;
 }
 
-class SmartcardManager extends Signals.EventEmitter {
+var SmartcardManager = class extends Signals.EventEmitter {
     constructor() {
         super();
 
@@ -49,12 +47,12 @@ class SmartcardManager extends Signals.EventEmitter {
             this._addToken(tokens[i]);
 
         this._objectManager.connect('interface-added', (objectManager, interfaceName, proxy) => {
-            if (interfaceName === 'org.gnome.SettingsDaemon.Smartcard.Token')
+            if (interfaceName == 'org.gnome.SettingsDaemon.Smartcard.Token')
                 this._addToken(proxy);
         });
 
         this._objectManager.connect('interface-removed', (objectManager, interfaceName, proxy) => {
-            if (interfaceName === 'org.gnome.SettingsDaemon.Smartcard.Token')
+            if (interfaceName == 'org.gnome.SettingsDaemon.Smartcard.Token')
                 this._removeToken(proxy);
         });
     }
@@ -94,12 +92,12 @@ class SmartcardManager extends Signals.EventEmitter {
     _removeToken(token) {
         let objectPath = token.get_object_path();
 
-        if (this._insertedTokens[objectPath] === token) {
+        if (this._insertedTokens[objectPath] == token) {
             delete this._insertedTokens[objectPath];
             this.emit('smartcard-removed', token);
         }
 
-        if (this._loginToken === token)
+        if (this._loginToken == token)
             this._loginToken = null;
 
         token.disconnectAll();
@@ -118,4 +116,4 @@ class SmartcardManager extends Signals.EventEmitter {
 
         return true;
     }
-}
+};

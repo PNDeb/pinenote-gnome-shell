@@ -1,21 +1,17 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
+/* exported WorkspaceAnimationController, WorkspaceGroup */
 
-import Clutter from 'gi://Clutter';
-import GObject from 'gi://GObject';
-import Meta from 'gi://Meta';
-import Shell from 'gi://Shell';
-import St from 'gi://St';
+const { Clutter, GObject, Meta, Shell, St } = imports.gi;
 
-import * as Background from './background.js';
-import * as Layout from './layout.js';
-import * as SwipeTracker from './swipeTracker.js';
-
-import * as Main from './main.js';
+const Background = imports.ui.background;
+const Layout = imports.ui.layout;
+const Main = imports.ui.main;
+const SwipeTracker = imports.ui.swipeTracker;
 
 const WINDOW_ANIMATION_TIME = 250;
 const WORKSPACE_SPACING = 100;
 
-const WorkspaceGroup = GObject.registerClass(
+var WorkspaceGroup = GObject.registerClass(
 class WorkspaceGroup extends Clutter.Actor {
     _init(workspace, monitor, movingWindow) {
         super._init();
@@ -101,7 +97,7 @@ class WorkspaceGroup extends Clutter.Actor {
 
             this.add_child(clone);
 
-            const record = {windowActor, clone};
+            const record = { windowActor, clone };
 
             windowActor.connectObject('destroy', () => {
                 clone.destroy();
@@ -143,7 +139,7 @@ const MonitorGroup = GObject.registerClass({
 
         this._monitor = monitor;
 
-        const constraint = new Layout.MonitorConstraint({index: monitor.index});
+        const constraint = new Layout.MonitorConstraint({ index: monitor.index });
         this.add_constraint(constraint);
 
         this._container = new Clutter.Actor();
@@ -270,7 +266,7 @@ const MonitorGroup = GObject.registerClass({
     }
 });
 
-export class WorkspaceAnimationController {
+var WorkspaceAnimationController = class {
     constructor() {
         this._movingWindow = null;
         this._switchData = null;
@@ -289,7 +285,7 @@ export class WorkspaceAnimationController {
         const swipeTracker = new SwipeTracker.SwipeTracker(global.stage,
             Clutter.Orientation.HORIZONTAL,
             Shell.ActionMode.NORMAL,
-            {allowDrag: false});
+            { allowDrag: false });
         swipeTracker.connect('begin', this._switchWorkspaceBegin.bind(this));
         swipeTracker.connect('update', this._switchWorkspaceUpdate.bind(this));
         swipeTracker.connect('end', this._switchWorkspaceEnd.bind(this));
@@ -497,4 +493,4 @@ export class WorkspaceAnimationController {
     get movingWindow() {
         return this._movingWindow;
     }
-}
+};

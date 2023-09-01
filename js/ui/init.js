@@ -1,22 +1,6 @@
-import GLib from 'gi://GLib';
-import Gio from 'gi://Gio';
+import { setConsoleLogDomain } from 'console';
 
-import './environment.js';
+setConsoleLogDomain('GNOME Shell');
 
-// Run the Mutter main loop after
-// GJS finishes resolving this module.
-imports._promiseNative.setMainLoopHook(() => {
-    // Queue starting the shell
-    GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
-        import('./main.js').then(main => main.start()).catch(e => {
-            const error = new GLib.Error(
-                Gio.IOErrorEnum, Gio.IOErrorEnum.FAILED,
-                e.message);
-            global.context.terminate_with_error(error);
-        });
-        return GLib.SOURCE_REMOVE;
-    });
-
-    // Run the meta context's main loop
-    global.context.run_main_loop();
-});
+imports.ui.environment.init();
+imports.ui.main.start();

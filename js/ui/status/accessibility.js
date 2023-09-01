@@ -1,12 +1,10 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
+/* exported ATIndicator */
 
-import Gio from 'gi://Gio';
-import GLib from 'gi://GLib';
-import GObject from 'gi://GObject';
-import St from 'gi://St';
+const { Gio, GLib, GObject, St } = imports.gi;
 
-import * as PanelMenu from '../panelMenu.js';
-import * as PopupMenu from '../popupMenu.js';
+const PanelMenu = imports.ui.panelMenu;
+const PopupMenu = imports.ui.popupMenu;
 
 const A11Y_SCHEMA                   = 'org.gnome.desktop.a11y';
 const KEY_ALWAYS_SHOW               = 'always-show-universal-access-status';
@@ -19,7 +17,7 @@ const KEY_MOUSE_KEYS_ENABLED        = 'mousekeys-enable';
 
 const APPLICATIONS_SCHEMA           = 'org.gnome.desktop.a11y.applications';
 
-const DPI_FACTOR_LARGE              = 1.25;
+var DPI_FACTOR_LARGE              = 1.25;
 
 const WM_SCHEMA                     = 'org.gnome.desktop.wm.preferences';
 const KEY_VISUAL_BELL               = 'visual-bell';
@@ -30,55 +28,50 @@ const KEY_TEXT_SCALING_FACTOR       = 'text-scaling-factor';
 const A11Y_INTERFACE_SCHEMA         = 'org.gnome.desktop.a11y.interface';
 const KEY_HIGH_CONTRAST             = 'high-contrast';
 
-export const ATIndicator = GObject.registerClass(
+var ATIndicator = GObject.registerClass(
 class ATIndicator extends PanelMenu.Button {
     _init() {
-        super._init(0.5, _('Accessibility'));
+        super._init(0.5, _("Accessibility"));
 
         this.add_child(new St.Icon({
             style_class: 'system-status-icon',
             icon_name: 'org.gnome.Settings-accessibility-symbolic',
         }));
 
-        this._a11ySettings = new Gio.Settings({schema_id: A11Y_SCHEMA});
+        this._a11ySettings = new Gio.Settings({ schema_id: A11Y_SCHEMA });
         this._a11ySettings.connect(`changed::${KEY_ALWAYS_SHOW}`, this._queueSyncMenuVisibility.bind(this));
 
         let highContrast = this._buildItem(_('High Contrast'), A11Y_INTERFACE_SCHEMA, KEY_HIGH_CONTRAST);
         this.menu.addMenuItem(highContrast);
 
-        const magnifier = this._buildItem(_('Zoom'),
-            APPLICATIONS_SCHEMA, 'screen-magnifier-enabled');
+        let magnifier = this._buildItem(_("Zoom"), APPLICATIONS_SCHEMA,
+                                        'screen-magnifier-enabled');
         this.menu.addMenuItem(magnifier);
 
         let textZoom = this._buildFontItem();
         this.menu.addMenuItem(textZoom);
 
-        const screenReader = this._buildItem(_('Screen Reader'),
-            APPLICATIONS_SCHEMA, 'screen-reader-enabled');
+        let screenReader = this._buildItem(_("Screen Reader"), APPLICATIONS_SCHEMA,
+                                           'screen-reader-enabled');
         this.menu.addMenuItem(screenReader);
 
-        const screenKeyboard = this._buildItem(_('Screen Keyboard'),
-            APPLICATIONS_SCHEMA, 'screen-keyboard-enabled');
+        let screenKeyboard = this._buildItem(_("Screen Keyboard"), APPLICATIONS_SCHEMA,
+                                             'screen-keyboard-enabled');
         this.menu.addMenuItem(screenKeyboard);
 
-        const visualBell = this._buildItem(_('Visual Alerts'),
-            WM_SCHEMA, KEY_VISUAL_BELL);
+        let visualBell = this._buildItem(_("Visual Alerts"), WM_SCHEMA, KEY_VISUAL_BELL);
         this.menu.addMenuItem(visualBell);
 
-        const stickyKeys = this._buildItem(_('Sticky Keys'),
-            A11Y_KEYBOARD_SCHEMA, KEY_STICKY_KEYS_ENABLED);
+        let stickyKeys = this._buildItem(_("Sticky Keys"), A11Y_KEYBOARD_SCHEMA, KEY_STICKY_KEYS_ENABLED);
         this.menu.addMenuItem(stickyKeys);
 
-        const slowKeys = this._buildItem(_('Slow Keys'),
-            A11Y_KEYBOARD_SCHEMA, KEY_SLOW_KEYS_ENABLED);
+        let slowKeys = this._buildItem(_("Slow Keys"), A11Y_KEYBOARD_SCHEMA, KEY_SLOW_KEYS_ENABLED);
         this.menu.addMenuItem(slowKeys);
 
-        const bounceKeys = this._buildItem(_('Bounce Keys'),
-            A11Y_KEYBOARD_SCHEMA, KEY_BOUNCE_KEYS_ENABLED);
+        let bounceKeys = this._buildItem(_("Bounce Keys"), A11Y_KEYBOARD_SCHEMA, KEY_BOUNCE_KEYS_ENABLED);
         this.menu.addMenuItem(bounceKeys);
 
-        const mouseKeys = this._buildItem(_('Mouse Keys'),
-            A11Y_KEYBOARD_SCHEMA, KEY_MOUSE_KEYS_ENABLED);
+        let mouseKeys = this._buildItem(_("Mouse Keys"), A11Y_KEYBOARD_SCHEMA, KEY_MOUSE_KEYS_ENABLED);
         this.menu.addMenuItem(mouseKeys);
 
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
@@ -120,7 +113,7 @@ class ATIndicator extends PanelMenu.Button {
     }
 
     _buildItem(string, schema, key) {
-        let settings = new Gio.Settings({schema_id: schema});
+        let settings = new Gio.Settings({ schema_id: schema });
         let widget = this._buildItemExtended(string,
             settings.get_boolean(key),
             settings.is_writable(key),
@@ -136,10 +129,10 @@ class ATIndicator extends PanelMenu.Button {
     }
 
     _buildFontItem() {
-        let settings = new Gio.Settings({schema_id: DESKTOP_INTERFACE_SCHEMA});
+        let settings = new Gio.Settings({ schema_id: DESKTOP_INTERFACE_SCHEMA });
         let factor = settings.get_double(KEY_TEXT_SCALING_FACTOR);
         let initialSetting = factor > 1.0;
-        let widget = this._buildItemExtended(_('Large Text'),
+        let widget = this._buildItemExtended(_("Large Text"),
             initialSetting,
             settings.is_writable(KEY_TEXT_SCALING_FACTOR),
             enabled => {

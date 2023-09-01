@@ -1,34 +1,18 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
-import Gio from 'gi://Gio';
-import GLib from 'gi://GLib';
-import Shew from 'gi://Shew';
+/* exported ExtensionsService */
 
-import {ExtensionPrefsDialog} from './extensionPrefsDialog.js';
-import {ServiceImplementation} from './dbusService.js';
+const { Gio, GLib, Shew } = imports.gi;
 
-import {deserializeExtension} from './misc/extensionUtils.js';
-import {loadInterfaceXML} from './misc/dbusUtils.js';
+const ExtensionUtils = imports.misc.extensionUtils;
+
+const { loadInterfaceXML } = imports.misc.dbusUtils;
+const { ExtensionPrefsDialog } = imports.extensionPrefsDialog;
+const { ServiceImplementation } = imports.dbusService;
 
 const ExtensionsIface = loadInterfaceXML('org.gnome.Shell.Extensions');
 const ExtensionsProxy = Gio.DBusProxy.makeProxyWrapper(ExtensionsIface);
 
-class ExtensionManager {
-    #extensions = new Map();
-
-    createExtensionObject(serialized) {
-        const extension = deserializeExtension(serialized);
-        this.#extensions.set(extension.uuid, extension);
-        return extension;
-    }
-
-    lookup(uuid) {
-        return this.#extensions.get(uuid);
-    }
-}
-
-export const extensionManager = new ExtensionManager();
-
-export const ExtensionsService = class extends ServiceImplementation {
+var ExtensionsService = class extends ServiceImplementation {
     constructor() {
         super(ExtensionsIface, '/org/gnome/Shell/Extensions');
 
@@ -130,11 +114,12 @@ export const ExtensionsService = class extends ServiceImplementation {
         const [uuid, parentWindow, options] = params;
 
         try {
+            const [serialized] = await this._proxy.GetExtensionInfoAsync(uuid);
+
             if (this._prefsDialog)
                 throw new Error('Already showing a prefs dialog');
 
-            const [serialized] = await this._proxy.GetExtensionInfoAsync(uuid);
-            const extension = extensionManager.createExtensionObject(serialized);
+            const extension = ExtensionUtils.deserializeExtension(serialized);
 
             this._prefsDialog = new ExtensionPrefsDialog(extension);
             this._prefsDialog.connect('realize', () => {

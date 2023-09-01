@@ -1,19 +1,14 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
+/* exported RunDialog */
 
-import Clutter from 'gi://Clutter';
-import Gio from 'gi://Gio';
-import GLib from 'gi://GLib';
-import GObject from 'gi://GObject';
-import Meta from 'gi://Meta';
-import Shell from 'gi://Shell';
-import St from 'gi://St';
+const { Clutter, Gio, GLib, GObject, Meta, Shell, St } = imports.gi;
 
-import * as Dialog from './dialog.js';
-import * as Main from './main.js';
-import * as ModalDialog from './modalDialog.js';
-import * as ShellEntry from './shellEntry.js';
-import * as Util from '../misc/util.js';
-import * as History from '../misc/history.js';
+const Dialog = imports.ui.dialog;
+const Main = imports.ui.main;
+const ModalDialog = imports.ui.modalDialog;
+const ShellEntry = imports.ui.shellEntry;
+const Util = imports.misc.util;
+const History = imports.misc.history;
 
 const HISTORY_KEY = 'command-history';
 
@@ -24,7 +19,7 @@ const TERMINAL_SCHEMA = 'org.gnome.desktop.default-applications.terminal';
 const EXEC_KEY = 'exec';
 const EXEC_ARG_KEY = 'exec-arg';
 
-export const RunDialog = GObject.registerClass(
+var RunDialog = GObject.registerClass(
 class RunDialog extends ModalDialog.ModalDialog {
     _init() {
         super._init({
@@ -32,8 +27,8 @@ class RunDialog extends ModalDialog.ModalDialog {
             destroyOnClose: false,
         });
 
-        this._lockdownSettings = new Gio.Settings({schema_id: LOCKDOWN_SCHEMA});
-        this._terminalSettings = new Gio.Settings({schema_id: TERMINAL_SCHEMA});
+        this._lockdownSettings = new Gio.Settings({ schema_id: LOCKDOWN_SCHEMA });
+        this._terminalSettings = new Gio.Settings({ schema_id: TERMINAL_SCHEMA });
         global.settings.connect('changed::development-tools', () => {
             this._enableInternalCommands = global.settings.get_boolean('development-tools');
         });
@@ -62,7 +57,7 @@ class RunDialog extends ModalDialog.ModalDialog {
 
         let title = _('Run a Command');
 
-        let content = new Dialog.MessageDialogContent({title});
+        let content = new Dialog.MessageDialogContent({ title });
         this.contentLayout.add_actor(content);
 
         let entry = new St.Entry({
@@ -104,7 +99,7 @@ class RunDialog extends ModalDialog.ModalDialog {
             if (symbol === Clutter.KEY_Tab) {
                 let text = o.get_text();
                 let prefix;
-                if (text.lastIndexOf(' ') === -1)
+                if (text.lastIndexOf(' ') == -1)
                     prefix = text;
                 else
                     prefix = text.substr(text.lastIndexOf(' ') + 1);
@@ -123,7 +118,7 @@ class RunDialog extends ModalDialog.ModalDialog {
     }
 
     vfunc_key_release_event(event) {
-        if (event.get_key_symbol() === Clutter.KEY_Escape) {
+        if (event.keyval === Clutter.KEY_Escape) {
             this.close();
             return Clutter.EVENT_STOP;
         }
@@ -138,10 +133,10 @@ class RunDialog extends ModalDialog.ModalDialog {
 
             let k = 0;
             for (; k < s1.length && k < s2.length; k++) {
-                if (s1[k] !== s2[k])
+                if (s1[k] != s2[k])
                     break;
             }
-            if (k === 0)
+            if (k == 0)
                 return '';
             return s1.substr(0, k);
         }
@@ -156,7 +151,7 @@ class RunDialog extends ModalDialog.ModalDialog {
                 let info;
                 while ((info = fileEnum.next_file(null))) {
                     let name = info.get_name();
-                    if (name.slice(0, text.length) === text)
+                    if (name.slice(0, text.length) == text)
                         results.push(name);
                 }
             } catch (e) {
@@ -205,10 +200,10 @@ class RunDialog extends ModalDialog.ModalDialog {
             } catch (e) {
                 // Mmmh, that failed - see if @input matches an existing file
                 let path = null;
-                if (input.charAt(0) === '/') {
+                if (input.charAt(0) == '/') {
                     path = input;
                 } else if (input) {
-                    if (input.charAt(0) === '~')
+                    if (input.charAt(0) == '~')
                         input = input.slice(1);
                     path = `${GLib.get_home_dir()}/${input}`;
                 }

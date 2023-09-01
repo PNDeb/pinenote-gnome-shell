@@ -1,18 +1,13 @@
-import Clutter from 'gi://Clutter';
-import Gio from 'gi://Gio';
-import GLib from 'gi://GLib';
-import GObject from 'gi://GObject';
-import Meta from 'gi://Meta';
-import Shell from 'gi://Shell';
-import St from 'gi://St';
+/* exported AudioDeviceSelectionDBus */
+const { Clutter, Gio, GLib, GObject, Meta, Shell, St } = imports.gi;
 
-import * as Dialog from './dialog.js';
-import * as ModalDialog from './modalDialog.js';
+const Dialog = imports.ui.dialog;
+const Main = imports.ui.main;
+const ModalDialog = imports.ui.modalDialog;
 
-import * as Main from './main.js';
-import {loadInterfaceXML} from '../misc/fileUtils.js';
+const { loadInterfaceXML } = imports.misc.fileUtils;
 
-const AudioDevice = {
+var AudioDevice = {
     HEADPHONES: 1 << 0,
     HEADSET:    1 << 1,
     MICROPHONE: 1 << 2,
@@ -20,11 +15,11 @@ const AudioDevice = {
 
 const AudioDeviceSelectionIface = loadInterfaceXML('org.gnome.Shell.AudioDeviceSelection');
 
-const AudioDeviceSelectionDialog = GObject.registerClass({
-    Signals: {'device-selected': {param_types: [GObject.TYPE_UINT]}},
+var AudioDeviceSelectionDialog = GObject.registerClass({
+    Signals: { 'device-selected': { param_types: [GObject.TYPE_UINT] } },
 }, class AudioDeviceSelectionDialog extends ModalDialog.ModalDialog {
     _init(devices) {
-        super._init({styleClass: 'audio-device-selection-dialog'});
+        super._init({ styleClass: 'audio-device-selection-dialog' });
 
         this._deviceItems = {};
 
@@ -71,11 +66,11 @@ const AudioDeviceSelectionDialog = GObject.registerClass({
     _getDeviceLabel(device) {
         switch (device) {
         case AudioDevice.HEADPHONES:
-            return _('Headphones');
+            return _("Headphones");
         case AudioDevice.HEADSET:
-            return _('Headset');
+            return _("Headset");
         case AudioDevice.MICROPHONE:
-            return _('Microphone');
+            return _("Microphone");
         default:
             return null;
         }
@@ -149,7 +144,7 @@ const AudioDeviceSelectionDialog = GObject.registerClass({
     }
 });
 
-export class AudioDeviceSelectionDBus {
+var AudioDeviceSelectionDBus = class AudioDeviceSelectionDBus {
     constructor() {
         this._audioSelectionDialog = null;
 
@@ -168,12 +163,11 @@ export class AudioDeviceSelectionDBus {
         let info = this._dbusImpl.get_info();
         const deviceName = Object.keys(AudioDevice)
             .filter(dev => AudioDevice[dev] === device)[0].toLowerCase();
-        connection.emit_signal(
-            this._audioSelectionDialog._sender,
-            this._dbusImpl.get_object_path(),
-            info ? info.name : null,
-            'DeviceSelected',
-            GLib.Variant.new('(s)', [deviceName]));
+        connection.emit_signal(this._audioSelectionDialog._sender,
+                               this._dbusImpl.get_object_path(),
+                               info ? info.name : null,
+                               'DeviceSelected',
+                               GLib.Variant.new('(s)', [deviceName]));
     }
 
     OpenAsync(params, invocation) {
@@ -197,7 +191,7 @@ export class AudioDeviceSelectionDBus {
 
         dialog.connect('closed', this._onDialogClosed.bind(this));
         dialog.connect('device-selected',
-            this._onDeviceSelected.bind(this));
+                       this._onDeviceSelected.bind(this));
         dialog.open();
 
         this._audioSelectionDialog = dialog;
@@ -206,9 +200,9 @@ export class AudioDeviceSelectionDBus {
 
     CloseAsync(params, invocation) {
         if (this._audioSelectionDialog &&
-            this._audioSelectionDialog._sender === invocation.get_sender())
+            this._audioSelectionDialog._sender == invocation.get_sender())
             this._audioSelectionDialog.close();
 
         invocation.return_value(null);
     }
-}
+};

@@ -1,25 +1,22 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
+/* exported WelcomeDialog */
 
-import Clutter from 'gi://Clutter';
-import GObject from 'gi://GObject';
-import Shell from 'gi://Shell';
-import St from 'gi://St';
+const { Clutter, GObject, Shell, St } = imports.gi;
 
-import * as Config from '../misc/config.js';
-import * as Main from './main.js';
-import * as Dialog from './dialog.js';
-import * as ModalDialog from './modalDialog.js';
+const Config = imports.misc.config;
+const Dialog = imports.ui.dialog;
+const Main = imports.ui.main;
+const ModalDialog = imports.ui.modalDialog;
 
-/** @enum {number} */
-const DialogResponse = {
+var DialogResponse = {
     NO_THANKS: 0,
     TAKE_TOUR: 1,
 };
 
-export const WelcomeDialog = GObject.registerClass(
+var WelcomeDialog = GObject.registerClass(
 class WelcomeDialog extends ModalDialog.ModalDialog {
     _init() {
-        super._init({styleClass: 'welcome-dialog'});
+        super._init({ styleClass: 'welcome-dialog' });
 
         const appSystem = Shell.AppSystem.get_default();
         this._tourAppInfo = appSystem.lookup_app('org.gnome.Tour.desktop');
@@ -38,9 +35,9 @@ class WelcomeDialog extends ModalDialog.ModalDialog {
         const [majorVersion] = Config.PACKAGE_VERSION.split('.');
         const title = _('Welcome to GNOME %s').format(majorVersion);
         const description = _('If you want to learn your way around, check out the tour.');
-        const content = new Dialog.MessageDialogContent({title, description});
+        const content = new Dialog.MessageDialogContent({ title, description });
 
-        const icon = new St.Widget({style_class: 'welcome-dialog-image'});
+        const icon = new St.Widget({ style_class: 'welcome-dialog-image' });
         content.insert_child_at_index(icon, 0);
 
         this.contentLayout.add_child(content);

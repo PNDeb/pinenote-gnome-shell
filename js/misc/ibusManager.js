@@ -1,15 +1,11 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
+/* exported getIBusManager */
 
-import Gio from 'gi://Gio';
-import GLib from 'gi://GLib';
-import IBus from 'gi://IBus';
-import Meta from 'gi://Meta';
-import Shell from 'gi://Shell';
+const { Gio, GLib, IBus, Meta, Shell } = imports.gi;
+const Signals = imports.misc.signals;
+const BoxPointer = imports.ui.boxpointer;
 
-import * as Signals from './signals.js';
-import * as BoxPointer from '../ui/boxpointer.js';
-
-import * as IBusCandidatePopup from '../ui/ibusCandidatePopup.js';
+const IBusCandidatePopup = imports.ui.ibusCandidatePopup;
 
 Gio._promisify(IBus.Bus.prototype,
     'list_engines_async', 'list_engines_async_finish');
@@ -36,8 +32,8 @@ const KEY_INPUTMETHOD = 'inputmethod';
 
 function _checkIBusVersion(requiredMajor, requiredMinor, requiredMicro) {
     if ((IBus.MAJOR_VERSION > requiredMajor) ||
-        (IBus.MAJOR_VERSION === requiredMajor && IBus.MINOR_VERSION > requiredMinor) ||
-        (IBus.MAJOR_VERSION === requiredMajor && IBus.MINOR_VERSION === requiredMinor &&
+        (IBus.MAJOR_VERSION == requiredMajor && IBus.MINOR_VERSION > requiredMinor) ||
+        (IBus.MAJOR_VERSION == requiredMajor && IBus.MINOR_VERSION == requiredMinor &&
          IBus.MICRO_VERSION >= requiredMicro))
         return;
 
@@ -46,16 +42,13 @@ function _checkIBusVersion(requiredMajor, requiredMinor, requiredMicro) {
         `but required is ${requiredMajor}.${requiredMinor}.${requiredMicro}`);
 }
 
-/**
- * @returns {IBusManager}
- */
-export function getIBusManager() {
+function getIBusManager() {
     if (_ibusManager == null)
         _ibusManager = new IBusManager();
     return _ibusManager;
 }
 
-class IBusManager extends Signals.EventEmitter {
+var IBusManager = class extends Signals.EventEmitter {
     constructor() {
         super();
 
@@ -221,7 +214,7 @@ class IBusManager extends Signals.EventEmitter {
         this._candidatePopup.setPanelService(this._panelService);
         this._panelService.connect('update-property', this._updateProperty.bind(this));
         this._panelService.connect('set-cursor-location', (ps, x, y, w, h) => {
-            let cursorLocation = {x, y, width: w, height: h};
+            let cursorLocation = { x, y, width: w, height: h };
             this.emit('set-cursor-location', cursorLocation);
         });
         this._panelService.connect('focus-in', (panel, path) => {
@@ -263,7 +256,7 @@ class IBusManager extends Signals.EventEmitter {
         this._currentEngineName = engineName;
         this._candidatePopup.close(BoxPointer.PopupAnimation.NONE);
 
-        if (this._registerPropertiesId !== 0)
+        if (this._registerPropertiesId != 0)
             return;
 
         this._registerPropertiesId =
@@ -341,7 +334,7 @@ class IBusManager extends Signals.EventEmitter {
         if (!ids.includes(TYPING_BOOSTER_ENGINE))
             ids.push(TYPING_BOOSTER_ENGINE);
 
-        if (this._preloadEnginesId !== 0) {
+        if (this._preloadEnginesId != 0) {
             GLib.source_remove(this._preloadEnginesId);
             this._preloadEnginesId = 0;
         }
@@ -410,4 +403,4 @@ class IBusManager extends Signals.EventEmitter {
         }
         return true;
     }
-}
+};

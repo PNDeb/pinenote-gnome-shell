@@ -1,37 +1,31 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
+/* exported NotificationDaemon */
 
-import GdkPixbuf from 'gi://GdkPixbuf';
-import Gio from 'gi://Gio';
-import GLib from 'gi://GLib';
-import GObject from 'gi://GObject';
-import Shell from 'gi://Shell';
-import St from 'gi://St';
+const { GdkPixbuf, Gio, GLib, GObject, Shell, St } = imports.gi;
 
-import * as Config from '../misc/config.js';
-import * as Main from './main.js';
-import * as MessageTray from './messageTray.js';
-import * as Params from '../misc/params.js';
+const Config = imports.misc.config;
+const Main = imports.ui.main;
+const MessageTray = imports.ui.messageTray;
+const Params = imports.misc.params;
 
-import {loadInterfaceXML} from '../misc/fileUtils.js';
+const { loadInterfaceXML } = imports.misc.fileUtils;
 
 const FdoNotificationsIface = loadInterfaceXML('org.freedesktop.Notifications');
 
-/** @enum {number} */
-const NotificationClosedReason = {
+var NotificationClosedReason = {
     EXPIRED: 1,
     DISMISSED: 2,
     APP_CLOSED: 3,
     UNDEFINED: 4,
 };
 
-/** @enum {number} */
-const Urgency = {
+var Urgency = {
     LOW: 0,
     NORMAL: 1,
     CRITICAL: 2,
 };
 
-class FdoNotificationDaemon {
+var FdoNotificationDaemon = class FdoNotificationDaemon {
     constructor() {
         this._dbusImpl = Gio.DBusExportedObject.wrapJSObject(FdoNotificationsIface, this);
         this._dbusImpl.export(Gio.DBus.session, '/org/freedesktop/Notifications');
@@ -48,13 +42,8 @@ class FdoNotificationDaemon {
                 width, height, rowStride, hasAlpha,
                 bitsPerSample, nChannels_, data,
             ] = hints['image-data'];
-            return Shell.util_create_pixbuf_from_data(data,
-                GdkPixbuf.Colorspace.RGB,
-                hasAlpha,
-                bitsPerSample,
-                width,
-                height,
-                rowStride);
+            return Shell.util_create_pixbuf_from_data(data, GdkPixbuf.Colorspace.RGB, hasAlpha,
+                                                      bitsPerSample, width, height, rowStride);
         } else if (hints['image-path']) {
             return this._iconForNotificationData(hints['image-path']);
         }
@@ -72,17 +61,17 @@ class FdoNotificationDaemon {
             stockIcon = 'dialog-error';
             break;
         }
-        return new Gio.ThemedIcon({name: stockIcon});
+        return new Gio.ThemedIcon({ name: stockIcon });
     }
 
     _iconForNotificationData(icon) {
         if (icon) {
-            if (icon.substr(0, 7) === 'file://')
-                return new Gio.FileIcon({file: Gio.File.new_for_uri(icon)});
-            else if (icon[0] === '/')
-                return new Gio.FileIcon({file: Gio.File.new_for_path(icon)});
+            if (icon.substr(0, 7) == 'file://')
+                return new Gio.FileIcon({ file: Gio.File.new_for_uri(icon) });
+            else if (icon[0] == '/')
+                return new Gio.FileIcon({ file: Gio.File.new_for_path(icon) });
             else
-                return new Gio.ThemedIcon({name: icon});
+                return new Gio.ThemedIcon({ name: icon });
         }
         return null;
     }
@@ -90,7 +79,7 @@ class FdoNotificationDaemon {
     _lookupSource(title, pid) {
         for (let i = 0; i < this._sources.length; i++) {
             let source = this._sources[i];
-            if (source.pid === pid && source.initialTitle === title)
+            if (source.pid == pid && source.initialTitle == title)
                 return source;
         }
         return null;
@@ -144,14 +133,14 @@ class FdoNotificationDaemon {
             hints[hint] = hints[hint].deepUnpack();
         }
 
-        hints = Params.parse(hints, {urgency: Urgency.NORMAL}, true);
+        hints = Params.parse(hints, { urgency: Urgency.NORMAL }, true);
 
         // Filter out chat, presence, calls and invitation notifications from
         // Empathy, since we handle that information from telepathyClient.js
         //
         // Note that empathy uses im.received for one to one chats and
         // x-empathy.im.mentioned for multi-user, so we're good here
-        if (appName === 'Empathy' && hints['category'] === 'im.received') {
+        if (appName == 'Empathy' && hints['category'] == 'im.received') {
             // Ignore replacesId since we already sent back a
             // NotificationClosed for that id.
             id = this._nextNotificationId++;
@@ -186,7 +175,7 @@ class FdoNotificationDaemon {
             hints,
             timeout,
         };
-        if (replacesId !== 0 && this._notifications[replacesId]) {
+        if (replacesId != 0 && this._notifications[replacesId]) {
             ndata.id = id = replacesId;
             ndata.notification = this._notifications[replacesId].notification;
         } else {
@@ -205,8 +194,8 @@ class FdoNotificationDaemon {
     }
 
     _notifyForSource(source, ndata) {
-        const {icon, summary, body, actions, hints} = ndata;
-        let {notification} = ndata;
+        const { icon, summary, body, actions, hints } = ndata;
+        let { notification } = ndata;
 
         if (notification == null) {
             notification = new MessageTray.Notification(source);
@@ -254,7 +243,7 @@ class FdoNotificationDaemon {
         if (actions.length) {
             for (let i = 0; i < actions.length - 1; i += 2) {
                 let [actionId, label] = [actions[i], actions[i + 1]];
-                if (actionId === 'default') {
+                if (actionId == 'default') {
                     hasDefaultAction = true;
                 } else {
                     notification.addAction(label, () => {
@@ -291,7 +280,7 @@ class FdoNotificationDaemon {
         notification.setTransient(!!hints['transient']);
 
         let privacyScope = hints['x-gnome-privacy-scope'] || 'user';
-        notification.setPrivacyScope(privacyScope === 'system'
+        notification.setPrivacyScope(privacyScope == 'system'
             ? MessageTray.PrivacyScope.SYSTEM
             : MessageTray.PrivacyScope.USER);
 
@@ -334,16 +323,16 @@ class FdoNotificationDaemon {
 
     _emitNotificationClosed(id, reason) {
         this._dbusImpl.emit_signal('NotificationClosed',
-            GLib.Variant.new('(uu)', [id, reason]));
+                                   GLib.Variant.new('(uu)', [id, reason]));
     }
 
     _emitActionInvoked(id, action) {
         this._dbusImpl.emit_signal('ActionInvoked',
-            GLib.Variant.new('(us)', [id, action]));
+                                   GLib.Variant.new('(us)', [id, action]));
     }
-}
+};
 
-export const FdoNotificationDaemonSource = GObject.registerClass(
+var FdoNotificationDaemonSource = GObject.registerClass(
 class FdoNotificationDaemonSource extends MessageTray.Source {
     _init(title, pid, sender, appId) {
         this.pid = pid;
@@ -359,9 +348,9 @@ class FdoNotificationDaemonSource extends MessageTray.Source {
 
         if (sender) {
             this._nameWatcherId = Gio.DBus.session.watch_name(sender,
-                Gio.BusNameWatcherFlags.NONE,
-                null,
-                this._onNameVanished.bind(this));
+                                                              Gio.BusNameWatcherFlags.NONE,
+                                                              null,
+                                                              this._onNameVanished.bind(this));
         } else {
             this._nameWatcherId = 0;
         }
@@ -392,7 +381,7 @@ class FdoNotificationDaemonSource extends MessageTray.Source {
         this.iconUpdated();
 
         let tracker = Shell.WindowTracker.get_default();
-        if (notification.resident && this.app && tracker.focus_app === this.app)
+        if (notification.resident && this.app && tracker.focus_app == this.app)
             this.pushNotification(notification);
         else
             this.showNotification(notification);
@@ -469,7 +458,7 @@ const PRIORITY_URGENCY_MAP = {
     urgent: MessageTray.Urgency.CRITICAL,
 };
 
-const GtkNotificationDaemonNotification = GObject.registerClass(
+var GtkNotificationDaemonNotification = GObject.registerClass(
 class GtkNotificationDaemonNotification extends MessageTray.Notification {
     _init(source, notification) {
         super._init(source);
@@ -489,7 +478,7 @@ class GtkNotificationDaemonNotification extends MessageTray.Notification {
 
         if (priority) {
             let urgency = PRIORITY_URGENCY_MAP[priority.unpack()];
-            this.setUrgency(urgency !== undefined ? urgency : MessageTray.Urgency.NORMAL);
+            this.setUrgency(urgency != undefined ? urgency : MessageTray.Urgency.NORMAL);
         } else if (urgent) {
             this.setUrgency(urgent.unpack()
                 ? MessageTray.Urgency.CRITICAL
@@ -529,7 +518,7 @@ class GtkNotificationDaemonNotification extends MessageTray.Notification {
     }
 
     _onButtonClicked(button) {
-        let {action, target} = button;
+        let { action, target } = button;
         this._activateAction(action.unpack(), target);
     }
 
@@ -550,17 +539,14 @@ function objectPathFromAppId(appId) {
     return `/${appId.replace(/\./g, '/').replace(/-/g, '_')}`;
 }
 
-/**
- * @returns {{ 'desktop-startup-id': string }}
- */
 function getPlatformData() {
     let startupId = GLib.Variant.new('s', `_TIME${global.get_current_time()}`);
-    return {'desktop-startup-id': startupId};
+    return { "desktop-startup-id": startupId };
 }
 
 function InvalidAppError() {}
 
-export const GtkNotificationDaemonAppSource = GObject.registerClass(
+var GtkNotificationDaemonAppSource = GObject.registerClass(
 class GtkNotificationDaemonAppSource extends MessageTray.Source {
     _init(appId) {
         let objectPath = objectPathFromAppId(appId);
@@ -671,7 +657,7 @@ class GtkNotificationDaemonAppSource extends MessageTray.Source {
 
 const GtkNotificationsIface = loadInterfaceXML('org.gtk.Notifications');
 
-class GtkNotificationDaemon {
+var GtkNotificationDaemon = class GtkNotificationDaemon {
     constructor() {
         this._sources = {};
 
@@ -707,7 +693,7 @@ class GtkNotificationDaemon {
             if (value) {
                 let sources = value.deepUnpack();
                 sources.forEach(([appId, notifications]) => {
-                    if (notifications.length === 0)
+                    if (notifications.length == 0)
                         return;
 
                     let source;
@@ -775,11 +761,11 @@ class GtkNotificationDaemon {
 
         invocation.return_value(null);
     }
-}
+};
 
-export class NotificationDaemon {
+var NotificationDaemon = class NotificationDaemon {
     constructor() {
         this._fdoNotificationDaemon = new FdoNotificationDaemon();
         this._gtkNotificationDaemon = new GtkNotificationDaemon();
     }
-}
+};

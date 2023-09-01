@@ -387,8 +387,6 @@ pack_extension (char      *srcdir,
   pack = extension_pack_new (srcdir);
   extension_pack_add_source (pack, "extension.js");
   extension_pack_add_source (pack, "metadata.json");
-  extension_pack_add_source (pack, "stylesheet-dark.css");
-  extension_pack_add_source (pack, "stylesheet-light.css");
   extension_pack_add_source (pack, "stylesheet.css");
   extension_pack_add_source (pack, "prefs.js");
 

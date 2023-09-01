@@ -4,5 +4,6 @@ po/gnome-shell.pot
 *.patch
 *.sw?
 .buildconfig
-.eslintcache
+.eslintcache-legacy
+.eslintcache-regular
 .vscode

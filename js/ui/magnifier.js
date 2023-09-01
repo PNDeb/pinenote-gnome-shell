@@ -1,26 +1,21 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
+/* exported Magnifier */
 
-import Atspi from 'gi://Atspi';
-import Clutter from 'gi://Clutter';
-import GDesktopEnums from 'gi://GDesktopEnums';
-import Gio from 'gi://Gio';
-import GLib from 'gi://GLib';
-import GObject from 'gi://GObject';
-import Meta from 'gi://Meta';
-import Shell from 'gi://Shell';
-import St from 'gi://St';
-import * as Signals from '../misc/signals.js';
+const {
+    Atspi, Clutter, GDesktopEnums, Gio, GLib, GObject, Meta, Shell, St,
+} = imports.gi;
+const Signals = imports.misc.signals;
 
-import * as Background from './background.js';
-import * as FocusCaretTracker from './focusCaretTracker.js';
-import * as Main from './main.js';
-import * as Params from '../misc/params.js';
-import * as PointerWatcher from './pointerWatcher.js';
+const Background = imports.ui.background;
+const FocusCaretTracker = imports.ui.focusCaretTracker;
+const Main = imports.ui.main;
+const Params = imports.misc.params;
+const PointerWatcher = imports.ui.pointerWatcher;
 
-const CROSSHAIRS_CLIP_SIZE = [100, 100];
-const NO_CHANGE = 0.0;
+var CROSSHAIRS_CLIP_SIZE = [100, 100];
+var NO_CHANGE = 0.0;
 
-const POINTER_REST_TIME = 1000; // milliseconds
+var POINTER_REST_TIME = 1000; // milliseconds
 
 // Settings
 const MAGNIFIER_SCHEMA          = 'org.gnome.desktop.a11y.magnifier';
@@ -46,7 +41,7 @@ const CROSS_HAIRS_OPACITY_KEY   = 'cross-hairs-opacity';
 const CROSS_HAIRS_LENGTH_KEY    = 'cross-hairs-length';
 const CROSS_HAIRS_CLIP_KEY      = 'cross-hairs-clip';
 
-const MouseSpriteContent = GObject.registerClass({
+var MouseSpriteContent = GObject.registerClass({
     Implements: [Clutter.Content],
 }, class MouseSpriteContent extends GObject.Object {
     _init() {
@@ -68,7 +63,7 @@ const MouseSpriteContent = GObject.registerClass({
         let color = Clutter.Color.get_static(Clutter.StaticColor.WHITE);
         let [minFilter, magFilter] = actor.get_content_scaling_filters();
         let textureNode = new Clutter.TextureNode(this._texture,
-            color, minFilter, magFilter);
+                                                  color, minFilter, magFilter);
         textureNode.set_name('MouseSpriteContent');
         node.add_child(textureNode);
 
@@ -80,7 +75,7 @@ const MouseSpriteContent = GObject.registerClass({
     }
 
     set texture(coglTexture) {
-        if (this._texture === coglTexture)
+        if (this._texture == coglTexture)
             return;
 
         let oldTexture = this._texture;
@@ -88,13 +83,13 @@ const MouseSpriteContent = GObject.registerClass({
         this.invalidate();
 
         if (!oldTexture || !coglTexture ||
-            oldTexture.get_width() !== coglTexture.get_width() ||
-            oldTexture.get_height() !== coglTexture.get_height())
+            oldTexture.get_width() != coglTexture.get_width() ||
+            oldTexture.get_height() != coglTexture.get_height())
             this.invalidate_size();
     }
 });
 
-export class Magnifier extends Signals.EventEmitter {
+var Magnifier = class Magnifier extends Signals.EventEmitter {
     constructor() {
         super();
 
@@ -105,7 +100,7 @@ export class Magnifier extends Signals.EventEmitter {
         let cursorTracker = Meta.CursorTracker.get_for_display(global.display);
         this._cursorTracker = cursorTracker;
 
-        this._mouseSprite = new Clutter.Actor({request_mode: Clutter.RequestMode.CONTENT_SIZE});
+        this._mouseSprite = new Clutter.Actor({ request_mode: Clutter.RequestMode.CONTENT_SIZE });
         this._mouseSprite.content = new MouseSpriteContent();
 
         this._cursorRoot = new Clutter.Actor();
@@ -168,8 +163,7 @@ export class Magnifier extends Signals.EventEmitter {
     /**
      * setActive:
      * Show/hide all the zoom regions.
-     *
-     * @param {boolean} activate Boolean to activate or de-activate the magnifier.
+     * @param {bool} activate: Boolean to activate or de-activate the magnifier.
      */
     setActive(activate) {
         let isActive = this.isActive();
@@ -208,13 +202,12 @@ export class Magnifier extends Signals.EventEmitter {
 
     /**
      * isActive:
-     *
-     * @returns {boolean} Whether the magnifier is active.
+     * @returns {bool} Whether the magnifier is active.
      */
     isActive() {
         // Sufficient to check one ZoomRegion since Magnifier's active
         // state applies to all of them.
-        if (this._zoomRegions.length === 0)
+        if (this._zoomRegions.length == 0)
             return false;
         else
             return this._zoomRegions[0].isActive();
@@ -246,8 +239,7 @@ export class Magnifier extends Signals.EventEmitter {
 
     /**
      * isTrackingMouse:
-     *
-     * @returns {boolean} whether the magnifier is currently tracking the mouse
+     * @returns {bool} whether the magnifier is currently tracking the mouse
      */
     isTrackingMouse() {
         return !!this._mouseTrackingId;
@@ -257,8 +249,6 @@ export class Magnifier extends Signals.EventEmitter {
      * scrollToMousePos:
      * Position all zoom regions' ROI relative to the current location of the
      * system pointer.
-     *
-     * @param {[xMouse: number, yMouse: number] | []} args
      */
     scrollToMousePos(...args) {
         const [xMouse, yMouse] = args.length ? args : global.get_pointer();
@@ -283,16 +273,15 @@ export class Magnifier extends Signals.EventEmitter {
     /**
      * createZoomRegion:
      * Create a ZoomRegion instance with the given properties.
-     *
-     * @param {number} xMagFactor
+     * @param {number} xMagFactor:
      *     The power to set horizontal magnification of the ZoomRegion. A value
      *     of 1.0 means no magnification, a value of 2.0 doubles the size.
-     * @param {number} yMagFactor
+     * @param {number} yMagFactor:
      *    The power to set the vertical magnification of the ZoomRegion.
-     * @param {{x: number, y: number, width: number, height: number}} roi
+     * @param {{x: number, y: number, width: number, height: number}} roi:
      *    The reg Object that defines the region to magnify, given in
      *    unmagnified coordinates.
-     * @param {{x: number, y: number, width: number, height: number}} viewPort
+     * @param {{x: number, y: number, width: number, height: number}} viewPort:
      *     Object that defines the position of the ZoomRegion on screen.
      * @returns {ZoomRegion} the newly created ZoomRegion.
      */
@@ -314,8 +303,7 @@ export class Magnifier extends Signals.EventEmitter {
      * addZoomRegion:
      * Append the given ZoomRegion to the list of currently defined ZoomRegions
      * for this Magnifier instance.
-     *
-     * @param {ZoomRegion} zoomRegion The zoomRegion to add.
+     * @param {ZoomRegion} zoomRegion: The zoomRegion to add.
      */
     addZoomRegion(zoomRegion) {
         if (zoomRegion) {
@@ -328,8 +316,7 @@ export class Magnifier extends Signals.EventEmitter {
     /**
      * getZoomRegions:
      * Return a list of ZoomRegion's for this Magnifier.
-     *
-     * @returns {ZoomRegion[]} The Magnifier's zoom region list.
+     * @returns {number[]} The Magnifier's zoom region list.
      */
     getZoomRegions() {
         return this._zoomRegions;
@@ -376,10 +363,8 @@ export class Magnifier extends Signals.EventEmitter {
 
     /**
      * setCrosshairsVisible:
-     *
-     * Show or hide the cross hair
-     *
-     * @param {boolean} visible Flag that indicates show (true) or hide (false).
+     * Show or hide the cross hair.
+     * @param {bool} visible: Flag that indicates show (true) or hide (false).
      */
     setCrosshairsVisible(visible) {
         if (visible) {
@@ -395,10 +380,8 @@ export class Magnifier extends Signals.EventEmitter {
 
     /**
      * setCrosshairsColor:
-     *
      * Set the color of the crosshairs for all ZoomRegions.
-     *
-     * @param {string} color The color as a string, e.g. '#ff0000ff' or 'red'.
+     * @param {string} color: The color as a string, e.g. '#ff0000ff' or 'red'.
      */
     setCrosshairsColor(color) {
         if (this._crossHairs) {
@@ -410,7 +393,6 @@ export class Magnifier extends Signals.EventEmitter {
     /**
      * getCrosshairsColor:
      * Get the color of the crosshairs.
-     *
      * @returns {string} The color as a string, e.g. '#0000ffff' or 'blue'.
      */
     getCrosshairsColor() {
@@ -424,10 +406,8 @@ export class Magnifier extends Signals.EventEmitter {
 
     /**
      * setCrosshairsThickness:
-     *
      * Set the crosshairs thickness for all ZoomRegions.
-     *
-     * @param {number} thickness The width of the vertical and
+     * @param {number} thickness: The width of the vertical and
      *     horizontal lines of the crosshairs.
      */
     setCrosshairsThickness(thickness) {
@@ -436,8 +416,8 @@ export class Magnifier extends Signals.EventEmitter {
     }
 
     /**
+     * getCrosshairsThickness:
      * Get the crosshairs thickness.
-     *
      * @returns {number} The width of the vertical and horizontal
      *     lines of the crosshairs.
      */
@@ -449,7 +429,8 @@ export class Magnifier extends Signals.EventEmitter {
     }
 
     /**
-     * @param {number} opacity Value between 0.0 (transparent)
+     * setCrosshairsOpacity:
+     * @param {number} opacity: Value between 0.0 (transparent)
      *     and 1.0 (fully opaque).
      */
     setCrosshairsOpacity(opacity) {
@@ -458,6 +439,7 @@ export class Magnifier extends Signals.EventEmitter {
     }
 
     /**
+     * getCrosshairsOpacity:
      * @returns {number} Value between 0.0 (transparent) and 1.0 (fully opaque).
      */
     getCrosshairsOpacity() {
@@ -468,9 +450,9 @@ export class Magnifier extends Signals.EventEmitter {
     }
 
     /**
+     * setCrosshairsLength:
      * Set the crosshairs length for all ZoomRegions.
-     *
-     * @param {number} length The length of the vertical and horizontal
+     * @param {number} length: The length of the vertical and horizontal
      *     lines making up the crosshairs.
      */
     setCrosshairsLength(length) {
@@ -483,7 +465,6 @@ export class Magnifier extends Signals.EventEmitter {
     /**
      * getCrosshairsLength:
      * Get the crosshairs length.
-     *
      * @returns {number} The length of the vertical and horizontal
      *     lines making up the crosshairs.
      */
@@ -496,10 +477,8 @@ export class Magnifier extends Signals.EventEmitter {
 
     /**
      * setCrosshairsClip:
-     *
      * Set whether the crosshairs are clipped at their intersection.
-     *
-     * @param {boolean} clip Flag to indicate whether to clip the crosshairs.
+     * @param {bool} clip: Flag to indicate whether to clip the crosshairs.
      */
     setCrosshairsClip(clip) {
         if (!this._crossHairs)
@@ -512,8 +491,7 @@ export class Magnifier extends Signals.EventEmitter {
     /**
      * getCrosshairsClip:
      * Get whether the crosshairs are clipped by the mouse image.
-     *
-     * @returns {boolean} Whether the crosshairs are clipped.
+     * @returns {bool} Whether the crosshairs are clipped.
      */
     getCrosshairsClip() {
         if (this._crossHairs) {
@@ -547,41 +525,41 @@ export class Magnifier extends Signals.EventEmitter {
     }
 
     _settingsInit(zoomRegion) {
-        this._settings = new Gio.Settings({schema_id: MAGNIFIER_SCHEMA});
+        this._settings = new Gio.Settings({ schema_id: MAGNIFIER_SCHEMA });
 
         this._settings.connect(`changed::${SCREEN_POSITION_KEY}`,
-            this._updateScreenPosition.bind(this));
+                               this._updateScreenPosition.bind(this));
         this._settings.connect(`changed::${MAG_FACTOR_KEY}`,
-            this._updateMagFactor.bind(this));
+                               this._updateMagFactor.bind(this));
         this._settings.connect(`changed::${LENS_MODE_KEY}`,
-            this._updateLensMode.bind(this));
+                               this._updateLensMode.bind(this));
         this._settings.connect(`changed::${CLAMP_MODE_KEY}`,
-            this._updateClampMode.bind(this));
+                               this._updateClampMode.bind(this));
         this._settings.connect(`changed::${MOUSE_TRACKING_KEY}`,
-            this._updateMouseTrackingMode.bind(this));
+                               this._updateMouseTrackingMode.bind(this));
         this._settings.connect(`changed::${FOCUS_TRACKING_KEY}`,
-            this._updateFocusTrackingMode.bind(this));
+                               this._updateFocusTrackingMode.bind(this));
         this._settings.connect(`changed::${CARET_TRACKING_KEY}`,
-            this._updateCaretTrackingMode.bind(this));
+                               this._updateCaretTrackingMode.bind(this));
 
         this._settings.connect(`changed::${INVERT_LIGHTNESS_KEY}`,
-            this._updateInvertLightness.bind(this));
+                               this._updateInvertLightness.bind(this));
         this._settings.connect(`changed::${COLOR_SATURATION_KEY}`,
-            this._updateColorSaturation.bind(this));
+                               this._updateColorSaturation.bind(this));
 
         this._settings.connect(`changed::${BRIGHT_RED_KEY}`,
-            this._updateBrightness.bind(this));
+                               this._updateBrightness.bind(this));
         this._settings.connect(`changed::${BRIGHT_GREEN_KEY}`,
-            this._updateBrightness.bind(this));
+                               this._updateBrightness.bind(this));
         this._settings.connect(`changed::${BRIGHT_BLUE_KEY}`,
-            this._updateBrightness.bind(this));
+                               this._updateBrightness.bind(this));
 
         this._settings.connect(`changed::${CONTRAST_RED_KEY}`,
-            this._updateContrast.bind(this));
+                               this._updateContrast.bind(this));
         this._settings.connect(`changed::${CONTRAST_GREEN_KEY}`,
-            this._updateContrast.bind(this));
+                               this._updateContrast.bind(this));
         this._settings.connect(`changed::${CONTRAST_BLUE_KEY}`,
-            this._updateContrast.bind(this));
+                               this._updateContrast.bind(this));
 
         this._settings.connect(`changed::${SHOW_CROSS_HAIRS_KEY}`, () => {
             this.setCrosshairsVisible(this._settings.get_boolean(SHOW_CROSS_HAIRS_KEY));
@@ -610,7 +588,7 @@ export class Magnifier extends Signals.EventEmitter {
         if (zoomRegion) {
             // Mag factor is accurate to two decimal places.
             let aPref = parseFloat(this._settings.get_double(MAG_FACTOR_KEY).toFixed(2));
-            if (aPref !== 0.0)
+            if (aPref != 0.0)
                 zoomRegion.setMagFactor(aPref, aPref);
 
             aPref = this._settings.get_enum(SCREEN_POSITION_KEY);
@@ -662,7 +640,7 @@ export class Magnifier extends Signals.EventEmitter {
         if (this._zoomRegions.length) {
             let position = this._settings.get_enum(SCREEN_POSITION_KEY);
             this._zoomRegions[0].setScreenPosition(position);
-            if (position !== GDesktopEnums.MagnifierScreenPosition.FULL_SCREEN)
+            if (position != GDesktopEnums.MagnifierScreenPosition.FULL_SCREEN)
                 this._updateLensMode();
         }
     }
@@ -751,9 +729,9 @@ export class Magnifier extends Signals.EventEmitter {
             this._zoomRegions[0].setContrast(contrast);
         }
     }
-}
+};
 
-class ZoomRegion {
+var ZoomRegion = class ZoomRegion {
     constructor(magnifier, mouseSourceActor) {
         this._magnifier = magnifier;
         this._focusCaretTracker = new FocusCaretTracker.FocusCaretTracker();
@@ -766,8 +744,8 @@ class ZoomRegion {
         this._screenPosition = GDesktopEnums.MagnifierScreenPosition.FULL_SCREEN;
         this._invertLightness = false;
         this._colorSaturation = 1.0;
-        this._brightness = {r: NO_CHANGE, g: NO_CHANGE, b: NO_CHANGE};
-        this._contrast = {r: NO_CHANGE, g: NO_CHANGE, b: NO_CHANGE};
+        this._brightness = { r: NO_CHANGE, g: NO_CHANGE, b: NO_CHANGE };
+        this._contrast = { r: NO_CHANGE, g: NO_CHANGE, b: NO_CHANGE };
 
         this._magView = null;
         this._background = null;
@@ -801,7 +779,7 @@ class ZoomRegion {
 
         this._signalConnections = [];
         let id = Main.layoutManager.connect('monitors-changed',
-            this._monitorsChanged.bind(this));
+                                            this._monitorsChanged.bind(this));
         this._signalConnections.push([Main.layoutManager, id]);
 
         id = this._focusCaretTracker.connect('caret-moved', this._updateCaret.bind(this));
@@ -819,7 +797,7 @@ class ZoomRegion {
     }
 
     _updateScreenPosition() {
-        if (this._screenPosition === GDesktopEnums.MagnifierScreenPosition.NONE) {
+        if (this._screenPosition == GDesktopEnums.MagnifierScreenPosition.NONE) {
             this._setViewPort({
                 x: this._viewPortX,
                 y: this._viewPortY,
@@ -872,7 +850,7 @@ class ZoomRegion {
             throw new Error(`Failed to validate parent window: ${e}`);
         }
 
-        const {focusWindow} = global.display;
+        const { focusWindow } = global.display;
         if (!focusWindow)
             return null;
 
@@ -893,7 +871,7 @@ class ZoomRegion {
 
     _updateFocus(caller, event) {
         let component = event.source.get_component_iface();
-        if (!component || event.detail1 !== 1)
+        if (!component || event.detail1 != 1)
             return;
         let extents;
         try {
@@ -949,11 +927,10 @@ class ZoomRegion {
 
     /**
      * setActive:
-     *
-     * @param {boolean} activate Boolean to show/hide the ZoomRegion.
+     * @param {bool} activate: Boolean to show/hide the ZoomRegion.
      */
     setActive(activate) {
-        if (activate === this.isActive())
+        if (activate == this.isActive())
             return;
 
         if (activate) {
@@ -977,8 +954,7 @@ class ZoomRegion {
 
     /**
      * isActive:
-     *
-     * @returns {boolean} Whether this ZoomRegion is active
+     * @returns {bool} Whether this ZoomRegion is active
      */
     isActive() {
         return this._magView != null;
@@ -986,11 +962,10 @@ class ZoomRegion {
 
     /**
      * setMagFactor:
-     *
-     * @param {number} xMagFactor The power to set the horizontal
+     * @param {number} xMagFactor: The power to set the horizontal
      *     magnification factor to of the magnified view. A value of 1.0
      *     means no magnification. A value of 2.0 doubles the size.
-     * @param {number} yMagFactor The power to set the vertical
+     * @param {number} yMagFactor: The power to set the vertical
      *     magnification factor to of the magnified view.
      */
     setMagFactor(xMagFactor, yMagFactor) {
@@ -1004,7 +979,6 @@ class ZoomRegion {
 
     /**
      * getMagFactor:
-     *
      * @returns {number[]} an array, [xMagFactor, yMagFactor], containing
      *     the horizontal and vertical magnification powers. A value of
      *     1.0 means no magnification. A value of 2.0 means the contents
@@ -1016,8 +990,7 @@ class ZoomRegion {
 
     /**
      * setMouseTrackingMode
-     *
-     * @param {GDesktopEnums.MagnifierMouseTrackingMode} mode the new mode
+     * @param {GDesktopEnums.MagnifierMouseTrackingMode} mode: the new mode
      */
     setMouseTrackingMode(mode) {
         if (mode >= GDesktopEnums.MagnifierMouseTrackingMode.NONE &&
@@ -1026,8 +999,7 @@ class ZoomRegion {
     }
 
     /**
-     * getMouseTrackingMode:
-     *
+     * getMouseTrackingMode
      * @returns {GDesktopEnums.MagnifierMouseTrackingMode} the current mode
      */
     getMouseTrackingMode() {
@@ -1036,8 +1008,7 @@ class ZoomRegion {
 
     /**
      * setFocusTrackingMode
-     *
-     * @param {GDesktopEnums.MagnifierFocusTrackingMode} mode the new mode
+     * @param {GDesktopEnums.MagnifierFocusTrackingMode} mode: the new mode
      */
     setFocusTrackingMode(mode) {
         this._focusTrackingMode = mode;
@@ -1046,8 +1017,7 @@ class ZoomRegion {
 
     /**
      * setCaretTrackingMode
-     *
-     * @param {GDesktopEnums.MagnifierCaretTrackingMode} mode the new mode
+     * @param {GDesktopEnums.MagnifierCaretTrackingMode} mode: the new mode
      */
     setCaretTrackingMode(mode) {
         this._caretTrackingMode = mode;
@@ -1055,7 +1025,7 @@ class ZoomRegion {
     }
 
     _syncFocusTracking() {
-        let enabled = this._focusTrackingMode !== GDesktopEnums.MagnifierFocusTrackingMode.NONE &&
+        let enabled = this._focusTrackingMode != GDesktopEnums.MagnifierFocusTrackingMode.NONE &&
             this.isActive();
 
         if (enabled)
@@ -1065,7 +1035,7 @@ class ZoomRegion {
     }
 
     _syncCaretTracking() {
-        let enabled = this._caretTrackingMode !== GDesktopEnums.MagnifierCaretTrackingMode.NONE &&
+        let enabled = this._caretTrackingMode != GDesktopEnums.MagnifierCaretTrackingMode.NONE &&
             this.isActive();
 
         if (enabled)
@@ -1077,8 +1047,7 @@ class ZoomRegion {
     /**
      * setViewPort
      * Sets the position and size of the ZoomRegion on screen.
-     *
-     * @param {{x: number, y: number, width: number, height: number}} viewPort
+     * @param {{x: number, y: number, width: number, height: number}} viewPort:
      *     Object defining the position and size of the view port.
      *     The values are in stage coordinate space.
      */
@@ -1090,8 +1059,7 @@ class ZoomRegion {
     /**
      * setROI
      * Sets the "region of interest" that the ZoomRegion is magnifying.
-     *
-     * @param {{x: number, y: number, width: number, height: number}} roi
+     * @param {{x: number, y: number, width: number, height: number}} roi:
      *     Object that defines the region of the screen to magnify.
      *     The values are in screen (unmagnified) coordinate space.
      */
@@ -1113,7 +1081,6 @@ class ZoomRegion {
      * Retrieves the "region of interest" -- the rectangular bounds of that part
      * of the desktop that the magnified view is showing (x, y, width, height).
      * The bounds are given in non-magnified coordinates.
-     *
      * @returns {number[]} an array, [x, y, width, height], representing
      *     the bounding rectangle of what is shown in the magnified view.
      */
@@ -1130,11 +1097,9 @@ class ZoomRegion {
 
     /**
      * setLensMode:
-     *
-     *  Turn lens mode on/off.  In full screen mode, lens mode does nothing since
+     * Turn lens mode on/off.  In full screen mode, lens mode does nothing since
      * a lens the size of the screen is pointless.
-     *
-     * @param {boolean} lensMode Whether lensMode should be active
+     * @param {bool} lensMode: Whether lensMode should be active
      */
     setLensMode(lensMode) {
         this._lensMode = lensMode;
@@ -1145,8 +1110,7 @@ class ZoomRegion {
     /**
      * isLensMode:
      * Is lens mode on or off?
-     *
-     * @returns {boolean} The lens mode state.
+     * @returns {bool} The lens mode state.
      */
     isLensMode() {
         return this._lensMode;
@@ -1156,8 +1120,7 @@ class ZoomRegion {
      * setClampScrollingAtEdges:
      * Stop vs. allow scrolling of the magnified contents when it scroll beyond
      * the edges of the screen.
-     *
-     *  @param {boolean} clamp Boolean to turn on/off clamping.
+     * @param {bool} clamp: Boolean to turn on/off clamping.
      */
     setClampScrollingAtEdges(clamp) {
         this._clampScrollingAtEdges = clamp;
@@ -1241,8 +1204,7 @@ class ZoomRegion {
      * setScreenPosition:
      * Positions the zoom region to one of the enumerated positions on the
      * screen.
-     *
-     *  @param {GDesktopEnums.MagnifierScreenPosition} inPosition the position
+     * @param {GDesktopEnums.MagnifierScreenPosition} inPosition: the position
      */
     setScreenPosition(inPosition) {
         switch (inPosition) {
@@ -1268,8 +1230,7 @@ class ZoomRegion {
      * getScreenPosition:
      * Tell the outside world what the current mode is -- magnifiying the
      * top half, bottom half, etc.
-     *
-     *  @returns {GDesktopEnums.MagnifierScreenPosition}: the current position.
+     * @returns {GDesktopEnums.MagnifierScreenPosition}: the current position.
      */
     getScreenPosition() {
         return this._screenPosition;
@@ -1285,14 +1246,13 @@ class ZoomRegion {
     /**
      * scrollToMousePos:
      * Set the region of interest based on the position of the system pointer.
-     *
-     *  @returns {boolean}: Whether the system mouse pointer is over the
+     * @returns {bool}: Whether the system mouse pointer is over the
      *     magnified view.
      */
     scrollToMousePos() {
         this._followingCursor = true;
-        if (this._mouseTrackingMode !== GDesktopEnums.MagnifierMouseTrackingMode.NONE)
-            this._changeROI({redoCursorTracking: true});
+        if (this._mouseTrackingMode != GDesktopEnums.MagnifierMouseTrackingMode.NONE)
+            this._changeROI({ redoCursorTracking: true });
         else
             this._updateMousePosition();
 
@@ -1327,9 +1287,8 @@ class ZoomRegion {
      * scrollContentsTo:
      * Shift the contents of the magnified view such it is centered on the given
      * coordinate.
-     *
-     *  @param {number} x The x-coord of the point to center on.
-     * @param {number} y The y-coord of the point to center on.
+     * @param {number} x: The x-coord of the point to center on.
+     * @param {number} y: The y-coord of the point to center on.
      */
     scrollContentsTo(x, y) {
         if (x < 0 || x > global.screen_width ||
@@ -1349,8 +1308,7 @@ class ZoomRegion {
     /**
      * addCrosshairs:
      * Add crosshairs centered on the magnified mouse.
-     *
-     *  @param {Crosshairs} crossHairs Crosshairs instance
+     * @param {Crosshairs} crossHairs: Crosshairs instance
      */
     addCrosshairs(crossHairs) {
         this._crossHairs = crossHairs;
@@ -1364,8 +1322,7 @@ class ZoomRegion {
     /**
      * setInvertLightness:
      * Set whether to invert the lightness of the magnified view.
-     *
-     *  @param {boolean} flag whether brightness should be inverted
+     * @param {bool} flag: whether brightness should be inverted
      */
     setInvertLightness(flag) {
         this._invertLightness = flag;
@@ -1375,10 +1332,8 @@ class ZoomRegion {
 
     /**
      * getInvertLightness:
-     *
      * Retrieve whether the lightness is inverted.
-     *
-     * @returns {boolean} whether brightness should be inverted
+     * @returns {bool} whether brightness should be inverted
      */
     getInvertLightness() {
         return this._invertLightness;
@@ -1386,10 +1341,8 @@ class ZoomRegion {
 
     /**
      * setColorSaturation:
-     *
      * Set the color saturation of the magnified view.
-     *
-     * @param {number} saturation A value from 0.0 to 1.0 that defines
+     * @param {number} saturation: A value from 0.0 to 1.0 that defines
      *     the color saturation, with 0.0 defining no color (grayscale),
      *     and 1.0 defining full color.
      */
@@ -1402,8 +1355,7 @@ class ZoomRegion {
     /**
      * getColorSaturation:
      * Retrieve the color saturation of the magnified view.
-     *
-     *  @returns {number} the color saturation
+     * @returns {number} the color saturation
      */
     getColorSaturation() {
         return this._colorSaturation;
@@ -1412,8 +1364,7 @@ class ZoomRegion {
     /**
      * setBrightness:
      * Alter the brightness of the magnified view.
-     *
-     *  @param {object} brightness Object containing the contrast for the
+     * @param {Object} brightness: Object containing the contrast for the
      *     red, green, and blue channels. Values of 0.0 represent "standard"
      *     brightness (no change), whereas values less or greater than
      *     0.0 indicate decreased or incresaed brightness, respectively.
@@ -1433,8 +1384,7 @@ class ZoomRegion {
     /**
      * setContrast:
      * Alter the contrast of the magnified view.
-     *
-     *  @param {object} contrast Object containing the contrast for the
+     * @param {Object} contrast: Object containing the contrast for the
      *     red, green, and blue channels. Values of 0.0 represent "standard"
      *     contrast (no change), whereas values less or greater than
      *     0.0 indicate decreased or incresaed contrast, respectively.
@@ -1454,8 +1404,7 @@ class ZoomRegion {
     /**
      * getContrast:
      * Retrieve the contrast of the magnified view.
-     *
-     *  @returns {{r: number, g: number, b: number}}: Object containing
+     * @returns {{r: number, g: number, b: number}}: Object containing
      *     the contrast for the red, green, and blue channels.
      */
     getContrast() {
@@ -1470,14 +1419,14 @@ class ZoomRegion {
 
     _createActors() {
         // The root actor for the zoom region
-        this._magView = new St.Bin({style_class: 'magnifier-zoom-region'});
+        this._magView = new St.Bin({ style_class: 'magnifier-zoom-region' });
         global.stage.add_actor(this._magView);
 
         // hide the magnified region from CLUTTER_PICK_ALL
         Shell.util_set_hidden_from_pick(this._magView, true);
 
         // Add a group to clip the contents of the magnified view.
-        let mainGroup = new Clutter.Actor({clip_to_allocation: true});
+        let mainGroup = new Clutter.Actor({ clip_to_allocation: true });
         this._magView.set_child(mainGroup);
 
         // Add a background for when the magnified uiGroup is scrolled
@@ -1496,7 +1445,7 @@ class ZoomRegion {
         // Add either the given mouseSourceActor to the ZoomRegion, or a clone of
         // it.
         if (this._mouseSourceActor.get_parent() != null)
-            this._mouseActor = new Clutter.Clone({source: this._mouseSourceActor});
+            this._mouseActor = new Clutter.Clone({ source: this._mouseSourceActor });
         else
             this._mouseActor = this._mouseSourceActor;
         mainGroup.add_actor(this._mouseActor);
@@ -1515,7 +1464,7 @@ class ZoomRegion {
     }
 
     _destroyActors() {
-        if (this._mouseActor === this._mouseSourceActor)
+        if (this._mouseActor == this._mouseSourceActor)
             this._mouseActor.get_parent().remove_actor(this._mouseActor);
         if (this._crossHairs)
             this._crossHairs.removeFromParent(this._crossHairsActor);
@@ -1549,7 +1498,7 @@ class ZoomRegion {
         this._updateMagViewGeometry();
 
         if (!fromROIUpdate)
-            this._changeROI({redoCursorTracking: this._followingCursor}); // will update mouse
+            this._changeROI({ redoCursorTracking: this._followingCursor }); // will update mouse
 
         if (this.isActive() && this._isMouseOverRegion())
             this._magnifier.hideSystemCursor();
@@ -1581,7 +1530,7 @@ class ZoomRegion {
         this._yMagFactor = params.yMagFactor;
 
         if (params.redoCursorTracking &&
-            this._mouseTrackingMode !== GDesktopEnums.MagnifierMouseTrackingMode.NONE) {
+            this._mouseTrackingMode != GDesktopEnums.MagnifierMouseTrackingMode.NONE) {
             // This depends on this.xMagFactor/yMagFactor already being updated
             [params.xCenter, params.yCenter] = this._centerFromMousePosition();
         }
@@ -1634,10 +1583,10 @@ class ZoomRegion {
         // doesn't necessarily imply
         // this._screenPosition = GDesktopEnums.MagnifierScreenPosition.FULL_SCREEN;
 
-        if (this._viewPortX !== 0 || this._viewPortY !== 0)
+        if (this._viewPortX != 0 || this._viewPortY != 0)
             return false;
-        if (this._viewPortWidth !== global.screen_width ||
-            this._viewPortHeight !== global.screen_height)
+        if (this._viewPortWidth != global.screen_width ||
+            this._viewPortHeight != global.screen_height)
             return false;
         return true;
     }
@@ -1649,11 +1598,11 @@ class ZoomRegion {
         let xMouse = this._magnifier.xMouse;
         let yMouse = this._magnifier.yMouse;
 
-        if (this._mouseTrackingMode === GDesktopEnums.MagnifierMouseTrackingMode.PROPORTIONAL)
+        if (this._mouseTrackingMode == GDesktopEnums.MagnifierMouseTrackingMode.PROPORTIONAL)
             return this._centerFromPointProportional(xMouse, yMouse);
-        else if (this._mouseTrackingMode === GDesktopEnums.MagnifierMouseTrackingMode.PUSH)
+        else if (this._mouseTrackingMode == GDesktopEnums.MagnifierMouseTrackingMode.PUSH)
             return this._centerFromPointPush(xMouse, yMouse);
-        else if (this._mouseTrackingMode === GDesktopEnums.MagnifierMouseTrackingMode.CENTERED)
+        else if (this._mouseTrackingMode == GDesktopEnums.MagnifierMouseTrackingMode.CENTERED)
             return this._centerFromPointCentered(xMouse, yMouse);
 
         return null; // Should never be hit
@@ -1663,11 +1612,11 @@ class ZoomRegion {
         let xCaret = this._xCaret;
         let yCaret = this._yCaret;
 
-        if (this._caretTrackingMode === GDesktopEnums.MagnifierCaretTrackingMode.PROPORTIONAL)
+        if (this._caretTrackingMode == GDesktopEnums.MagnifierCaretTrackingMode.PROPORTIONAL)
             [xCaret, yCaret] = this._centerFromPointProportional(xCaret, yCaret);
-        else if (this._caretTrackingMode === GDesktopEnums.MagnifierCaretTrackingMode.PUSH)
+        else if (this._caretTrackingMode == GDesktopEnums.MagnifierCaretTrackingMode.PUSH)
             [xCaret, yCaret] = this._centerFromPointPush(xCaret, yCaret);
-        else if (this._caretTrackingMode === GDesktopEnums.MagnifierCaretTrackingMode.CENTERED)
+        else if (this._caretTrackingMode == GDesktopEnums.MagnifierCaretTrackingMode.CENTERED)
             [xCaret, yCaret] = this._centerFromPointCentered(xCaret, yCaret);
 
         this._scrollContentsToDelayed(xCaret, yCaret);
@@ -1677,11 +1626,11 @@ class ZoomRegion {
         let xFocus = this._xFocus;
         let yFocus = this._yFocus;
 
-        if (this._focusTrackingMode === GDesktopEnums.MagnifierFocusTrackingMode.PROPORTIONAL)
+        if (this._focusTrackingMode == GDesktopEnums.MagnifierFocusTrackingMode.PROPORTIONAL)
             [xFocus, yFocus] = this._centerFromPointProportional(xFocus, yFocus);
-        else if (this._focusTrackingMode === GDesktopEnums.MagnifierFocusTrackingMode.PUSH)
+        else if (this._focusTrackingMode == GDesktopEnums.MagnifierFocusTrackingMode.PUSH)
             [xFocus, yFocus] = this._centerFromPointPush(xFocus, yFocus);
-        else if (this._focusTrackingMode === GDesktopEnums.MagnifierFocusTrackingMode.CENTERED)
+        else if (this._focusTrackingMode == GDesktopEnums.MagnifierFocusTrackingMode.CENTERED)
             [xFocus, yFocus] = this._centerFromPointCentered(xFocus, yFocus);
 
         this._scrollContentsToDelayed(xFocus, yFocus);
@@ -1813,9 +1762,9 @@ class ZoomRegion {
         this._background.set_size(global.screen_width, global.screen_height);
         this._updateScreenPosition();
     }
-}
+};
 
-const Crosshairs = GObject.registerClass(
+var Crosshairs = GObject.registerClass(
 class Crosshairs extends Clutter.Actor {
     _init() {
         // Set the group containing the crosshairs to three times the desktop
@@ -1859,18 +1808,18 @@ class Crosshairs extends Clutter.Actor {
     }
 
     /**
-     * Either add the crosshairs actor to the given ZoomRegion, or, if it is
-     * already part of some other ZoomRegion, create a clone of the crosshairs
-     * actor, and add the clone instead.  Returns either the original or the
-     * clone.
-     *
-     * @param {ZoomRegion} zoomRegion The container to add the crosshairs
-     *     group to.
-     * @param {Clutter.Actor} magnifiedMouse The mouse actor for the
-     *     zoom region -- used to position the crosshairs and properly
-     *     layer them below the mouse.
-     * @returns {Clutter.Actor} The crosshairs actor, or its clone.
-     */
+    * addToZoomRegion
+    * Either add the crosshairs actor to the given ZoomRegion, or, if it is
+    * already part of some other ZoomRegion, create a clone of the crosshairs
+    * actor, and add the clone instead.  Returns either the original or the
+    * clone.
+    * @param {ZoomRegion} zoomRegion: The container to add the crosshairs
+    *     group to.
+    * @param {Clutter.Actor} magnifiedMouse: The mouse actor for the
+    *     zoom region -- used to position the crosshairs and properly
+    *     layer them below the mouse.
+    * @returns {Clutter.Actor} The crosshairs actor, or its clone.
+    */
     addToZoomRegion(zoomRegion, magnifiedMouse) {
         let crosshairsActor = null;
         if (zoomRegion && magnifiedMouse) {
@@ -1878,13 +1827,12 @@ class Crosshairs extends Clutter.Actor {
             if (container) {
                 crosshairsActor = this;
                 if (this.get_parent() != null) {
-                    crosshairsActor = new Clutter.Clone({source: this});
+                    crosshairsActor = new Clutter.Clone({ source: this });
                     this._clones.push(crosshairsActor);
 
                     // Clones don't share visibility.
-                    this.bind_property('visible',
-                        crosshairsActor, 'visible',
-                        GObject.BindingFlags.SYNC_CREATE);
+                    this.bind_property('visible', crosshairsActor, 'visible',
+                                       GObject.BindingFlags.SYNC_CREATE);
                 }
 
                 container.add_actor(crosshairsActor);
@@ -1899,15 +1847,13 @@ class Crosshairs extends Clutter.Actor {
 
     /**
      * removeFromParent:
-     *
+     * @param {Clutter.Actor} childActor: the actor returned from
+     *     addToZoomRegion
      * Remove the crosshairs actor from its parent container, or destroy the
      * child actor if it was just a clone of the crosshairs actor.
-     *
-     * @param {Clutter.Actor} childActor the actor returned from
-     *     addToZoomRegion
      */
     removeFromParent(childActor) {
-        if (childActor === this)
+        if (childActor == this)
             childActor.get_parent().remove_actor(childActor);
         else
             childActor.destroy();
@@ -1916,8 +1862,7 @@ class Crosshairs extends Clutter.Actor {
     /**
      * setColor:
      * Set the color of the crosshairs.
-     *
-     *  @param {Clutter.Color} clutterColor The color
+     * @param {Clutter.Color} clutterColor: The color
      */
     setColor(clutterColor) {
         this._horizLeftHair.background_color = clutterColor;
@@ -1929,7 +1874,6 @@ class Crosshairs extends Clutter.Actor {
     /**
      * getColor:
      * Get the color of the crosshairs.
-     *
      * @returns {ClutterColor} the crosshairs color
      */
     getColor() {
@@ -1938,10 +1882,8 @@ class Crosshairs extends Clutter.Actor {
 
     /**
      * setThickness:
-     *
      * Set the width of the vertical and horizontal lines of the crosshairs.
-     *
-     * @param {number} thickness the new thickness value
+     * @param {number} thickness: the new thickness value
      */
     setThickness(thickness) {
         this._horizLeftHair.set_height(thickness);
@@ -1954,7 +1896,6 @@ class Crosshairs extends Clutter.Actor {
     /**
      * getThickness:
      * Get the width of the vertical and horizontal lines of the crosshairs.
-     *
      * @returns {number} The thickness of the crosshairs.
      */
     getThickness() {
@@ -1964,8 +1905,7 @@ class Crosshairs extends Clutter.Actor {
     /**
      * setOpacity:
      * Set how opaque the crosshairs are.
-     *
-     * @param {number} opacity Value between 0 (fully transparent)
+     * @param {number} opacity: Value between 0 (fully transparent)
      *     and 255 (full opaque).
      */
     setOpacity(opacity) {
@@ -1985,8 +1925,7 @@ class Crosshairs extends Clutter.Actor {
     /**
      * setLength:
      * Set the length of the vertical and horizontal lines in the crosshairs.
-     *
-     * @param {number} length The length of the crosshairs.
+     * @param {number} length: The length of the crosshairs.
      */
     setLength(length) {
         this._horizLeftHair.set_width(length);
@@ -1999,7 +1938,6 @@ class Crosshairs extends Clutter.Actor {
     /**
      * getLength:
      * Get the length of the vertical and horizontal lines in the crosshairs.
-     *
      * @returns {number} The length of the crosshairs.
      */
     getLength() {
@@ -2010,8 +1948,7 @@ class Crosshairs extends Clutter.Actor {
      * setClip:
      * Set the width and height of the rectangle that clips the crosshairs at
      * their intersection
-     *
-     * @param {[number, number]} size Array of [width, height] defining the size
+     * @param {number[]} size: Array of [width, height] defining the size
      *     of the clip rectangle.
      */
     setClip(size) {
@@ -2032,8 +1969,7 @@ class Crosshairs extends Clutter.Actor {
      * Reposition the horizontal and vertical hairs such that they cross at
      * the center of crosshairs group.  If called with the dimensions of
      * the clip rectangle, these are used to update the size of the clip.
-     *
-     * @param {[number, number]} [clipSize] If present, the clip's [width, height].
+     * @param {number[]=} clipSize: If present, the clip's [width, height].
      */
     reCenter(clipSize) {
         let [groupWidth, groupHeight] = this.get_size();
@@ -2058,7 +1994,7 @@ class Crosshairs extends Clutter.Actor {
     }
 });
 
-class MagShaderEffects {
+var MagShaderEffects = class MagShaderEffects {
     constructor(uiGroupClone) {
         this._inverse = new Shell.InvertLightnessEffect();
         this._brightnessContrast = new Clutter.BrightnessContrastEffect();
@@ -2090,8 +2026,7 @@ class MagShaderEffects {
     /**
      * setInvertLightness:
      * Enable/disable invert lightness effect.
-     *
-     * @param {boolean} invertFlag Enabled flag.
+     * @param {bool} invertFlag: Enabled flag.
      */
     setInvertLightness(invertFlag) {
         this._inverse.set_enabled(invertFlag);
@@ -2105,8 +2040,7 @@ class MagShaderEffects {
     /**
      * setBrightness:
      * Set the brightness of the magnified view.
-     *
-     * @param {object} brightness Object containing the contrast for the
+     * @param {Object} brightness: Object containing the contrast for the
      *     red, green, and blue channels. Values of 0.0 represent "standard"
      *     brightness (no change), whereas values less or greater than
      *     0.0 indicate decreased or incresaed brightness, respectively.
@@ -2131,8 +2065,7 @@ class MagShaderEffects {
 
     /**
      * Set the contrast of the magnified view.
-     *
-     * @param {object} contrast Object containing the contrast for the
+     * @param {Object} contrast: Object containing the contrast for the
      *     red, green, and blue channels. Values of 0.0 represent "standard"
      *     contrast (no change), whereas values less or greater than
      *     0.0 indicate decreased or incresaed contrast, respectively.
@@ -2157,4 +2090,4 @@ class MagShaderEffects {
             cRed !== NO_CHANGE || cGreen !== NO_CHANGE || cBlue !== NO_CHANGE ||
             bRed !== NO_CHANGE || bGreen !== NO_CHANGE || bBlue !== NO_CHANGE);
     }
-}
+};

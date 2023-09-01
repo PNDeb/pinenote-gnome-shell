@@ -1,27 +1,22 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
+/* exported ShellMountOperation, GnomeShellMountOpHandler */
 
-import Clutter from 'gi://Clutter';
-import Gio from 'gi://Gio';
-import GLib from 'gi://GLib';
-import GObject from 'gi://GObject';
-import Pango from 'gi://Pango';
-import Shell from 'gi://Shell';
-import St from 'gi://St';
+const { Clutter, Gio, GLib, GObject, Pango, Shell, St } = imports.gi;
 
-import * as Animation from './animation.js';
-import * as CheckBox from './checkBox.js';
-import * as Dialog from './dialog.js';
-import * as Main from './main.js';
-import * as MessageTray from './messageTray.js';
-import * as ModalDialog from './modalDialog.js';
-import * as Params from '../misc/params.js';
-import * as ShellEntry from './shellEntry.js';
+const Animation = imports.ui.animation;
+const CheckBox = imports.ui.checkBox;
+const Dialog = imports.ui.dialog;
+const Main = imports.ui.main;
+const MessageTray = imports.ui.messageTray;
+const ModalDialog = imports.ui.modalDialog;
+const Params = imports.misc.params;
+const ShellEntry = imports.ui.shellEntry;
 
-import {loadInterfaceXML} from '../misc/fileUtils.js';
-import {wiggle} from '../misc/animationUtils.js';
+const { loadInterfaceXML } = imports.misc.fileUtils;
+const Util = imports.misc.util;
 
-const LIST_ITEM_ICON_SIZE = 48;
-const WORK_SPINNER_ICON_SIZE = 16;
+var LIST_ITEM_ICON_SIZE = 48;
+var WORK_SPINNER_ICON_SIZE = 16;
 
 const REMEMBER_MOUNT_PASSWORD_KEY = 'remember-mount-password';
 
@@ -54,9 +49,9 @@ function _setLabelsForMessage(content, message) {
 
 /* -------------------------------------------------------- */
 
-export class ShellMountOperation {
+var ShellMountOperation = class {
     constructor(source, params) {
-        params = Params.parse(params, {existingDialog: null});
+        params = Params.parse(params, { existingDialog: null });
 
         this._dialog = null;
         this._existingDialog = params.existingDialog;
@@ -65,15 +60,15 @@ export class ShellMountOperation {
         this.mountOp = new Shell.MountOperation();
 
         this.mountOp.connect('ask-question',
-            this._onAskQuestion.bind(this));
+                             this._onAskQuestion.bind(this));
         this.mountOp.connect('ask-password',
-            this._onAskPassword.bind(this));
+                             this._onAskPassword.bind(this));
         this.mountOp.connect('show-processes-2',
-            this._onShowProcesses2.bind(this));
+                             this._onShowProcesses2.bind(this));
         this.mountOp.connect('aborted',
-            this.close.bind(this));
+                             this.close.bind(this));
         this.mountOp.connect('show-unmount-progress',
-            this._onShowUnmountProgress.bind(this));
+                             this._onShowUnmountProgress.bind(this));
     }
 
     _closeExistingDialog() {
@@ -110,7 +105,7 @@ export class ShellMountOperation {
 
         this._dialog.connectObject('response',
             (object, choice, password, remember, hiddenVolume, systemVolume, pim) => {
-                if (choice === -1) {
+                if (choice == -1) {
                     this.mountOp.reply(Gio.MountOperationResult.ABORTED);
                 } else {
                     if (remember)
@@ -156,7 +151,7 @@ export class ShellMountOperation {
 
             this._processesDialog.connectObject('response',
                 (object, choice) => {
-                    if (choice === -1) {
+                    if (choice == -1) {
                         this.mountOp.reply(Gio.MountOperationResult.ABORTED);
                     } else {
                         this.mountOp.set_choice(choice);
@@ -175,7 +170,7 @@ export class ShellMountOperation {
         if (!this._notifier)
             this._notifier = new ShellUnmountNotifier();
 
-        if (bytesLeft === 0)
+        if (bytesLeft == 0)
             this._notifier.done(message);
         else
             this._notifier.show(message);
@@ -185,9 +180,9 @@ export class ShellMountOperation {
         this._dialog?.disconnectObject(this);
         return this._dialog;
     }
-}
+};
 
-const ShellUnmountNotifier = GObject.registerClass(
+var ShellUnmountNotifier = GObject.registerClass(
 class ShellUnmountNotifier extends MessageTray.Source {
     _init() {
         super._init('', 'media-removable');
@@ -225,11 +220,11 @@ class ShellUnmountNotifier extends MessageTray.Source {
     }
 });
 
-const ShellMountQuestionDialog = GObject.registerClass({
-    Signals: {'response': {param_types: [GObject.TYPE_INT]}},
+var ShellMountQuestionDialog = GObject.registerClass({
+    Signals: { 'response': { param_types: [GObject.TYPE_INT] } },
 }, class ShellMountQuestionDialog extends ModalDialog.ModalDialog {
     _init() {
-        super._init({styleClass: 'mount-question-dialog'});
+        super._init({ styleClass: 'mount-question-dialog' });
 
         this._oldChoices = [];
 
@@ -238,7 +233,7 @@ const ShellMountQuestionDialog = GObject.registerClass({
     }
 
     vfunc_key_release_event(event) {
-        if (event.get_key_symbol() === Clutter.KEY_Escape) {
+        if (event.keyval === Clutter.KEY_Escape) {
             this.emit('response', -1);
             return Clutter.EVENT_STOP;
         }
@@ -253,7 +248,7 @@ const ShellMountQuestionDialog = GObject.registerClass({
     }
 });
 
-const ShellMountPasswordDialog = GObject.registerClass({
+var ShellMountPasswordDialog = GObject.registerClass({
     Signals: {
         'response': {
             param_types: [
@@ -271,13 +266,13 @@ const ShellMountPasswordDialog = GObject.registerClass({
         let strings = message.split('\n');
         let title = strings.shift() || null;
         let description = strings.shift() || null;
-        super._init({styleClass: 'prompt-dialog'});
+        super._init({ styleClass: 'prompt-dialog' });
 
         let disksApp = Shell.AppSystem.get_default().lookup_app('org.gnome.DiskUtility.desktop');
 
-        let content = new Dialog.MessageDialogContent({title, description});
+        let content = new Dialog.MessageDialogContent({ title, description });
 
-        let passwordGridLayout = new Clutter.GridLayout({orientation: Clutter.Orientation.VERTICAL});
+        let passwordGridLayout = new Clutter.GridLayout({ orientation: Clutter.Orientation.VERTICAL });
         let passwordGrid = new St.Widget({
             style_class: 'prompt-dialog-password-grid',
             layout_manager: passwordGridLayout,
@@ -288,17 +283,17 @@ const ShellMountPasswordDialog = GObject.registerClass({
         let curGridRow = 0;
 
         if (flags & Gio.AskPasswordFlags.TCRYPT) {
-            this._hiddenVolume = new CheckBox.CheckBox(_('Hidden Volume'));
+            this._hiddenVolume = new CheckBox.CheckBox(_("Hidden Volume"));
             content.add_child(this._hiddenVolume);
 
-            this._systemVolume = new CheckBox.CheckBox(_('Windows System Volume'));
+            this._systemVolume = new CheckBox.CheckBox(_("Windows System Volume"));
             content.add_child(this._systemVolume);
 
-            this._keyfilesCheckbox = new CheckBox.CheckBox(_('Uses Keyfiles'));
-            this._keyfilesCheckbox.connect('clicked', this._onKeyfilesCheckboxClicked.bind(this));
+            this._keyfilesCheckbox = new CheckBox.CheckBox(_("Uses Keyfiles"));
+            this._keyfilesCheckbox.connect("clicked", this._onKeyfilesCheckboxClicked.bind(this));
             content.add_child(this._keyfilesCheckbox);
 
-            this._keyfilesLabel = new St.Label({visible: false});
+            this._keyfilesLabel = new St.Label({ visible: false });
             if (disksApp) {
                 this._keyfilesLabel.clutter_text.set_markup(
                     /* Translators: %s is the Disks application */
@@ -355,7 +350,7 @@ const ShellMountPasswordDialog = GObject.registerClass({
         }
         curGridRow += 1;
 
-        let warningBox = new St.BoxLayout({vertical: true});
+        let warningBox = new St.BoxLayout({ vertical: true });
 
         let capsLockWarning = new ShellEntry.CapsLockWarning();
         warningBox.add_child(capsLockWarning);
@@ -373,7 +368,7 @@ const ShellMountPasswordDialog = GObject.registerClass({
         content.add_child(passwordGrid);
 
         if (flags & Gio.AskPasswordFlags.SAVING_SUPPORTED) {
-            this._rememberChoice = new CheckBox.CheckBox(_('Remember Password'));
+            this._rememberChoice = new CheckBox.CheckBox(_("Remember Password"));
             this._rememberChoice.checked =
                 global.settings.get_boolean(REMEMBER_MOUNT_PASSWORD_KEY);
             content.add_child(this._rememberChoice);
@@ -384,17 +379,17 @@ const ShellMountPasswordDialog = GObject.registerClass({
         this.contentLayout.add_child(content);
 
         this._defaultButtons = [{
-            label: _('Cancel'),
+            label: _("Cancel"),
             action: this._onCancelButton.bind(this),
             key: Clutter.KEY_Escape,
         }, {
-            label: _('Unlock'),
+            label: _("Unlock"),
             action: this._onUnlockButton.bind(this),
             default: true,
         }];
 
         this._usesKeyfilesButtons = [{
-            label: _('Cancel'),
+            label: _("Cancel"),
             action: this._onCancelButton.bind(this),
             key: Clutter.KEY_Escape,
         }];
@@ -420,7 +415,7 @@ const ShellMountPasswordDialog = GObject.registerClass({
         this._errorMessageLabel.text = _('Sorry, that didn’t work. Please try again.');
         this._errorMessageLabel.opacity = 255;
 
-        wiggle(this._passwordEntry);
+        Util.wiggle(this._passwordEntry);
     }
 
     _onCancelButton() {
@@ -474,11 +469,11 @@ const ShellMountPasswordDialog = GObject.registerClass({
     }
 });
 
-const ShellProcessesDialog = GObject.registerClass({
-    Signals: {'response': {param_types: [GObject.TYPE_INT]}},
+var ShellProcessesDialog = GObject.registerClass({
+    Signals: { 'response': { param_types: [GObject.TYPE_INT] } },
 }, class ShellProcessesDialog extends ModalDialog.ModalDialog {
     _init() {
-        super._init({styleClass: 'processes-dialog'});
+        super._init({ styleClass: 'processes-dialog' });
 
         this._oldChoices = [];
 
@@ -491,7 +486,7 @@ const ShellProcessesDialog = GObject.registerClass({
     }
 
     vfunc_key_release_event(event) {
-        if (event.get_key_symbol() === Clutter.KEY_Escape) {
+        if (event.keyval === Clutter.KEY_Escape) {
             this.emit('response', -1);
             return Clutter.EVENT_STOP;
         }
@@ -531,21 +526,19 @@ const ShellProcessesDialog = GObject.registerClass({
 
 const GnomeShellMountOpIface = loadInterfaceXML('org.Gtk.MountOperationHandler');
 
-/** @enum {number} */
-const ShellMountOperationType = {
+var ShellMountOperationType = {
     NONE: 0,
     ASK_PASSWORD: 1,
     ASK_QUESTION: 2,
     SHOW_PROCESSES: 3,
 };
 
-export class GnomeShellMountOpHandler {
+var GnomeShellMountOpHandler = class {
     constructor() {
         this._dbusImpl = Gio.DBusExportedObject.wrapJSObject(GnomeShellMountOpIface, this);
         this._dbusImpl.export(Gio.DBus.session, '/org/gtk/MountOperationHandler');
-        Gio.bus_own_name_on_connection(Gio.DBus.session,
-            'org.gtk.MountOperationHandler',
-            Gio.BusNameOwnerFlags.REPLACE, null, null);
+        Gio.bus_own_name_on_connection(Gio.DBus.session, 'org.gtk.MountOperationHandler',
+                                       Gio.BusNameOwnerFlags.REPLACE, null, null);
 
         this._dialog = null;
 
@@ -578,7 +571,7 @@ export class GnomeShellMountOpHandler {
         this._currentId = requestId;
         this._currentType = type;
 
-        if (this._dialog && (oldId === requestId) && (oldType === type))
+        if (this._dialog && (oldId == requestId) && (oldType == type))
             return true;
 
         return false;
@@ -592,12 +585,7 @@ export class GnomeShellMountOpHandler {
     }
 
     /**
-     * The dialog will stay visible until clients call the Close() method, or
-     * another dialog becomes visible.
-     * Calling AskPassword again for the same id will have the effect to clear
-     * the existing dialog and update it with a message indicating the previous
-     * attempt went wrong.
-     *
+     * AskPassword:
      * @param {Array} params
      *   {string} id: an opaque ID identifying the object for which
      *       the operation is requested
@@ -614,6 +602,12 @@ export class GnomeShellMountOpHandler {
      *   - "password_save" -> (u): a GPasswordSave
      * @param {Gio.DBusMethodInvocation} invocation
      *      The ID must be unique in the context of the calling process.
+     *
+     * The dialog will stay visible until clients call the Close() method, or
+     * another dialog becomes visible.
+     * Calling AskPassword again for the same id will have the effect to clear
+     * the existing dialog and update it with a message indicating the previous
+     * attempt went wrong.
      */
     AskPasswordAsync(params, invocation) {
         let [id, message, iconName_, defaultUser_, defaultDomain_, flags] = params;
@@ -631,7 +625,7 @@ export class GnomeShellMountOpHandler {
                 let details = {};
                 let response;
 
-                if (choice === -1) {
+                if (choice == -1) {
                     response = Gio.MountOperationResult.ABORTED;
                 } else {
                     response = Gio.MountOperationResult.HANDLED;
@@ -650,11 +644,7 @@ export class GnomeShellMountOpHandler {
     }
 
     /**
-     * The dialog will stay visible until clients call the Close() method, or
-     * another dialog becomes visible.
-     * Calling AskQuestion again for the same id will have the effect to clear
-     * update the dialog with the new question.
-     *
+     * AskQuestion:
      * @param {Array} params - params
      *   {string} id: an opaque ID identifying the object for which
      *       the operation is requested
@@ -663,6 +653,11 @@ export class GnomeShellMountOpHandler {
      *   {string} icon_name: the name of an icon to display
      *   {string[]} choices: an array of choice strings
      * @param {Gio.DBusMethodInvocation} invocation - invocation
+     *
+     * The dialog will stay visible until clients call the Close() method, or
+     * another dialog becomes visible.
+     * Calling AskQuestion again for the same id will have the effect to clear
+     * update the dialog with the new question.
      */
     AskQuestionAsync(params, invocation) {
         let [id, message, iconName_, choices] = params;
@@ -679,7 +674,7 @@ export class GnomeShellMountOpHandler {
             let response;
             let details = {};
 
-            if (choice === -1) {
+            if (choice == -1) {
                 response = Gio.MountOperationResult.ABORTED;
             } else {
                 response = Gio.MountOperationResult.HANDLED;
@@ -694,12 +689,7 @@ export class GnomeShellMountOpHandler {
     }
 
     /**
-     * The dialog will stay visible until clients call the Close() method, or
-     * another dialog becomes visible.
-     * Calling ShowProcesses again for the same id will have the effect to clear
-     * the existing dialog and update it with the new message and the new list
-     * of processes.
-     *
+     * ShowProcesses:
      * @param {Array} params - params
      *   {string} id: an opaque ID identifying the object for which
      *       the operation is requested
@@ -709,6 +699,12 @@ export class GnomeShellMountOpHandler {
      *   {number[]} application_pids: the PIDs of the applications to display
      *   {string[]} choices: an array of choice strings
      * @param {Gio.DBusMethodInvocation} invocation - invocation
+     *
+     * The dialog will stay visible until clients call the Close() method, or
+     * another dialog becomes visible.
+     * Calling ShowProcesses again for the same id will have the effect to clear
+     * the existing dialog and update it with the new message and the new list
+     * of processes.
      */
     ShowProcessesAsync(params, invocation) {
         let [id, message, iconName_, applicationPids, choices] = params;
@@ -725,7 +721,7 @@ export class GnomeShellMountOpHandler {
             let response;
             let details = {};
 
-            if (choice === -1) {
+            if (choice == -1) {
                 response = Gio.MountOperationResult.ABORTED;
             } else {
                 response = Gio.MountOperationResult.HANDLED;
@@ -740,14 +736,15 @@ export class GnomeShellMountOpHandler {
     }
 
     /**
-     * Closes a dialog previously opened by AskPassword, AskQuestion or ShowProcesses.
-     * If no dialog is open, does nothing.
-     *
+     * Close:
      * @param {Array} _params - params
      * @param {Gio.DBusMethodInvocation} _invocation - invocation
+     *
+     * Closes a dialog previously opened by AskPassword, AskQuestion or ShowProcesses.
+     * If no dialog is open, does nothing.
      */
     Close(_params, _invocation) {
         this._clearCurrentRequest(Gio.MountOperationResult.UNHANDLED, {});
         this._closeDialog();
     }
-}
+};

@@ -26,8 +26,6 @@ configure_file(
   install_dir: pkgdatadir,
 )
 
-subdir('misc')
-
 gnome.compile_resources(
   app_id + '.src',
   configure_file(
@@ -35,7 +33,7 @@ gnome.compile_resources(
     output: app_id + '.src.gresource.xml',
     configuration: {'profile': '/'.join(profile.split('.')) },
   ),
-  source_dir: ['.', meson.current_build_dir(), '../../../js'],
+  source_dir: ['.', '../../../js'],
   gresource_bundle: true,
   install: true,
   install_dir: pkgdatadir

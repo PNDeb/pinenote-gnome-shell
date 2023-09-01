@@ -1,12 +1,12 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
+/* exported WindowAttentionHandler */
 
-import GObject from 'gi://GObject';
-import Shell from 'gi://Shell';
+const { GObject, Shell } = imports.gi;
 
-import * as Main from './main.js';
-import * as MessageTray from './messageTray.js';
+const Main = imports.ui.main;
+const MessageTray = imports.ui.messageTray;
 
-export class WindowAttentionHandler {
+var WindowAttentionHandler = class {
     constructor() {
         this._tracker = Shell.WindowTracker.get_default();
         global.display.connectObject(
@@ -17,7 +17,7 @@ export class WindowAttentionHandler {
 
     _getTitleAndBanner(app, window) {
         let title = app.get_name();
-        let banner = _('“%s” is ready').format(window.get_title());
+        let banner = _("“%s” is ready").format(window.get_title());
         return [title, banner];
     }
 
@@ -52,9 +52,9 @@ export class WindowAttentionHandler {
             notification.update(title, banner);
         }, source);
     }
-}
+};
 
-const WindowAttentionSource = GObject.registerClass(
+var WindowAttentionSource = GObject.registerClass(
 class WindowAttentionSource extends MessageTray.Source {
     _init(app, window) {
         this._window = window;

@@ -1,12 +1,11 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
+/* exported Indicator */
 
-import Gio from 'gi://Gio';
-import GLib from 'gi://GLib';
-import GObject from 'gi://GObject';
+const {Gio, GLib, GObject} = imports.gi;
 
-import {QuickToggle, SystemIndicator} from '../quickSettings.js';
+const {QuickToggle, SystemIndicator} = imports.ui.quickSettings;
 
-import {loadInterfaceXML} from '../../misc/fileUtils.js';
+const {loadInterfaceXML} = imports.misc.fileUtils;
 
 const BUS_NAME = 'org.gnome.SettingsDaemon.Rfkill';
 const OBJECT_PATH = '/org/gnome/SettingsDaemon/Rfkill';
@@ -81,12 +80,8 @@ const RfkillManager = GObject.registerClass({
     }
 });
 
-let _manager;
-
-/**
- * @returns {RfkillManager}
- */
-export function getRfkillManager() {
+var _manager;
+function getRfkillManager() {
     if (_manager != null)
         return _manager;
 
@@ -115,7 +110,7 @@ class RfkillToggle extends QuickToggle {
     }
 });
 
-export const Indicator = GObject.registerClass(
+var Indicator = GObject.registerClass(
 class Indicator extends SystemIndicator {
     _init() {
         super._init();

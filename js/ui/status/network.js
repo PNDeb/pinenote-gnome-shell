@@ -1,25 +1,18 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
+/* exported Indicator */
+const {Atk, Clutter, Gio, GLib, GObject, NM, Polkit, St} = imports.gi;
 
-import Atk from 'gi://Atk';
-import Clutter from 'gi://Clutter';
-import Gio from 'gi://Gio';
-import GLib from 'gi://GLib';
-import GObject from 'gi://GObject';
-import NM from 'gi://NM';
-import Polkit from 'gi://Polkit';
-import St from 'gi://St';
+const Main = imports.ui.main;
+const PopupMenu = imports.ui.popupMenu;
+const MessageTray = imports.ui.messageTray;
+const ModemManager = imports.misc.modemManager;
+const Util = imports.misc.util;
 
-import * as Main from '../main.js';
-import * as PopupMenu from '../popupMenu.js';
-import * as MessageTray from '../messageTray.js';
-import * as ModemManager from '../../misc/modemManager.js';
-import * as Util from '../../misc/util.js';
+const {Spinner} = imports.ui.animation;
+const {QuickMenuToggle, SystemIndicator} = imports.ui.quickSettings;
 
-import {Spinner} from '../animation.js';
-import {QuickMenuToggle, SystemIndicator} from '../quickSettings.js';
-
-import {loadInterfaceXML} from '../../misc/fileUtils.js';
-import {registerDestroyableType} from '../../misc/signalTracker.js';
+const {loadInterfaceXML} = imports.misc.fileUtils;
+const {registerDestroyableType} = imports.misc.signalTracker;
 
 Gio._promisify(Gio.DBusConnection.prototype, 'call');
 Gio._promisify(NM.Client, 'new_async');
@@ -32,8 +25,7 @@ const MAX_VISIBLE_NETWORKS = 8;
 // small optimization, to avoid using [] all the time
 const NM80211Mode = NM['80211Mode'];
 
-/** @enum {number} */
-const PortalHelperResult = {
+var PortalHelperResult = {
     CANCELLED: 0,
     COMPLETED: 1,
     RECHECK: 2,
@@ -58,7 +50,7 @@ function signalToIcon(value) {
 function ssidToLabel(ssid) {
     let label = NM.utils_ssid_to_utf8(ssid.get_data());
     if (!label)
-        label = _('<unknown>');
+        label = _("<unknown>");
     return label;
 }
 
@@ -245,6 +237,7 @@ const NMSectionItem = GObject.registerClass({
 
         // Turn into an empty container with no padding
         this.styleClass = '';
+        this.setOrnament(PopupMenu.Ornament.HIDDEN);
 
         // Add intermediate section; we need this for submenu support
         this._mainSection = new PopupMenu.PopupMenuSection();
@@ -359,6 +352,11 @@ class NMConnectionItem extends NMMenuItem {
         this._sync();
     }
 
+    _updateOrnament() {
+        this.setOrnament(this.radio_mode && this.is_active
+            ? PopupMenu.Ornament.DOT : PopupMenu.Ornament.NONE);
+    }
+
     _getAccessibleName() {
         return this.is_active
             // Translators: %s is a device name like "MyPhone"
@@ -378,14 +376,12 @@ class NMConnectionItem extends NMMenuItem {
             this._subtitle.text = null;
             this.accessible_name = this.name;
             this.accessible_role = Atk.Role.CHECK_MENU_ITEM;
-            this.setOrnament(this.is_active
-                ? PopupMenu.Ornament.DOT : PopupMenu.Ornament.NONE);
         } else {
             this.accessible_name = this._getAccessibleName();
             this._subtitle.text = this._getSubtitleLabel();
             this.accessible_role = Atk.Role.MENU_ITEM;
-            this.setOrnament(PopupMenu.Ornament.HIDDEN);
         }
+        this._updateOrnament();
     }
 
     activate() {
@@ -658,7 +654,7 @@ class NMModemDeviceItem extends NMDeviceItem {
         this._mobileDevice = null;
 
         let capabilities = device.current_capabilities;
-        if (device.udi.indexOf('/org/freedesktop/ModemManager1/Modem') === 0)
+        if (device.udi.indexOf('/org/freedesktop/ModemManager1/Modem') == 0)
             this._mobileDevice = new ModemManager.BroadbandModem(device.udi, capabilities);
         else if (capabilities & NM.DeviceModemCapabilities.GSM_UMTS)
             this._mobileDevice = new ModemManager.ModemGsm(device.udi);
@@ -1935,7 +1931,7 @@ class NMModemToggle extends NMDeviceToggle {
     }
 });
 
-export const Indicator = GObject.registerClass(
+var Indicator = GObject.registerClass(
 class Indicator extends SystemIndicator {
     _init() {
         super._init();
@@ -2073,14 +2069,14 @@ class Indicator extends SystemIndicator {
     async _portalHelperDone(parameters) {
         let [path, result] = parameters;
 
-        if (result === PortalHelperResult.CANCELLED) {
+        if (result == PortalHelperResult.CANCELLED) {
             // Keep the connection in the queue, so the user is not
             // spammed with more logins until we next flush the queue,
             // which will happen once they choose a better connection
             // or we get to full connectivity through other means
-        } else if (result === PortalHelperResult.COMPLETED) {
+        } else if (result == PortalHelperResult.COMPLETED) {
             this._closeConnectivityCheck(path);
-        } else if (result === PortalHelperResult.RECHECK) {
+        } else if (result == PortalHelperResult.RECHECK) {
             try {
                 const state = await this._client.check_connectivity_async(null);
                 if (state >= NM.ConnectivityState.FULL)
@@ -2093,12 +2089,12 @@ class Indicator extends SystemIndicator {
 
     async _syncConnectivity() {
         if (this._mainConnection == null ||
-            this._mainConnection.state !== NM.ActiveConnectionState.ACTIVATED) {
+            this._mainConnection.state != NM.ActiveConnectionState.ACTIVATED) {
             this._flushConnectivityQueue();
             return;
         }
 
-        let isPortal = this._client.connectivity === NM.ConnectivityState.PORTAL;
+        let isPortal = this._client.connectivity == NM.ConnectivityState.PORTAL;
         // For testing, allow interpreting any value != FULL as PORTAL, because
         // LIMITED (no upstream route after the default gateway) is easy to obtain
         // with a tethered phone

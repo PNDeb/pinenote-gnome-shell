@@ -28,6 +28,8 @@
 #include <meta-test/meta-context-test.h>
 #include <meta/meta-backend.h>
 
+#include <gtk/gtk.h>
+
 static ClutterActor *stage;
 static StThemeNode *root;
 static StThemeNode *group1;
@@ -546,6 +548,8 @@ main (int argc, char **argv)
   PangoFontDescription *font_desc;
   GFile *file;
   g_autofree char *cwd = NULL;
+
+  gtk_init (&argc, &argv);
 
   /* meta_init() cds to $HOME */
   cwd = g_get_current_dir ();

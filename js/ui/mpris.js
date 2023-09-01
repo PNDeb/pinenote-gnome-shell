@@ -1,13 +1,11 @@
-import Gio from 'gi://Gio';
-import GObject from 'gi://GObject';
-import Shell from 'gi://Shell';
-import St from 'gi://St';
-import * as Signals from '../misc/signals.js';
+/* exported MediaSection */
+const { Gio, GObject, Shell, St } = imports.gi;
+const Signals = imports.misc.signals;
 
-import * as Main from './main.js';
-import * as MessageList from './messageList.js';
+const Main = imports.ui.main;
+const MessageList = imports.ui.messageList;
 
-import {loadInterfaceXML} from '../misc/fileUtils.js';
+const { loadInterfaceXML } = imports.misc.fileUtils;
 
 const DBusIface = loadInterfaceXML('org.freedesktop.DBus');
 const DBusProxy = Gio.DBusProxy.makeProxyWrapper(DBusIface);
@@ -20,14 +18,14 @@ const MprisPlayerProxy = Gio.DBusProxy.makeProxyWrapper(MprisPlayerIface);
 
 const MPRIS_PLAYER_PREFIX = 'org.mpris.MediaPlayer2.';
 
-export const MediaMessage = GObject.registerClass(
+var MediaMessage = GObject.registerClass(
 class MediaMessage extends MessageList.Message {
     _init(player) {
         super._init('', '');
 
         this._player = player;
 
-        this._icon = new St.Icon({style_class: 'media-message-cover-icon'});
+        this._icon = new St.Icon({ style_class: 'media-message-cover-icon' });
         this.setIcon(this._icon);
 
         // reclaim space used by unused elements
@@ -70,17 +68,14 @@ class MediaMessage extends MessageList.Message {
 
         if (this._player.trackCoverUrl) {
             let file = Gio.File.new_for_uri(this._player.trackCoverUrl);
-            this._icon.gicon = new Gio.FileIcon({file});
+            this._icon.gicon = new Gio.FileIcon({ file });
             this._icon.remove_style_class_name('fallback');
-        } else if (this._player.app) {
-            this._icon.gicon = this._player.app.icon;
-            this._icon.add_style_class_name('fallback');
         } else {
             this._icon.icon_name = 'audio-x-generic-symbolic';
             this._icon.add_style_class_name('fallback');
         }
 
-        let isPlaying = this._player.status === 'Playing';
+        let isPlaying = this._player.status == 'Playing';
         let iconName = isPlaying
             ? 'media-playback-pause-symbolic'
             : 'media-playback-start-symbolic';
@@ -91,7 +86,7 @@ class MediaMessage extends MessageList.Message {
     }
 });
 
-export class MprisPlayer extends Signals.EventEmitter {
+var MprisPlayer = class MprisPlayer extends Signals.EventEmitter {
     constructor(busName) {
         super();
 
@@ -125,10 +120,6 @@ export class MprisPlayer extends Signals.EventEmitter {
         return this._trackCoverUrl;
     }
 
-    get app() {
-        return this._app;
-    }
-
     playPause() {
         this._playerProxy.PlayPauseAsync().catch(logError);
     }
@@ -152,8 +143,14 @@ export class MprisPlayer extends Signals.EventEmitter {
     raise() {
         // The remote Raise() method may run into focus stealing prevention,
         // so prefer activating the app via .desktop file if possible
-        if (this._app)
-            this._app.activate();
+        let app = null;
+        if (this._mprisProxy.DesktopEntry) {
+            let desktopId = `${this._mprisProxy.DesktopEntry}.desktop`;
+            app = Shell.AppSystem.get_default().lookup_app(desktopId);
+        }
+
+        if (app)
+            app.activate();
         else if (this._mprisProxy.CanRaise)
             this._mprisProxy.RaiseAsync().catch(logError);
     }
@@ -202,7 +199,7 @@ export class MprisPlayer extends Signals.EventEmitter {
                     this._busName}; expected an array of strings, got ${
                     this._trackArtists} (${typeof this._trackArtists})`);
             }
-            this._trackArtists =  [_('Unknown artist')];
+            this._trackArtists =  [_("Unknown artist")];
         }
 
         this._trackTitle = metadata['xesam:title'];
@@ -212,7 +209,7 @@ export class MprisPlayer extends Signals.EventEmitter {
                     this._busName}; expected a string, got ${
                     this._trackTitle} (${typeof this._trackTitle})`);
             }
-            this._trackTitle = _('Unknown title');
+            this._trackTitle = _("Unknown title");
         }
 
         this._trackCoverUrl = metadata['mpris:artUrl'];
@@ -225,18 +222,11 @@ export class MprisPlayer extends Signals.EventEmitter {
             this._trackCoverUrl = '';
         }
 
-        if (this._mprisProxy.DesktopEntry) {
-            const desktopId = `${this._mprisProxy.DesktopEntry}.desktop`;
-            this._app = Shell.AppSystem.get_default().lookup_app(desktopId);
-        } else {
-            this._app = null;
-        }
-
         this.emit('changed');
 
         let visible = this._playerProxy.CanPlay;
 
-        if (this._visible !== visible) {
+        if (this._visible != visible) {
             this._visible = visible;
             if (visible)
                 this.emit('show');
@@ -244,9 +234,9 @@ export class MprisPlayer extends Signals.EventEmitter {
                 this.emit('hide');
         }
     }
-}
+};
 
-export const MediaSection = GObject.registerClass(
+var MediaSection = GObject.registerClass(
 class MediaSection extends MessageList.MessageListSection {
     _init() {
         super._init();
@@ -254,9 +244,9 @@ class MediaSection extends MessageList.MessageListSection {
         this._players = new Map();
 
         this._proxy = new DBusProxy(Gio.DBus.session,
-            'org.freedesktop.DBus',
-            '/org/freedesktop/DBus',
-            this._onProxyReady.bind(this));
+                                    'org.freedesktop.DBus',
+                                    '/org/freedesktop/DBus',
+                                    this._onProxyReady.bind(this));
     }
 
     get allowed() {
@@ -294,7 +284,7 @@ class MediaSection extends MessageList.MessageListSection {
             this._addPlayer(name);
         });
         this._proxy.connectSignal('NameOwnerChanged',
-            this._onNameOwnerChanged.bind(this));
+                                  this._onNameOwnerChanged.bind(this));
     }
 
     _onNameOwnerChanged(proxy, sender, [name, oldOwner, newOwner]) {

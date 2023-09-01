@@ -1,18 +1,16 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
+/* exported WorkspaceSwitcherPopup */
 
-import Clutter from 'gi://Clutter';
-import GLib from 'gi://GLib';
-import GObject from 'gi://GObject';
-import St from 'gi://St';
+const { Clutter, GLib, GObject, St } = imports.gi;
 
-import * as Layout from './layout.js';
-import * as Main from './main.js';
+const Layout = imports.ui.layout;
+const Main = imports.ui.main;
 
-const ANIMATION_TIME = 100;
-const DISPLAY_TIMEOUT = 600;
+var ANIMATION_TIME = 100;
+var DISPLAY_TIMEOUT = 600;
 
 
-export const WorkspaceSwitcherPopup = GObject.registerClass(
+var WorkspaceSwitcherPopup = GObject.registerClass(
 class WorkspaceSwitcherPopup extends Clutter.Actor {
     _init() {
         super._init({
@@ -23,7 +21,7 @@ class WorkspaceSwitcherPopup extends Clutter.Actor {
             y_align: Clutter.ActorAlign.END,
         });
 
-        const constraint = new Layout.MonitorConstraint({primary: true});
+        const constraint = new Layout.MonitorConstraint({ primary: true });
         this.add_constraint(constraint);
 
         Main.uiGroup.add_actor(this);
@@ -68,7 +66,7 @@ class WorkspaceSwitcherPopup extends Clutter.Actor {
         this._activeWorkspaceIndex = activeWorkspaceIndex;
 
         this._redisplay();
-        if (this._timeoutId !== 0)
+        if (this._timeoutId != 0)
             GLib.source_remove(this._timeoutId);
         this._timeoutId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, DISPLAY_TIMEOUT, this._onTimeout.bind(this));
         GLib.Source.set_name_by_id(this._timeoutId, '[gnome-shell] this._onTimeout');

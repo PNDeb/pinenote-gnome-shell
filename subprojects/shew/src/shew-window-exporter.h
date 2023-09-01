@@ -35,5 +35,4 @@ char *shew_window_exporter_export_finish (ShewWindowExporter  *exporter,
                                           GAsyncResult        *result,
                                           GError             **error);
 
-void shew_window_exporter_unexport (ShewWindowExporter *exporter,
-                                    const char         *handle);
+void shew_window_exporter_unexport (ShewWindowExporter *exporter);

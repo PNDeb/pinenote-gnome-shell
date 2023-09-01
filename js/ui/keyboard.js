@@ -1,27 +1,21 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
-import Clutter from 'gi://Clutter';
-import Gio from 'gi://Gio';
-import GLib from 'gi://GLib';
-import GObject from 'gi://GObject';
-import Meta from 'gi://Meta';
-import Graphene from 'gi://Graphene';
-import IBus from 'gi://IBus';
-import Shell from 'gi://Shell';
-import St from 'gi://St';
-import * as Signals from '../misc/signals.js';
+/* exported KeyboardManager */
 
-import * as EdgeDragAction from './edgeDragAction.js';
-import * as InputSourceManager from './status/keyboard.js';
-import * as IBusManager from '../misc/ibusManager.js';
-import * as BoxPointer from './boxpointer.js';
-import * as Main from './main.js';
-import * as PageIndicators from './pageIndicators.js';
-import * as PopupMenu from './popupMenu.js';
-import * as SwipeTracker from './swipeTracker.js';
+const {Clutter, Gio, GLib, GObject, Graphene, IBus, Meta, Shell, St} = imports.gi;
+const Signals = imports.misc.signals;
 
-const KEYBOARD_ANIMATION_TIME = 150;
-const KEYBOARD_REST_TIME = KEYBOARD_ANIMATION_TIME * 2;
-const KEY_LONG_PRESS_TIME = 250;
+const EdgeDragAction = imports.ui.edgeDragAction;
+const InputSourceManager = imports.ui.status.keyboard;
+const IBusManager = imports.misc.ibusManager;
+const BoxPointer = imports.ui.boxpointer;
+const Main = imports.ui.main;
+const PageIndicators = imports.ui.pageIndicators;
+const PopupMenu = imports.ui.popupMenu;
+const SwipeTracker = imports.ui.swipeTracker;
+
+var KEYBOARD_ANIMATION_TIME = 150;
+var KEYBOARD_REST_TIME = KEYBOARD_ANIMATION_TIME * 2;
+var KEY_LONG_PRESS_TIME = 250;
 
 const A11Y_APPLICATIONS_SCHEMA = 'org.gnome.desktop.a11y.applications';
 const SHOW_KEYBOARD = 'screen-keyboard-enabled';
@@ -33,7 +27,7 @@ const KEY_SIZE = 2;
 const KEY_RELEASE_TIMEOUT = 50;
 const BACKSPACE_WORD_DELETE_THRESHOLD = 50;
 
-const AspectContainer = GObject.registerClass(
+var AspectContainer = GObject.registerClass(
 class AspectContainer extends St.Widget {
     _init(params) {
         super._init(params);
@@ -80,7 +74,7 @@ class AspectContainer extends St.Widget {
     }
 });
 
-const KeyContainer = GObject.registerClass(
+var KeyContainer = GObject.registerClass(
 class KeyContainer extends St.Widget {
     _init() {
         const gridLayout = new Clutter.GridLayout({
@@ -137,7 +131,7 @@ class KeyContainer extends St.Widget {
             let row = this._rows[i];
 
             /* When starting a new row, see if we need some padding */
-            if (nCol === 0) {
+            if (nCol == 0) {
                 let diff = this._maxCols - row.width;
                 if (diff >= 1)
                     nCol = diff * KEY_SIZE / 2;
@@ -164,7 +158,7 @@ class KeyContainer extends St.Widget {
     }
 });
 
-const Suggestions = GObject.registerClass(
+var Suggestions = GObject.registerClass(
 class Suggestions extends St.BoxLayout {
     _init() {
         super._init({
@@ -176,7 +170,7 @@ class Suggestions extends St.BoxLayout {
     }
 
     add(word, callback) {
-        let button = new St.Button({label: word});
+        let button = new St.Button({ label: word });
         button.connect('button-press-event', () => {
             callback();
             return Clutter.EVENT_STOP;
@@ -201,7 +195,7 @@ class Suggestions extends St.BoxLayout {
     }
 });
 
-class LanguageSelectionPopup extends PopupMenu.PopupMenu {
+var LanguageSelectionPopup = class extends PopupMenu.PopupMenu {
     constructor(actor) {
         super(actor, 0.5, St.Side.BOTTOM);
 
@@ -238,7 +232,7 @@ class LanguageSelectionPopup extends PopupMenu.PopupMenu {
             this.actor.contains(targetActor))
             return Clutter.EVENT_PROPAGATE;
 
-        if (event.type() === Clutter.EventType.BUTTON_RELEASE || event.type() === Clutter.EventType.TOUCH_END)
+        if (event.type() == Clutter.EventType.BUTTON_RELEASE || event.type() == Clutter.EventType.TOUCH_END)
             this.close(true);
 
         return Clutter.EVENT_STOP;
@@ -260,9 +254,9 @@ class LanguageSelectionPopup extends PopupMenu.PopupMenu {
         this.sourceActor.disconnectObject(this);
         super.destroy();
     }
-}
+};
 
-const Key = GObject.registerClass({
+var Key = GObject.registerClass({
     Signals: {
         'long-press': {},
         'pressed': {},
@@ -272,7 +266,7 @@ const Key = GObject.registerClass({
 }, class Key extends St.BoxLayout {
     _init(params, extendedKeys = []) {
         const {label, iconName, commitString, keyval} = {keyval: 0, ...params};
-        super._init({style_class: 'key-container'});
+        super._init({ style_class: 'key-container' });
 
         this._keyval = parseInt(keyval, 16);
         this.keyButton = this._makeKey(commitString, label, iconName);
@@ -355,7 +349,7 @@ const Key = GObject.registerClass({
     }
 
     _release(button, commitString) {
-        if (this._pressTimeoutId !== 0) {
+        if (this._pressTimeoutId != 0) {
             GLib.source_remove(this._pressTimeoutId);
             this._pressTimeoutId = 0;
         }
@@ -376,7 +370,7 @@ const Key = GObject.registerClass({
     }
 
     cancel() {
-        if (this._pressTimeoutId !== 0) {
+        if (this._pressTimeoutId != 0) {
             GLib.source_remove(this._pressTimeoutId);
             this._pressTimeoutId = 0;
         }
@@ -387,8 +381,8 @@ const Key = GObject.registerClass({
 
     _onCapturedEvent(actor, event) {
         let type = event.type();
-        let press = type === Clutter.EventType.BUTTON_PRESS || type === Clutter.EventType.TOUCH_BEGIN;
-        let release = type === Clutter.EventType.BUTTON_RELEASE || type === Clutter.EventType.TOUCH_END;
+        let press = type == Clutter.EventType.BUTTON_PRESS || type == Clutter.EventType.TOUCH_BEGIN;
+        let release = type == Clutter.EventType.BUTTON_RELEASE || type == Clutter.EventType.TOUCH_END;
         const targetActor = global.stage.get_event_actor(event);
 
         if (targetActor === this._boxPointer.bin ||
@@ -463,7 +457,7 @@ const Key = GObject.registerClass({
             const slot = event.get_event_sequence().get_slot();
 
             if (!this._touchPressSlot &&
-                event.type() === Clutter.EventType.TOUCH_BEGIN) {
+                event.type() == Clutter.EventType.TOUCH_BEGIN) {
                 this._touchPressSlot = slot;
                 this._press(button, commitString);
                 button.add_style_pseudo_class('active');
@@ -518,7 +512,7 @@ const Key = GObject.registerClass({
     }
 });
 
-class KeyboardModel {
+var KeyboardModel = class {
     constructor(groupName) {
         let names = [groupName];
         if (groupName.includes('+'))
@@ -548,11 +542,11 @@ class KeyboardModel {
     }
 
     getKeysForLevel(levelName) {
-        return this._model.levels.find(level => level === levelName);
+        return this._model.levels.find(level => level == levelName);
     }
-}
+};
 
-class FocusTracker extends Signals.EventEmitter {
+var FocusTracker = class extends Signals.EventEmitter {
     constructor() {
         super();
 
@@ -649,9 +643,9 @@ class FocusTracker extends Signals.EventEmitter {
 
         return rect;
     }
-}
+};
 
-const EmojiPager = GObject.registerClass({
+var EmojiPager = GObject.registerClass({
     Properties: {
         'delta': GObject.ParamSpec.int(
             'delta', 'delta', 'delta',
@@ -659,7 +653,7 @@ const EmojiPager = GObject.registerClass({
             GLib.MININT32, GLib.MAXINT32, 0),
     },
     Signals: {
-        'emoji': {param_types: [GObject.TYPE_STRING]},
+        'emoji': { param_types: [GObject.TYPE_STRING] },
         'page-changed': {
             param_types: [GObject.TYPE_INT, GObject.TYPE_INT, GObject.TYPE_INT],
         },
@@ -711,7 +705,7 @@ const EmojiPager = GObject.registerClass({
     }
 
     set delta(value) {
-        if (this._delta === value)
+        if (this._delta == value)
             return;
 
         this._delta = value;
@@ -719,7 +713,7 @@ const EmojiPager = GObject.registerClass({
 
         let followingPage = this.getFollowingPage();
 
-        if (this._followingPage !== followingPage) {
+        if (this._followingPage != followingPage) {
             if (this._followingPanel) {
                 this._followingPanel.destroy();
                 this._followingPanel = null;
@@ -756,7 +750,7 @@ const EmojiPager = GObject.registerClass({
     }
 
     getFollowingPage() {
-        if (this.delta === 0)
+        if (this.delta == 0)
             return null;
 
         if (this.delta < 0)
@@ -810,10 +804,10 @@ const EmojiPager = GObject.registerClass({
             let pageKeys;
 
             for (let j = 0; j < section.keys.length; j++) {
-                if (j % itemsPerPage === 0) {
+                if (j % itemsPerPage == 0) {
                     page++;
                     pageKeys = [];
-                    this._pages.push({pageKeys, nPages, page, section: this._sections[i]});
+                    this._pages.push({ pageKeys, nPages, page, section: this._sections[i] });
                 }
 
                 pageKeys.push(section.keys[j]);
@@ -825,7 +819,7 @@ const EmojiPager = GObject.registerClass({
         for (let i = 0; i < this._pages.length; i++) {
             let page = this._pages[i];
 
-            if (page.section === section && page.page === nPage)
+            if (page.section == section && page.page == nPage)
                 return i;
         }
 
@@ -865,7 +859,7 @@ const EmojiPager = GObject.registerClass({
                 this._currentKey = key;
             });
             key.connect('commit', (actor, keyval, str) => {
-                if (this._currentKey !== key)
+                if (this._currentKey != key)
                     return;
                 this._currentKey = null;
                 this.emit('emoji', str);
@@ -884,7 +878,7 @@ const EmojiPager = GObject.registerClass({
     }
 
     setCurrentPage(nPage) {
-        if (this._curPage === nPage)
+        if (this._curPage == nPage)
             return;
 
         this._curPage = nPage;
@@ -895,7 +889,7 @@ const EmojiPager = GObject.registerClass({
         }
 
         /* Reuse followingPage if possible */
-        if (nPage === this._followingPage) {
+        if (nPage == this._followingPage) {
             this._panel = this._followingPanel;
             this._followingPanel = null;
         }
@@ -920,7 +914,7 @@ const EmojiPager = GObject.registerClass({
         for (let i = 0; i < this._pages.length; i++) {
             let page = this._pages[i];
 
-            if (page.section === section && page.page === nPage) {
+            if (page.section == section && page.page == nPage) {
                 this.setCurrentPage(i);
                 break;
             }
@@ -934,9 +928,9 @@ const EmojiPager = GObject.registerClass({
     }
 });
 
-const EmojiSelection = GObject.registerClass({
+var EmojiSelection = GObject.registerClass({
     Signals: {
-        'emoji-selected': {param_types: [GObject.TYPE_STRING]},
+        'emoji-selected': { param_types: [GObject.TYPE_STRING] },
         'close-request': {},
         'toggle': {},
     },
@@ -956,15 +950,15 @@ const EmojiSelection = GObject.registerClass({
         });
 
         this._sections = [
-            {first: 'grinning face', label: '🙂️'},
-            {first: 'selfie', label: '👍️'},
-            {first: 'monkey face', label: '🌷️'},
-            {first: 'grapes', label: '🍴️'},
-            {first: 'globe showing Europe-Africa', label: '✈️'},
-            {first: 'jack-o-lantern', label: '🏃️'},
-            {first: 'muted speaker', label: '🔔️'},
-            {first: 'ATM sign', label: '❤️'},
-            {first: 'chequered flag', label: '🚩️'},
+            { first: 'grinning face', label: '🙂️' },
+            { first: 'selfie', label: '👍️' },
+            { first: 'monkey face', label: '🌷️' },
+            { first: 'grapes', label: '🍴️' },
+            { first: 'globe showing Europe-Africa', label: '✈️' },
+            { first: 'jack-o-lantern', label: '🏃️' },
+            { first: 'muted speaker', label: '🔔️' },
+            { first: 'ATM sign', label: '❤️' },
+            { first: 'chequered flag', label: '🚩️' },
         ];
 
         this._gridLayout = gridLayout;
@@ -1013,7 +1007,7 @@ const EmojiSelection = GObject.registerClass({
 
         for (let i = 0; i < this._sections.length; i++) {
             let sect = this._sections[i];
-            sect.button.setLatched(sectionLabel === sect.label);
+            sect.button.setLatched(sectionLabel == sect.label);
         }
     }
 
@@ -1024,7 +1018,7 @@ const EmojiSelection = GObject.registerClass({
 
     _findSection(emoji) {
         for (let i = 0; i < this._sections.length; i++) {
-            if (this._sections[i].first === emoji)
+            if (this._sections[i].first == emoji)
                 return this._sections[i];
         }
 
@@ -1057,7 +1051,7 @@ const EmojiSelection = GObject.registerClass({
 
             /* Create the key */
             let label = emoji[currentKey].char + String.fromCharCode(0xFE0F);
-            currentSection.keys.push({label, variants});
+            currentSection.keys.push({ label, variants });
             currentKey = i;
             variants = [];
         }
@@ -1119,25 +1113,25 @@ const EmojiSelection = GObject.registerClass({
     }
 });
 
-const Keypad = GObject.registerClass({
+var Keypad = GObject.registerClass({
     Signals: {
-        'keyval': {param_types: [GObject.TYPE_UINT]},
+        'keyval': { param_types: [GObject.TYPE_UINT] },
     },
 }, class Keypad extends AspectContainer {
     _init() {
         let keys = [
-            {label: '1', keyval: Clutter.KEY_1, left: 0, top: 0},
-            {label: '2', keyval: Clutter.KEY_2, left: 1, top: 0},
-            {label: '3', keyval: Clutter.KEY_3, left: 2, top: 0},
-            {label: '4', keyval: Clutter.KEY_4, left: 0, top: 1},
-            {label: '5', keyval: Clutter.KEY_5, left: 1, top: 1},
-            {label: '6', keyval: Clutter.KEY_6, left: 2, top: 1},
-            {label: '7', keyval: Clutter.KEY_7, left: 0, top: 2},
-            {label: '8', keyval: Clutter.KEY_8, left: 1, top: 2},
-            {label: '9', keyval: Clutter.KEY_9, left: 2, top: 2},
-            {label: '0', keyval: Clutter.KEY_0, left: 1, top: 3},
-            {keyval: Clutter.KEY_BackSpace, icon: 'edit-clear-symbolic', left: 3, top: 0},
-            {keyval: Clutter.KEY_Return, extraClassName: 'enter-key', icon: 'keyboard-enter-symbolic', left: 3, top: 1, height: 2},
+            { label: '1', keyval: Clutter.KEY_1, left: 0, top: 0 },
+            { label: '2', keyval: Clutter.KEY_2, left: 1, top: 0 },
+            { label: '3', keyval: Clutter.KEY_3, left: 2, top: 0 },
+            { label: '4', keyval: Clutter.KEY_4, left: 0, top: 1 },
+            { label: '5', keyval: Clutter.KEY_5, left: 1, top: 1 },
+            { label: '6', keyval: Clutter.KEY_6, left: 2, top: 1 },
+            { label: '7', keyval: Clutter.KEY_7, left: 0, top: 2 },
+            { label: '8', keyval: Clutter.KEY_8, left: 1, top: 2 },
+            { label: '9', keyval: Clutter.KEY_9, left: 2, top: 2 },
+            { label: '0', keyval: Clutter.KEY_0, left: 1, top: 3 },
+            { keyval: Clutter.KEY_BackSpace, icon: 'edit-clear-symbolic', left: 3, top: 0 },
+            { keyval: Clutter.KEY_Return, extraClassName: 'enter-key', icon: 'keyboard-enter-symbolic', left: 3, top: 1, height: 2 },
         ];
 
         super._init({
@@ -1151,7 +1145,7 @@ const Keypad = GObject.registerClass({
             column_homogeneous: true,
             row_homogeneous: true,
         });
-        this._box = new St.Widget({layout_manager: gridLayout, x_expand: true, y_expand: true});
+        this._box = new St.Widget({ layout_manager: gridLayout, x_expand: true, y_expand: true });
         this.add_child(this._box);
 
         for (let i = 0; i < keys.length; i++) {
@@ -1176,12 +1170,12 @@ const Keypad = GObject.registerClass({
     }
 });
 
-export class KeyboardManager extends Signals.EventEmitter {
+var KeyboardManager = class extends Signals.EventEmitter {
     constructor() {
         super();
 
         this._keyboard = null;
-        this._a11yApplicationsSettings = new Gio.Settings({schema_id: A11Y_APPLICATIONS_SCHEMA});
+        this._a11yApplicationsSettings = new Gio.Settings({ schema_id: A11Y_APPLICATIONS_SCHEMA });
         this._a11yApplicationsSettings.connect('changed', this._syncEnabled.bind(this));
 
         this._seat = Clutter.get_default_backend().get_default_seat();
@@ -1221,7 +1215,7 @@ export class KeyboardManager extends Signals.EventEmitter {
             return false;
 
         let deviceType = this._lastDevice.get_device_type();
-        return deviceType === Clutter.InputDeviceType.TOUCHSCREEN_DEVICE;
+        return deviceType == Clutter.InputDeviceType.TOUCHSCREEN_DEVICE;
     }
 
     _syncEnabled() {
@@ -1295,9 +1289,9 @@ export class KeyboardManager extends Signals.EventEmitter {
 
         return false;
     }
-}
+};
 
-export const Keyboard = GObject.registerClass({
+var Keyboard = GObject.registerClass({
     Signals: {
         'visibility-changed': {},
     },
@@ -1494,7 +1488,7 @@ export const Keyboard = GObject.registerClass({
              * basically). We however make things consistent by skipping that
              * second level.
              */
-            let level = i >= 1 && levels.length === 3 ? i + 1 : i;
+            let level = i >= 1 && levels.length == 3 ? i + 1 : i;
 
             let layout = new KeyContainer();
             layout.shiftKeys = [];
@@ -1837,7 +1831,7 @@ export const Keyboard = GObject.registerClass({
     }
 
     _onKeypadVisible(controller, visible) {
-        if (visible === this._keypadVisible)
+        if (visible == this._keypadVisible)
             return;
 
         this._keypadVisible = visible;
@@ -1846,7 +1840,7 @@ export const Keyboard = GObject.registerClass({
     }
 
     _onEmojiKeyVisible(controller, visible) {
-        if (visible === this._emojiKeyVisible)
+        if (visible == this._emojiKeyVisible)
             return;
 
         this._emojiKeyVisible = visible;
@@ -1856,12 +1850,12 @@ export const Keyboard = GObject.registerClass({
 
     _onKeyboardStateChanged(controller, state) {
         let enabled;
-        if (state === Clutter.InputPanelState.OFF)
+        if (state == Clutter.InputPanelState.OFF)
             enabled = false;
-        else if (state === Clutter.InputPanelState.ON)
+        else if (state == Clutter.InputPanelState.ON)
             enabled = true;
-        else if (state === Clutter.InputPanelState.TOGGLE)
-            enabled = this._keyboardVisible === false;
+        else if (state == Clutter.InputPanelState.TOGGLE)
+            enabled = this._keyboardVisible == false;
         else
             return;
 
@@ -1876,7 +1870,7 @@ export const Keyboard = GObject.registerClass({
         let layers = this._groups[activeGroupName];
         let currentPage = layers[activeLevel];
 
-        if (this._currentPage === currentPage) {
+        if (this._currentPage == currentPage) {
             this._updateCurrentPageVisible();
             return;
         }
@@ -2168,7 +2162,7 @@ export const Keyboard = GObject.registerClass({
     }
 });
 
-class KeyboardController extends Signals.EventEmitter {
+var KeyboardController = class extends Signals.EventEmitter {
     constructor() {
         super();
 
@@ -2211,14 +2205,14 @@ class KeyboardController extends Signals.EventEmitter {
         let emojiVisible = false;
         let keypadVisible = false;
 
-        if (purpose === Clutter.InputContentPurpose.NORMAL ||
-            purpose === Clutter.InputContentPurpose.ALPHA ||
-            purpose === Clutter.InputContentPurpose.PASSWORD ||
-            purpose === Clutter.InputContentPurpose.TERMINAL)
+        if (purpose == Clutter.InputContentPurpose.NORMAL ||
+            purpose == Clutter.InputContentPurpose.ALPHA ||
+            purpose == Clutter.InputContentPurpose.PASSWORD ||
+            purpose == Clutter.InputContentPurpose.TERMINAL)
             emojiVisible = true;
-        if (purpose === Clutter.InputContentPurpose.DIGITS ||
-            purpose === Clutter.InputContentPurpose.NUMBER ||
-            purpose === Clutter.InputContentPurpose.PHONE)
+        if (purpose == Clutter.InputContentPurpose.DIGITS ||
+            purpose == Clutter.InputContentPurpose.NUMBER ||
+            purpose == Clutter.InputContentPurpose.PHONE)
             keypadVisible = true;
 
         this.emit('emoji-visible', emojiVisible);
@@ -2261,7 +2255,7 @@ class KeyboardController extends Signals.EventEmitter {
         if (string == null)
             return false;
         /* Let ibus methods fall through keyval emission */
-        if (fromKey && this._currentSource.type === InputSourceManager.INPUT_SOURCE_TYPE_IBUS)
+        if (fromKey && this._currentSource.type == InputSourceManager.INPUT_SOURCE_TYPE_IBUS)
             return false;
 
         Main.inputMethod.commit(string);
@@ -2270,11 +2264,11 @@ class KeyboardController extends Signals.EventEmitter {
 
     keyvalPress(keyval) {
         this._virtualDevice.notify_keyval(Clutter.get_current_event_time() * 1000,
-            keyval, Clutter.KeyState.PRESSED);
+                                          keyval, Clutter.KeyState.PRESSED);
     }
 
     keyvalRelease(keyval) {
         this._virtualDevice.notify_keyval(Clutter.get_current_event_time() * 1000,
-            keyval, Clutter.KeyState.RELEASED);
+                                          keyval, Clutter.KeyState.RELEASED);
     }
-}
+};

@@ -1,9 +1,8 @@
-import Gio from 'gi://Gio';
-import GObject from 'gi://GObject';
+/* exported Indicator */
+const {Gio, GObject} = imports.gi;
 
-import * as Main from '../main.js';
-
-import {QuickToggle, SystemIndicator} from '../quickSettings.js';
+const Main = imports.ui.main;
+const {QuickToggle, SystemIndicator} = imports.ui.quickSettings;
 
 const DarkModeToggle = GObject.registerClass(
 class DarkModeToggle extends QuickToggle {
@@ -40,7 +39,7 @@ class DarkModeToggle extends QuickToggle {
     }
 });
 
-export const Indicator = GObject.registerClass(
+var Indicator = GObject.registerClass(
 class Indicator extends SystemIndicator {
     _init() {
         super._init();

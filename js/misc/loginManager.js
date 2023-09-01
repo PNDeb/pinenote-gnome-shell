@@ -1,10 +1,10 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
+/* exported canLock, getLoginManager, registerSessionWithGDM */
 
-import GLib from 'gi://GLib';
-import Gio from 'gi://Gio';
-import * as Signals from './signals.js';
+const { GLib, Gio } = imports.gi;
+const Signals = imports.misc.signals;
 
-import {loadInterfaceXML} from './fileUtils.js';
+const { loadInterfaceXML } = imports.misc.fileUtils;
 
 const SystemdLoginManagerIface = loadInterfaceXML('org.freedesktop.login1.Manager');
 const SystemdLoginSessionIface = loadInterfaceXML('org.freedesktop.login1.Session');
@@ -15,7 +15,7 @@ const SystemdLoginSession = Gio.DBusProxy.makeProxyWrapper(SystemdLoginSessionIf
 const SystemdLoginUser = Gio.DBusProxy.makeProxyWrapper(SystemdLoginUserIface);
 
 function haveSystemd() {
-    return GLib.access('/run/systemd/seats', 0) >= 0;
+    return GLib.access("/run/systemd/seats", 0) >= 0;
 }
 
 function versionCompare(required, reference) {
@@ -25,26 +25,22 @@ function versionCompare(required, reference) {
     for (let i = 0; i < required.length; i++) {
         let requiredInt = parseInt(required[i]);
         let referenceInt = parseInt(reference[i]);
-        if (requiredInt !== referenceInt)
+        if (requiredInt != referenceInt)
             return requiredInt < referenceInt;
     }
 
     return true;
 }
 
-/**
- * @returns {boolean}
- */
-export function canLock() {
+function canLock() {
     try {
         let params = GLib.Variant.new('(ss)', ['org.gnome.DisplayManager.Manager', 'Version']);
-        let result = Gio.DBus.system.call_sync(
-            'org.gnome.DisplayManager',
-            '/org/gnome/DisplayManager/Manager',
-            'org.freedesktop.DBus.Properties',
-            'Get', params, null,
-            Gio.DBusCallFlags.NONE,
-            -1, null);
+        let result = Gio.DBus.system.call_sync('org.gnome.DisplayManager',
+                                               '/org/gnome/DisplayManager/Manager',
+                                               'org.freedesktop.DBus.Properties',
+                                               'Get', params, null,
+                                               Gio.DBusCallFlags.NONE,
+                                               -1, null);
 
         let version = result.deepUnpack()[0].deepUnpack();
         return haveSystemd() && versionCompare('3.5.91', version);
@@ -53,8 +49,9 @@ export function canLock() {
     }
 }
 
-export async function registerSessionWithGDM() {
-    log('Registering session with GDM');
+
+async function registerSessionWithGDM() {
+    log("Registering session with GDM");
     try {
         await Gio.DBus.system.call(
             'org.gnome.DisplayManager',
@@ -74,11 +71,12 @@ export async function registerSessionWithGDM() {
 let _loginManager = null;
 
 /**
+ * getLoginManager:
  * An abstraction over systemd/logind and ConsoleKit.
+ * @returns {object} - the LoginManager singleton
  *
- * @returns {LoginManagerSystemd | LoginManagerDummy} - the LoginManager singleton
  */
-export function getLoginManager() {
+function getLoginManager() {
     if (_loginManager == null) {
         if (haveSystemd())
             _loginManager = new LoginManagerSystemd();
@@ -89,18 +87,18 @@ export function getLoginManager() {
     return _loginManager;
 }
 
-class LoginManagerSystemd extends Signals.EventEmitter {
+var LoginManagerSystemd = class extends Signals.EventEmitter {
     constructor() {
         super();
 
         this._proxy = new SystemdLoginManager(Gio.DBus.system,
-            'org.freedesktop.login1',
-            '/org/freedesktop/login1');
+                                              'org.freedesktop.login1',
+                                              '/org/freedesktop/login1');
         this._userProxy = new SystemdLoginUser(Gio.DBus.system,
-            'org.freedesktop.login1',
-            '/org/freedesktop/login1/user/self');
+                                               'org.freedesktop.login1',
+                                               '/org/freedesktop/login1/user/self');
         this._proxy.connectSignal('PrepareForSleep',
-            this._prepareForSleep.bind(this));
+                                  this._prepareForSleep.bind(this));
     }
 
     async getCurrentSessionProxy() {
@@ -119,10 +117,10 @@ class LoginManagerSystemd extends Signals.EventEmitter {
 
                 for ([session, objectPath] of this._userProxy.Sessions) {
                     let sessionProxy = new SystemdLoginSession(Gio.DBus.system,
-                        'org.freedesktop.login1',
-                        objectPath);
+                                                               'org.freedesktop.login1',
+                                                               objectPath);
                     log(`Considering ${session}, class=${sessionProxy.Class}`);
-                    if (sessionProxy.Class === 'greeter') {
+                    if (sessionProxy.Class == 'greeter') {
                         log(`Yes, will monitor session ${session}`);
                         sessionId = session;
                         break;
@@ -200,15 +198,15 @@ class LoginManagerSystemd extends Signals.EventEmitter {
             await this._proxy.call_with_unix_fd_list('Inhibit',
                 inVariant, 0, -1, null, cancellable);
         const [fd] = fdList.steal_fds();
-        return new Gio.UnixInputStream({fd});
+        return new Gio.UnixInputStream({ fd });
     }
 
     _prepareForSleep(proxy, sender, [aboutToSuspend]) {
         this.emit('prepare-for-sleep', aboutToSuspend);
     }
-}
+};
 
-class LoginManagerDummy extends Signals.EventEmitter  {
+var LoginManagerDummy = class extends Signals.EventEmitter  {
     getCurrentSessionProxy() {
         // we could return a DummySession object that fakes whatever callers
         // expect (at the time of writing: connect() and connectSignal()
@@ -246,4 +244,4 @@ class LoginManagerDummy extends Signals.EventEmitter  {
     async inhibit() {
         return null;
     }
-}
+};

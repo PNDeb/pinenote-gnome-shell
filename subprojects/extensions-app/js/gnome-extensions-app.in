@@ -1,2 +1,2 @@
 #!/bin/sh
-@gjs@ -m @pkgdatadir@/@app_id@ "$@"
+@gjs@ @pkgdatadir@/@app_id@ "$@"

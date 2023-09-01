@@ -1,12 +1,13 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
+/* exported getVmwareCredentialsManager */
 
-import Gio from 'gi://Gio';
-import * as Credential from './credentialManager.js';
+const Gio = imports.gi.Gio;
+const Credential = imports.gdm.credentialManager;
 
 const dbusPath = '/org/vmware/viewagent/Credentials';
 const dbusInterface = 'org.vmware.viewagent.Credentials';
 
-export const SERVICE_NAME = 'gdm-vmwcred';
+var SERVICE_NAME = 'gdm-vmwcred';
 
 const VmwareCredentialsIface = `<node>
 <interface name="${dbusInterface}">
@@ -34,7 +35,7 @@ function VmwareCredentials() {
     return self;
 }
 
-class VmwareCredentialsManager extends Credential.CredentialManager {
+var VmwareCredentialsManager = class VmwareCredentialsManager extends Credential.CredentialManager {
     constructor() {
         super(SERVICE_NAME);
         this._credentials = new VmwareCredentials();
@@ -43,12 +44,9 @@ class VmwareCredentialsManager extends Credential.CredentialManager {
                 this.token = token;
             });
     }
-}
+};
 
-/**
- * @returns {VmwareCredentialsManager}
- */
-export function getVmwareCredentialsManager() {
+function getVmwareCredentialsManager() {
     if (!_vmwareCredentialsManager)
         _vmwareCredentialsManager = new VmwareCredentialsManager();
 

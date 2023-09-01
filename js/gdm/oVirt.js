@@ -1,9 +1,10 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
+/* exported getOVirtCredentialsManager */
 
-import Gio from 'gi://Gio';
-import * as Credential from './credentialManager.js';
+const Gio = imports.gi.Gio;
+const Credential = imports.gdm.credentialManager;
 
-export const SERVICE_NAME = 'gdm-ovirtcred';
+var SERVICE_NAME = 'gdm-ovirtcred';
 
 const OVirtCredentialsIface = `
 <node>
@@ -31,7 +32,7 @@ function OVirtCredentials() {
     return self;
 }
 
-class OVirtCredentialsManager extends Credential.CredentialManager {
+var OVirtCredentialsManager = class OVirtCredentialsManager extends Credential.CredentialManager {
     constructor() {
         super(SERVICE_NAME);
         this._credentials = new OVirtCredentials();
@@ -40,12 +41,9 @@ class OVirtCredentialsManager extends Credential.CredentialManager {
                 this.token = token;
             });
     }
-}
+};
 
-/**
- * @returns {OVirtCredentialsManager}
- */
-export function getOVirtCredentialsManager() {
+function getOVirtCredentialsManager() {
     if (!_oVirtCredentialsManager)
         _oVirtCredentialsManager = new OVirtCredentialsManager();
 

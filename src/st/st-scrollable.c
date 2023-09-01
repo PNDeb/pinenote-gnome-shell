@@ -97,7 +97,7 @@ st_scrollable_default_init (StScrollableInterface *g_iface)
        * JavaScript code may override this as demonstrated below:
        *
        * |[<!-- language="JavaScript" -->
-       * export const MyScrollable = GObject.registerClass({
+       * var MyScrollable = GObject.registerClass({
        *     Properties: {
        *         'hadjustment': GObject.ParamSpec.override(
        *             'hadjustment',

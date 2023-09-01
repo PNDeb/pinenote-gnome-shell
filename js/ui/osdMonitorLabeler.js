@@ -1,18 +1,14 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
+/* exported OsdMonitorLabeler */
 
-import Clutter from 'gi://Clutter';
-import Gio from 'gi://Gio';
-import GObject from 'gi://GObject';
-import Meta from 'gi://Meta';
-import St from 'gi://St';
+const { Clutter, Gio, GObject, Meta, St } = imports.gi;
 
+const Main = imports.ui.main;
 
-import * as Main from './main.js';
-
-const OsdMonitorLabel = GObject.registerClass(
+var OsdMonitorLabel = GObject.registerClass(
 class OsdMonitorLabel extends St.Widget {
     _init(monitor, label) {
-        super._init({x_expand: true, y_expand: true});
+        super._init({ x_expand: true, y_expand: true });
 
         this._monitor = monitor;
 
@@ -40,7 +36,7 @@ class OsdMonitorLabel extends St.Widget {
     _position() {
         let workArea = Main.layoutManager.getWorkAreaForMonitor(this._monitor);
 
-        if (Clutter.get_default_text_direction() === Clutter.TextDirection.RTL)
+        if (Clutter.get_default_text_direction() == Clutter.TextDirection.RTL)
             this._box.x = workArea.x + (workArea.width - this._box.width);
         else
             this._box.x = workArea.x;
@@ -49,7 +45,7 @@ class OsdMonitorLabel extends St.Widget {
     }
 });
 
-export class OsdMonitorLabeler {
+var OsdMonitorLabeler = class {
     constructor() {
         this._monitorManager = global.backend.get_monitor_manager();
         this._client = null;
@@ -57,7 +53,7 @@ export class OsdMonitorLabeler {
         this._osdLabels = [];
         this._monitorLabels = null;
         Main.layoutManager.connect('monitors-changed',
-            this._reset.bind(this));
+                                   this._reset.bind(this));
         this._reset();
     }
 
@@ -73,19 +69,18 @@ export class OsdMonitorLabeler {
 
     _trackClient(client) {
         if (this._client)
-            return this._client === client;
+            return this._client == client;
 
         this._client = client;
-        this._clientWatchId = Gio.bus_watch_name(Gio.BusType.SESSION,
-            client, 0, null,
-            (c, name) => {
-                this.hide(name);
-            });
+        this._clientWatchId = Gio.bus_watch_name(Gio.BusType.SESSION, client, 0, null,
+                                                 (c, name) => {
+                                                     this.hide(name);
+                                                 });
         return true;
     }
 
     _untrackClient(client) {
-        if (!this._client || this._client !== client)
+        if (!this._client || this._client != client)
             return false;
 
         Gio.bus_unwatch_name(this._clientWatchId);
@@ -102,7 +97,7 @@ export class OsdMonitorLabeler {
 
         for (let connector in params) {
             let monitor = this._monitorManager.get_monitor_for_connector(connector);
-            if (monitor === -1)
+            if (monitor == -1)
                 continue;
             this._monitorLabels.get(monitor).push(params[connector].deepUnpack());
         }
@@ -119,4 +114,4 @@ export class OsdMonitorLabeler {
 
         this._reset();
     }
-}
+};

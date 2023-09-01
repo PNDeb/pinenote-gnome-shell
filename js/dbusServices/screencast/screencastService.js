@@ -1,13 +1,14 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
-import Gio from 'gi://Gio';
-import GLib from 'gi://GLib';
-import Gst from 'gi://Gst?version=1.0';
-import Gtk from 'gi://Gtk?version=4.0';
+/* exported ScreencastService */
 
-import {ServiceImplementation} from './dbusService.js';
+imports.gi.versions.Gst = '1.0';
+imports.gi.versions.Gtk = '4.0';
 
-import {loadInterfaceXML, loadSubInterfaceXML} from './misc/dbusUtils.js';
-import * as Signals from './misc/signals.js';
+const { Gio, GLib, Gst, Gtk } = imports.gi;
+
+const { loadInterfaceXML, loadSubInterfaceXML } = imports.misc.dbusUtils;
+const Signals = imports.misc.signals;
+const { ServiceImplementation } = imports.dbusService;
 
 const ScreencastIface = loadInterfaceXML('org.gnome.Shell.Screencast');
 
@@ -28,15 +29,6 @@ const DEFAULT_FRAMERATE = 30;
 const DEFAULT_DRAW_CURSOR = true;
 
 const PIPELINES = [
-    {
-        pipelineString:
-            'capsfilter caps=video/x-raw(memory:DMABuf),max-framerate=%F/1 ! \
-             glupload ! glcolorconvert ! gldownload ! \
-             queue ! \
-             vp8enc cpu-used=16 max-quantizer=17 deadline=1 keyframe-mode=disabled threads=%T static-threshold=1000 buffer-size=20000 ! \
-             queue ! \
-             webmmux',
-    },
     {
         pipelineString:
             'capsfilter caps=video/x-raw,max-framerate=%F/1 ! \
@@ -63,7 +55,7 @@ const SessionState = {
     STOPPED: 'STOPPED',
 };
 
-class Recorder extends Signals.EventEmitter {
+var Recorder = class extends Signals.EventEmitter {
     constructor(sessionPath, x, y, width, height, filePath, options,
         invocation) {
         super();
@@ -397,9 +389,9 @@ class Recorder extends Signals.EventEmitter {
         return Gst.parse_launch_full(fullPipeline, null,
             Gst.ParseFlags.FATAL_ERRORS);
     }
-}
+};
 
-export const ScreencastService = class extends ServiceImplementation {
+var ScreencastService = class extends ServiceImplementation {
     static canScreencast() {
         if (!Gst.init_check(null))
             return false;

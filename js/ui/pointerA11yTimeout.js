@@ -1,13 +1,11 @@
-import Clutter from 'gi://Clutter';
-import GObject from 'gi://GObject';
-import Meta from 'gi://Meta';
-import St from 'gi://St';
-import * as Main from './main.js';
-import Cairo from 'gi://cairo';
+/* exported PointerA11yTimeout */
+const { Clutter, GObject, Meta, St } = imports.gi;
+const Main = imports.ui.main;
+const Cairo = imports.cairo;
 
 const SUCCESS_ZOOM_OUT_DURATION = 150;
 
-const PieTimer = GObject.registerClass({
+var PieTimer = GObject.registerClass({
     Properties: {
         'angle': GObject.ParamSpec.double(
             'angle', 'angle', 'angle',
@@ -33,7 +31,7 @@ const PieTimer = GObject.registerClass({
     }
 
     set angle(angle) {
-        if (this._angle === angle)
+        if (this._angle == angle)
             return;
 
         this._angle = angle;
@@ -108,7 +106,7 @@ const PieTimer = GObject.registerClass({
     }
 });
 
-export class PointerA11yTimeout {
+var PointerA11yTimeout = class PointerA11yTimeout {
     constructor() {
         let seat = Clutter.get_default_backend().get_default_seat();
 
@@ -121,7 +119,7 @@ export class PointerA11yTimeout {
 
             this._pieTimer.start(x, y, timeout);
 
-            if (type === Clutter.PointerA11yTimeoutType.GESTURE)
+            if (type == Clutter.PointerA11yTimeoutType.GESTURE)
                 global.display.set_cursor(Meta.Cursor.CROSSHAIR);
         });
 
@@ -129,8 +127,8 @@ export class PointerA11yTimeout {
             if (!clicked)
                 this._pieTimer.destroy();
 
-            if (type === Clutter.PointerA11yTimeoutType.GESTURE)
+            if (type == Clutter.PointerA11yTimeoutType.GESTURE)
                 global.display.set_cursor(Meta.Cursor.DEFAULT);
         });
     }
-}
+};

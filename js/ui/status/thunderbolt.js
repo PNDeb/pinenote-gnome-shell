@@ -1,19 +1,16 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
+/* exported Indicator */
 
 // the following is a modified version of bolt/contrib/js/client.js
 
-import Gio from 'gi://Gio';
-import GLib from 'gi://GLib';
-import GObject from 'gi://GObject';
-import Polkit from 'gi://Polkit';
-import Shell from 'gi://Shell';
-import * as Signals from '../../misc/signals.js';
+const { Gio, GLib, GObject, Polkit, Shell } = imports.gi;
+const Signals = imports.misc.signals;
 
-import * as Main from '../main.js';
-import * as MessageTray from '../messageTray.js';
-import {SystemIndicator} from '../quickSettings.js';
+const Main = imports.ui.main;
+const MessageTray = imports.ui.messageTray;
+const {SystemIndicator} = imports.ui.quickSettings;
 
-import {loadInterfaceXML} from '../../misc/fileUtils.js';
+const { loadInterfaceXML } = imports.misc.fileUtils;
 
 /* Keep in sync with data/org.freedesktop.bolt.xml */
 
@@ -22,8 +19,9 @@ const BoltDeviceInterface = loadInterfaceXML('org.freedesktop.bolt1.Device');
 
 const BoltDeviceProxy = Gio.DBusProxy.makeProxyWrapper(BoltDeviceInterface);
 
-/** @enum {string} */
-const Status = {
+/*  */
+
+var Status = {
     DISCONNECTED: 'disconnected',
     CONNECTING: 'connecting',
     CONNECTED: 'connected',
@@ -32,20 +30,17 @@ const Status = {
     AUTHORIZED: 'authorized',
 };
 
-/** @enum {string} */
-const Policy = {
+var Policy = {
     DEFAULT: 'default',
     MANUAL: 'manual',
     AUTO: 'auto',
 };
 
-/** @enum {string} */
-const AuthCtrl = {
+var AuthCtrl = {
     NONE: 'none',
 };
 
-/** @enum {string} */
-const AuthMode = {
+var AuthMode = {
     DISABLED: 'disabled',
     ENABLED: 'enabled',
 };
@@ -54,7 +49,7 @@ const BOLT_DBUS_CLIENT_IFACE = 'org.freedesktop.bolt1.Manager';
 const BOLT_DBUS_NAME = 'org.freedesktop.bolt';
 const BOLT_DBUS_PATH = '/org/freedesktop/bolt';
 
-class Client extends Signals.EventEmitter {
+var Client = class extends Signals.EventEmitter {
     constructor() {
         super();
 
@@ -97,7 +92,9 @@ class Client extends Signals.EventEmitter {
 
     _onDeviceAdded(proxy, emitter, params) {
         let [path] = params;
-        let device = new BoltDeviceProxy(Gio.DBus.system, BOLT_DBUS_NAME, path);
+        let device = new BoltDeviceProxy(Gio.DBus.system,
+                                         BOLT_DBUS_NAME,
+                                         path);
         this.emit('device-added', device);
     }
 
@@ -125,10 +122,10 @@ class Client extends Signals.EventEmitter {
     get authMode() {
         return this._proxy.AuthMode;
     }
-}
+};
 
 /* helper class to automatically authorize new devices */
-class AuthRobot extends Signals.EventEmitter {
+var AuthRobot = class extends Signals.EventEmitter {
     constructor(client) {
         super();
 
@@ -185,7 +182,7 @@ class AuthRobot extends Signals.EventEmitter {
 
         this._enrolling = true;
         GLib.idle_add(GLib.PRIORITY_DEFAULT,
-            this._enrollDevicesIdle.bind(this));
+                      this._enrollDevicesIdle.bind(this));
     }
 
     async _enrollDevicesIdle() {
@@ -213,11 +210,11 @@ class AuthRobot extends Signals.EventEmitter {
         }
         return GLib.SOURCE_REMOVE;
     }
-}
+};
 
 /* eof client.js  */
 
-export const Indicator = GObject.registerClass(
+var Indicator = GObject.registerClass(
 class Indicator extends SystemIndicator {
     _init() {
         super._init();
@@ -256,8 +253,8 @@ class Indicator extends SystemIndicator {
 
     _ensureSource() {
         if (!this._source) {
-            this._source = new MessageTray.Source(_('Thunderbolt'),
-                'thunderbolt-symbolic');
+            this._source = new MessageTray.Source(_("Thunderbolt"),
+                                                  'thunderbolt-symbolic');
             this._source.connect('destroy', () => (this._source = null));
 
             Main.messageTray.add(this._source);
@@ -317,19 +314,19 @@ class Indicator extends SystemIndicator {
             return; /* we are done */
 
         if (!unlocked) {
-            const title = _('Unknown Thunderbolt device');
-            const body = _('New device has been detected while you were away. Please disconnect and reconnect the device to start using it.');
+            const title = _("Unknown Thunderbolt device");
+            const body = _("New device has been detected while you were away. Please disconnect and reconnect the device to start using it.");
             this._notify(title, body);
         } else {
-            const title = _('Unauthorized Thunderbolt device');
-            const body = _('New device has been detected and needs to be authorized by an administrator.');
+            const title = _("Unauthorized Thunderbolt device");
+            const body = _("New device has been detected and needs to be authorized by an administrator.");
             this._notify(title, body);
         }
     }
 
     _onEnrollFailed(obj, device, error) {
-        const title = _('Thunderbolt authorization error');
-        const body = _('Could not authorize the Thunderbolt device: %s').format(error.message);
+        const title = _("Thunderbolt authorization error");
+        const body = _("Could not authorize the Thunderbolt device: %s").format(error.message);
         this._notify(title, body);
     }
 });

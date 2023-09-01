@@ -1,24 +1,18 @@
-import Atk from 'gi://Atk';
-import Clutter from 'gi://Clutter';
-import Gio from 'gi://Gio';
-import GLib from 'gi://GLib';
-import GObject from 'gi://GObject';
-import Graphene from 'gi://Graphene';
-import Meta from 'gi://Meta';
-import Pango from 'gi://Pango';
-import St from 'gi://St';
+/* exported QuickToggle, QuickMenuToggle, QuickSlider, QuickSettingsMenu, SystemIndicator */
+const {Atk, Clutter, Gio, GLib, GObject, Graphene, Meta, Pango, St} = imports.gi;
 
-import * as Main from './main.js';
-import * as PopupMenu from './popupMenu.js';
-import {Slider} from './slider.js';
+const Main = imports.ui.main;
+const PopupMenu = imports.ui.popupMenu;
+const {Slider} = imports.ui.slider;
 
-import {PopupAnimation} from './boxpointer.js';
+const {PopupAnimation} = imports.ui.boxpointer;
 
 const DIM_BRIGHTNESS = -0.4;
 const POPUP_ANIMATION_TIME = 400;
+
 const MENU_BUTTON_BRIGHTNESS = 0.1;
 
-export const QuickSettingsItem = GObject.registerClass({
+var QuickSettingsItem = GObject.registerClass({
     Properties: {
         'has-menu': GObject.ParamSpec.boolean(
             'has-menu', 'has-menu', 'has-menu',
@@ -40,7 +34,7 @@ export const QuickSettingsItem = GObject.registerClass({
     }
 });
 
-export const QuickToggle = GObject.registerClass({
+var QuickToggle = GObject.registerClass({
     Properties: {
         'title': GObject.ParamSpec.string('title', '', '',
             GObject.ParamFlags.READWRITE,
@@ -141,7 +135,7 @@ export const QuickToggle = GObject.registerClass({
     }
 });
 
-export const QuickMenuToggle = GObject.registerClass({
+var QuickMenuToggle = GObject.registerClass({
     Properties: {
         'title': GObject.ParamSpec.string('title', '', '',
             GObject.ParamFlags.READWRITE,
@@ -232,7 +226,7 @@ export const QuickMenuToggle = GObject.registerClass({
     }
 });
 
-export const QuickSlider = GObject.registerClass({
+var QuickSlider = GObject.registerClass({
     Properties: {
         'icon-name': GObject.ParamSpec.override('icon-name', St.Button),
         'gicon': GObject.ParamSpec.object('gicon', '', '',
@@ -705,7 +699,7 @@ const QuickSettingsLayout = GObject.registerClass({
     }
 });
 
-export const QuickSettingsMenu = class extends PopupMenu.PopupMenu {
+var QuickSettingsMenu = class extends PopupMenu.PopupMenu {
     constructor(sourceActor, nColumns = 1) {
         super(sourceActor, 0, St.Side.TOP);
 
@@ -816,7 +810,7 @@ export const QuickSettingsMenu = class extends PopupMenu.PopupMenu {
     }
 };
 
-export const SystemIndicator = GObject.registerClass(
+var SystemIndicator = GObject.registerClass(
 class SystemIndicator extends St.BoxLayout {
     _init() {
         super._init({

@@ -1,10 +1,11 @@
-import {DBusService} from './dbusService.js';
-import {ScreenSaverService} from './screenSaverService.js';
+/* exported main */
 
-/** @returns {void} */
-export async function main() {
+const { DBusService } = imports.dbusService;
+const { ScreenSaverService } = imports.screenSaverService;
+
+function main() {
     const service = new DBusService(
         'org.gnome.ScreenSaver',
         new ScreenSaverService());
-    await service.runAsync();
+    service.run();
 }

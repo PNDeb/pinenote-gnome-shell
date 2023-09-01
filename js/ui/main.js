@@ -1,52 +1,56 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
+/* exported componentManager, notificationDaemon, windowAttentionHandler,
+            ctrlAltTabManager, padOsdService, osdWindowManager,
+            osdMonitorLabeler, shellMountOpDBusService, shellDBusService,
+            shellAccessDialogDBusService, shellAudioSelectionDBusService,
+            screenSaverDBus, uiGroup, magnifier, xdndHandler, keyboard,
+            kbdA11yDialog, introspectService, start, pushModal, popModal,
+            activateWindow, moveWindowToMonitorAndWorkspace,
+            createLookingGlass, initializeDeferredWork,
+            getThemeStylesheet, setThemeStylesheet, screenshotUI */
 
-import Clutter from 'gi://Clutter';
-import Gio from 'gi://Gio';
-import GLib from 'gi://GLib';
-import GObject from 'gi://GObject';
-import Meta from 'gi://Meta';
-import Shell from 'gi://Shell';
-import St from 'gi://St';
+const { Clutter, Gio, GLib, GObject, Meta, Shell, St } = imports.gi;
 
-import * as AccessDialog from './accessDialog.js';
-import * as AudioDeviceSelection from './audioDeviceSelection.js';
-import * as Config from '../misc/config.js';
-import * as Components from './components.js';
-import * as CtrlAltTab from './ctrlAltTab.js';
-import * as EndSessionDialog from './endSessionDialog.js';
-import * as ExtensionSystem from './extensionSystem.js';
-import * as ExtensionDownloader from './extensionDownloader.js';
-import * as InputMethod from '../misc/inputMethod.js';
-import * as Introspect from '../misc/introspect.js';
-import * as Keyboard from './keyboard.js';
-import * as MessageTray from './messageTray.js';
-import * as ModalDialog from './modalDialog.js';
-import * as OsdWindow from './osdWindow.js';
-import * as OsdMonitorLabeler from './osdMonitorLabeler.js';
-import * as Overview from './overview.js';
-import * as PadOsd from './padOsd.js';
-import * as Panel from './panel.js';
-import * as Params from '../misc/params.js';
-import * as RunDialog from './runDialog.js';
-import * as WelcomeDialog from './welcomeDialog.js';
-import * as Layout from './layout.js';
-import * as LoginManager from '../misc/loginManager.js';
-import * as LookingGlass from './lookingGlass.js';
-import * as NotificationDaemon from './notificationDaemon.js';
-import * as WindowAttentionHandler from './windowAttentionHandler.js';
-import * as Screenshot from './screenshot.js';
-import * as ScreenShield from './screenShield.js';
-import * as SessionMode from './sessionMode.js';
-import * as ShellDBus from './shellDBus.js';
-import * as ShellMountOperation from './shellMountOperation.js';
-import * as WindowManager from './windowManager.js';
-import * as Magnifier from './magnifier.js';
-import * as XdndHandler from './xdndHandler.js';
-import * as KbdA11yDialog from './kbdA11yDialog.js';
-import * as LocatePointer from './locatePointer.js';
-import * as PointerA11yTimeout from './pointerA11yTimeout.js';
-import * as ParentalControlsManager from '../misc/parentalControlsManager.js';
-import * as Util from '../misc/util.js';
+const AccessDialog = imports.ui.accessDialog;
+const AudioDeviceSelection = imports.ui.audioDeviceSelection;
+const Components = imports.ui.components;
+const CtrlAltTab = imports.ui.ctrlAltTab;
+const EndSessionDialog = imports.ui.endSessionDialog;
+const ExtensionSystem = imports.ui.extensionSystem;
+const ExtensionDownloader = imports.ui.extensionDownloader;
+const InputMethod = imports.misc.inputMethod;
+const Introspect = imports.misc.introspect;
+const Keyboard = imports.ui.keyboard;
+const MessageTray = imports.ui.messageTray;
+const ModalDialog = imports.ui.modalDialog;
+const OsdWindow = imports.ui.osdWindow;
+const OsdMonitorLabeler = imports.ui.osdMonitorLabeler;
+const Overview = imports.ui.overview;
+const PadOsd = imports.ui.padOsd;
+const Panel = imports.ui.panel;
+const Params = imports.misc.params;
+const RunDialog = imports.ui.runDialog;
+const WelcomeDialog = imports.ui.welcomeDialog;
+const Layout = imports.ui.layout;
+const LoginManager = imports.misc.loginManager;
+const LookingGlass = imports.ui.lookingGlass;
+const NotificationDaemon = imports.ui.notificationDaemon;
+const WindowAttentionHandler = imports.ui.windowAttentionHandler;
+const Screenshot = imports.ui.screenshot;
+const ScreenShield = imports.ui.screenShield;
+const Scripting = imports.ui.scripting;
+const SessionMode = imports.ui.sessionMode;
+const ShellDBus = imports.ui.shellDBus;
+const ShellMountOperation = imports.ui.shellMountOperation;
+const WindowManager = imports.ui.windowManager;
+const Magnifier = imports.ui.magnifier;
+const XdndHandler = imports.ui.xdndHandler;
+const KbdA11yDialog = imports.ui.kbdA11yDialog;
+const LocatePointer = imports.ui.locatePointer;
+const PointerA11yTimeout = imports.ui.pointerA11yTimeout;
+const ParentalControlsManager = imports.misc.parentalControlsManager;
+const Config = imports.misc.config;
+const Util = imports.misc.util;
 
 const WELCOME_DIALOG_LAST_SHOWN_VERSION = 'welcome-dialog-last-shown-version';
 // Make sure to mention the point release, otherwise it will show every time
@@ -55,42 +59,41 @@ const WELCOME_DIALOG_LAST_TOUR_CHANGE = '40.beta';
 const LOG_DOMAIN = 'GNOME Shell';
 const GNOMESHELL_STARTED_MESSAGE_ID = 'f3ea493c22934e26811cd62abe8e203a';
 
-export let componentManager = null;
-export let extensionManager = null;
-export let panel = null;
-export let overview = null;
-export let runDialog = null;
-export let lookingGlass = null;
-export let welcomeDialog = null;
-export let wm = null;
-export let messageTray = null;
-export let screenShield = null;
-export let notificationDaemon = null;
-export let windowAttentionHandler = null;
-export let ctrlAltTabManager = null;
-export let padOsdService = null;
-export let osdWindowManager = null;
-export let osdMonitorLabeler = null;
-export let sessionMode = null;
-export let screenshotUI = null;
-export let shellAccessDialogDBusService = null;
-export let shellAudioSelectionDBusService = null;
-export let shellDBusService = null;
-export let shellMountOpDBusService = null;
-export let screenSaverDBus = null;
-export let modalCount = 0;
-export let actionMode = Shell.ActionMode.NONE;
-export let modalActorFocusStack = [];
-export let uiGroup = null;
-export let magnifier = null;
-export let xdndHandler = null;
-export let keyboard = null;
-export let layoutManager = null;
-export let kbdA11yDialog = null;
-export let inputMethod = null;
-export let introspectService = null;
-export let locatePointer = null;
-
+var componentManager = null;
+var extensionManager = null;
+var panel = null;
+var overview = null;
+var runDialog = null;
+var lookingGlass = null;
+var welcomeDialog = null;
+var wm = null;
+var messageTray = null;
+var screenShield = null;
+var notificationDaemon = null;
+var windowAttentionHandler = null;
+var ctrlAltTabManager = null;
+var padOsdService = null;
+var osdWindowManager = null;
+var osdMonitorLabeler = null;
+var sessionMode = null;
+var screenshotUI = null;
+var shellAccessDialogDBusService = null;
+var shellAudioSelectionDBusService = null;
+var shellDBusService = null;
+var shellMountOpDBusService = null;
+var screenSaverDBus = null;
+var modalCount = 0;
+var actionMode = Shell.ActionMode.NONE;
+var modalActorFocusStack = [];
+var uiGroup = null;
+var magnifier = null;
+var xdndHandler = null;
+var keyboard = null;
+var layoutManager = null;
+var kbdA11yDialog = null;
+var inputMethod = null;
+var introspectService = null;
+var locatePointer = null;
 let _startDate;
 let _defaultCssStylesheet = null;
 let _cssStylesheet = null;
@@ -107,14 +110,15 @@ function _sessionUpdated() {
     if (sessionMode.isPrimary)
         _loadDefaultStylesheet();
 
-    wm.allowKeybinding('overlay-key',
-        Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW);
+    wm.allowKeybinding('overlay-key', Shell.ActionMode.NORMAL |
+                                      Shell.ActionMode.OVERVIEW);
 
     wm.allowKeybinding('locate-pointer-key', Shell.ActionMode.ALL);
 
     wm.setCustomKeybindingHandler('panel-run-dialog',
-        Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW,
-        sessionMode.hasRunDialog ? openRunDialog : null);
+                                  Shell.ActionMode.NORMAL |
+                                  Shell.ActionMode.OVERVIEW,
+                                  sessionMode.hasRunDialog ? openRunDialog : null);
 
     if (!sessionMode.hasRunDialog) {
         if (runDialog)
@@ -137,9 +141,30 @@ function _sessionUpdated() {
     }
 }
 
-/** @returns {void} */
-export async function start() {
-    globalThis.log = console.log;
+/**
+ * @param {any...} args a list of values to log
+ */
+function _loggingFunc(...args) {
+    let fields = { 'MESSAGE': args.join(', ') };
+    let domain = 'GNOME Shell';
+
+    // If the caller is an extension, add it as metadata
+    let extension = imports.misc.extensionUtils.getCurrentExtension();
+    if (extension != null) {
+        domain = extension.metadata.name;
+        fields['GNOME_SHELL_EXTENSION_UUID'] = extension.uuid;
+        fields['GNOME_SHELL_EXTENSION_NAME'] = extension.metadata.name;
+    }
+
+    GLib.log_structured(domain, GLib.LogLevelFlags.LEVEL_MESSAGE, fields);
+}
+
+function start() {
+    globalThis.log = _loggingFunc;
+
+    // These are here so we don't break compatibility.
+    global.logError = globalThis.log;
+    global.log = globalThis.log;
 
     // Chain up async errors reported from C
     global.connect('notify-error', (global, msg, detail) => {
@@ -154,12 +179,11 @@ export async function start() {
     sessionMode.connect('updated', _sessionUpdated);
 
     St.Settings.get().connect('notify::high-contrast', _loadDefaultStylesheet);
-    St.Settings.get().connect('notify::color-scheme', _loadDefaultStylesheet);
 
     // Initialize ParentalControlsManager before the UI
     ParentalControlsManager.getDefault();
 
-    await _initializeUI();
+    _initializeUI();
 
     shellAccessDialogDBusService = new AccessDialog.AccessDialogDBus();
     shellAudioSelectionDBusService = new AudioDeviceSelection.AudioDeviceSelectionDBus();
@@ -174,8 +198,7 @@ export async function start() {
     _sessionUpdated();
 }
 
-/** @private */
-async function _initializeUI() {
+function _initializeUI() {
     // Ensure ShellWindowTracker and ShellAppUsage are initialized; this will
     // also initialize ShellAppSystem first. ShellAppSystem
     // needs to load all the .desktop files, and ShellWindowTracker
@@ -293,25 +316,23 @@ async function _initializeUI() {
         });
     }
 
-    let Scripting;
     let perfModule;
-    const {automationScript} = global;
-    if (automationScript) {
-        Scripting = await import('./scripting.js');
-        perfModule = await import(automationScript.get_uri());
+    const perfModuleName = GLib.getenv('SHELL_PERF_MODULE');
+    if (perfModuleName) {
+        perfModule = eval(`imports.perf.${perfModuleName};`);
         if (perfModule.init)
             perfModule.init();
     }
 
     layoutManager.connect('startup-complete', () => {
-        if (actionMode === Shell.ActionMode.NONE)
+        if (actionMode == Shell.ActionMode.NONE)
             actionMode = Shell.ActionMode.NORMAL;
 
         if (screenShield)
             screenShield.lockIfWasLocked();
 
-        if (sessionMode.currentMode !== 'gdm' &&
-            sessionMode.currentMode !== 'initial-setup') {
+        if (sessionMode.currentMode != 'gdm' &&
+            sessionMode.currentMode != 'initial-setup') {
             GLib.log_structured(LOG_DOMAIN, GLib.LogLevelFlags.LEVEL_MESSAGE, {
                 'MESSAGE': `GNOME Shell started at ${_startDate}`,
                 'MESSAGE_ID': GNOMESHELL_STARTED_MESSAGE_ID,
@@ -336,7 +357,7 @@ async function _initializeUI() {
         LoginManager.registerSessionWithGDM();
 
         if (perfModule) {
-            let perfOutput = GLib.getenv('SHELL_PERF_OUTPUT');
+            let perfOutput = GLib.getenv("SHELL_PERF_OUTPUT");
             Scripting.runPerfScript(perfModule, perfOutput);
         }
     });
@@ -398,25 +419,6 @@ function _getStylesheet(name) {
     return null;
 }
 
-/** @returns {string} */
-export function getStyleVariant() {
-    const {colorScheme} = St.Settings.get();
-    switch (sessionMode.colorScheme) {
-    case 'force-dark':
-        return 'dark';
-    case 'force-light':
-        return 'light';
-    case 'prefer-dark':
-        return colorScheme === St.SystemColorScheme.PREFER_LIGHT
-            ? 'light' : 'dark';
-    case 'prefer-light':
-        return colorScheme === St.SystemColorScheme.PREFER_DARK
-            ? 'dark' : 'light';
-    default:
-        return '';
-    }
-}
-
 function _getDefaultStylesheet() {
     let stylesheet = null;
     let name = sessionMode.stylesheetName;
@@ -425,11 +427,8 @@ function _getDefaultStylesheet() {
     if (St.Settings.get().high_contrast)
         stylesheet = _getStylesheet(name.replace('.css', '-high-contrast.css'));
 
-    if (stylesheet === null)
-        stylesheet = _getStylesheet(name.replace('.css', `-${getStyleVariant()}.css`));
-
     if (stylesheet == null)
-        stylesheet = _getStylesheet(name);
+        stylesheet = _getStylesheet(sessionMode.stylesheetName);
 
     return stylesheet;
 }
@@ -444,26 +443,29 @@ function _loadDefaultStylesheet() {
 }
 
 /**
+ * getThemeStylesheet:
+ *
  * Get the theme CSS file that the shell will load
  *
  * @returns {?Gio.File}: A #GFile that contains the theme CSS,
  *          null if using the default
  */
-export function getThemeStylesheet() {
+function getThemeStylesheet() {
     return _cssStylesheet;
 }
 
 /**
- * Set the theme CSS file that the shell will load
- *
- * @param {string=} cssStylesheet - A file path that contains the theme CSS,
+ * setThemeStylesheet:
+ * @param {string=} cssStylesheet: A file path that contains the theme CSS,
  *     set it to null to use the default
+ *
+ * Set the theme CSS file that the shell will load
  */
-export function setThemeStylesheet(cssStylesheet) {
+function setThemeStylesheet(cssStylesheet) {
     _cssStylesheet = cssStylesheet ? Gio.File.new_for_path(cssStylesheet) : null;
 }
 
-export function reloadThemeResource() {
+function reloadThemeResource() {
     if (_themeResource)
         _themeResource._unregister();
 
@@ -488,7 +490,7 @@ function _loadOskLayouts() {
  *
  * Reloads the theme CSS file
  */
-export function loadTheme() {
+function loadTheme() {
     let themeContext = St.ThemeContext.get_for_stage(global.stage);
     let previousTheme = themeContext.get_theme();
 
@@ -511,10 +513,11 @@ export function loadTheme() {
 }
 
 /**
- * @param {string} msg A message
- * @param {string} details Additional information
+ * notify:
+ * @param {string} msg: A message
+ * @param {string} details: Additional information
  */
-export function notify(msg, details) {
+function notify(msg, details) {
     let source = new MessageTray.SystemNotificationSource();
     messageTray.add(source);
     let notification = new MessageTray.Notification(source, msg, details);
@@ -523,12 +526,13 @@ export function notify(msg, details) {
 }
 
 /**
- * See shell_global_notify_problem().
+ * notifyError:
+ * @param {string} msg: An error message
+ * @param {string} details: Additional information
  *
- * @param {string} msg - An error message
- * @param {string} details - Additional information
+ * See shell_global_notify_problem().
  */
-export function notifyError(msg, details) {
+function notifyError(msg, details) {
     // Also print to stderr so it's logged somewhere
     if (details)
         console.warn(`error: ${msg}: ${details}`);
@@ -539,8 +543,12 @@ export function notifyError(msg, details) {
 }
 
 /**
- * @private
+ * _findModal:
+ *
  * @param {Clutter.Grab} grab - grab
+ *
+ * Private function.
+ *
  */
 function _findModal(grab) {
     for (let i = 0; i < modalActorFocusStack.length; i++) {
@@ -551,6 +559,10 @@ function _findModal(grab) {
 }
 
 /**
+ * pushModal:
+ * @param {Clutter.Actor} actor: actor which will be given keyboard focus
+ * @param {Object=} params: optional parameters
+ *
  * Ensure we are in a mode where all keyboard and mouse input goes to
  * the stage, and focus @actor. Multiple calls to this function act in
  * a stacking fashion; the effect will be undone when an equal number
@@ -560,7 +572,7 @@ function _findModal(grab) {
  * modal stack returns to this actor, reset the focus to the actor
  * which was focused at the time pushModal() was invoked.
  *
- * `params` may be used to provide the following parameters:
+ * @params may be used to provide the following parameters:
  *  - timestamp: used to associate the call with a specific user initiated
  *               event. If not provided then the value of
  *               global.get_current_time() is assumed.
@@ -572,11 +584,9 @@ function _findModal(grab) {
  *                global keybindings; the default of NONE will filter
  *                out all keybindings
  *
- * @param {Clutter.Actor} actor - actor which will be given keyboard focus
- * @param {object=} params - optional parameters
- * @returns {Clutter.Grab} - the grab handle created
+ * @returns {Clutter.Grab}: the grab handle created
  */
-export function pushModal(actor, params) {
+function pushModal(actor, params) {
     params = Params.parse(params, {
         timestamp: global.get_current_time(),
         options: 0,
@@ -621,19 +631,20 @@ export function pushModal(actor, params) {
 }
 
 /**
+ * popModal:
+ * @param {Clutter.Grab} grab - the grab given by pushModal()
+ * @param {number=} timestamp - optional timestamp
+ *
  * Reverse the effect of pushModal(). If this invocation is undoing
  * the topmost invocation, then the focus will be restored to the
  * previous focus at the time when pushModal() was invoked.
  *
- * `timestamp` is optionally used to associate the call with a specific user
+ * @timestamp is optionally used to associate the call with a specific user
  * initiated event. If not provided then the value of
  * global.get_current_time() is assumed.
- *
- * @param {Clutter.Grab} grab - the grab given by pushModal()
- * @param {number=} timestamp - optional timestamp
  */
-export function popModal(grab, timestamp) {
-    if (timestamp === undefined)
+function popModal(grab, timestamp) {
+    if (timestamp == undefined)
         timestamp = global.get_current_time();
 
     let focusIndex = _findModal(grab);
@@ -651,7 +662,7 @@ export function popModal(grab, timestamp) {
 
     record.grab.dismiss();
 
-    if (focusIndex === modalActorFocusStack.length - 1) {
+    if (focusIndex == modalActorFocusStack.length - 1) {
         if (record.prevFocus)
             record.prevFocus.disconnect(record.prevFocusDestroyId);
         actionMode = record.actionMode;
@@ -692,29 +703,21 @@ export function popModal(grab, timestamp) {
     actionMode = Shell.ActionMode.NORMAL;
 }
 
-/**
- * Creates the looking glass panel
- *
- * @returns {LookingGlass.LookingGlass}
- */
-export function createLookingGlass() {
+function createLookingGlass() {
     if (lookingGlass == null)
         lookingGlass = new LookingGlass.LookingGlass();
 
     return lookingGlass;
 }
 
-/**
- * Opens the run dialog
- */
-export function openRunDialog() {
+function openRunDialog() {
     if (runDialog == null)
         runDialog = new RunDialog.RunDialog();
 
     runDialog.open();
 }
 
-export function openWelcomeDialog() {
+function openWelcomeDialog() {
     if (welcomeDialog === null)
         welcomeDialog = new WelcomeDialog.WelcomeDialog();
 
@@ -723,15 +726,14 @@ export function openWelcomeDialog() {
 
 /**
  * activateWindow:
- *
- * @param {Meta.Window} window the window to activate
- * @param {number=} time current event time
- * @param {number=} workspaceNum  window's workspace number
+ * @param {Meta.Window} window: the window to activate
+ * @param {number=} time: current event time
+ * @param {number=} workspaceNum:  window's workspace number
  *
  * Activates @window, switching to its workspace first if necessary,
  * and switching out of the overview if it's currently active
  */
-export function activateWindow(window, time, workspaceNum) {
+function activateWindow(window, time, workspaceNum) {
     let workspaceManager = global.workspace_manager;
     let activeWorkspaceNum = workspaceManager.get_active_workspace_index();
     let windowWorkspaceNum = workspaceNum !== undefined ? workspaceNum : window.get_workspace().index();
@@ -739,7 +741,7 @@ export function activateWindow(window, time, workspaceNum) {
     if (!time)
         time = global.get_current_time();
 
-    if (windowWorkspaceNum !== activeWorkspaceNum) {
+    if (windowWorkspaceNum != activeWorkspaceNum) {
         let workspace = workspaceManager.get_workspace_by_index(windowWorkspaceNum);
         workspace.activate_with_focus(window, time);
     } else {
@@ -758,7 +760,7 @@ export function activateWindow(window, time, workspaceNum) {
  * @param {number} workspaceIndex - the requested workspace
  * @param {bool} append - create workspace if it doesn't exist
  */
-export function moveWindowToMonitorAndWorkspace(window, monitorIndex, workspaceIndex, append = false) {
+function moveWindowToMonitorAndWorkspace(window, monitorIndex, workspaceIndex, append = false) {
     // We need to move the window before changing the workspace, because
     // the move itself could cause a workspace change if the window enters
     // the primary monitor
@@ -779,15 +781,15 @@ export function moveWindowToMonitorAndWorkspace(window, monitorIndex, workspaceI
 
 // TODO - replace this timeout with some system to guess when the user might
 // be e.g. just reading the screen and not likely to interact.
-const DEFERRED_TIMEOUT_SECONDS = 20;
-let _deferredWorkData = {};
+var DEFERRED_TIMEOUT_SECONDS = 20;
+var _deferredWorkData = {};
 // Work scheduled for some point in the future
-let _deferredWorkQueue = [];
+var _deferredWorkQueue = [];
 // Work we need to process before the next redraw
-let _beforeRedrawQueue = [];
+var _beforeRedrawQueue = [];
 // Counter to assign work ids
-let _deferredWorkSequence = 0;
-let _deferredTimeoutId = 0;
+var _deferredWorkSequence = 0;
+var _deferredTimeoutId = 0;
 
 function _runDeferredWork(workId) {
     if (!_deferredWorkData[workId])
@@ -798,7 +800,7 @@ function _runDeferredWork(workId) {
 
     _deferredWorkQueue.splice(index, 1);
     _deferredWorkData[workId].callback();
-    if (_deferredWorkQueue.length === 0 && _deferredTimeoutId > 0) {
+    if (_deferredWorkQueue.length == 0 && _deferredTimeoutId > 0) {
         GLib.source_remove(_deferredTimeoutId);
         _deferredTimeoutId = 0;
     }
@@ -819,7 +821,7 @@ function _runBeforeRedrawQueue() {
 
 function _queueBeforeRedraw(workId) {
     _beforeRedrawQueue.push(workId);
-    if (_beforeRedrawQueue.length === 1) {
+    if (_beforeRedrawQueue.length == 1) {
         const laters = global.compositor.get_laters();
         laters.add(Meta.LaterType.BEFORE_REDRAW, () => {
             _runBeforeRedrawQueue();
@@ -829,6 +831,10 @@ function _queueBeforeRedraw(workId) {
 }
 
 /**
+ * initializeDeferredWork:
+ * @param {Clutter.Actor} actor: an actor
+ * @param {callback} callback: Function to invoke to perform work
+ *
  * This function sets up a callback to be invoked when either the
  * given actor is mapped, or after some period of time when the machine
  * is idle. This is useful if your actor isn't always visible on the
@@ -840,12 +846,9 @@ function _queueBeforeRedraw(workId) {
  * initialization as well, under the assumption that new actors
  * will need it.
  *
- * @param {Clutter.Actor} actor - an actor
- * @param {callback} callback - Function to invoke to perform work
- *
- * @returns {string} - A string work identifier
+ * @returns {string}: A string work identifier
  */
-export function initializeDeferredWork(actor, callback) {
+function initializeDeferredWork(actor, callback) {
     // Turn into a string so we can use as an object property
     let workId = `${++_deferredWorkSequence}`;
     _deferredWorkData[workId] = {
@@ -869,15 +872,14 @@ export function initializeDeferredWork(actor, callback) {
 
 /**
  * queueDeferredWork:
- *
- * @param {string} workId work identifier
+ * @param {string} workId: work identifier
  *
  * Ensure that the work identified by @workId will be
  * run on map or timeout. You should call this function
  * for example when data being displayed by the actor has
  * changed.
  */
-export function queueDeferredWork(workId) {
+function queueDeferredWork(workId) {
     let data = _deferredWorkData[workId];
     if (!data) {
         let message = `Invalid work id ${workId}`;
@@ -888,7 +890,7 @@ export function queueDeferredWork(workId) {
         _deferredWorkQueue.push(workId);
     if (data.actor.mapped) {
         _queueBeforeRedraw(workId);
-    } else if (_deferredTimeoutId === 0) {
+    } else if (_deferredTimeoutId == 0) {
         _deferredTimeoutId = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, DEFERRED_TIMEOUT_SECONDS, () => {
             _runAllDeferredWork();
             _deferredTimeoutId = 0;
@@ -898,7 +900,7 @@ export function queueDeferredWork(workId) {
     }
 }
 
-const RestartMessage = GObject.registerClass(
+var RestartMessage = GObject.registerClass(
 class RestartMessage extends ModalDialog.ModalDialog {
     _init(message) {
         super._init({
@@ -924,7 +926,7 @@ function showRestartMessage(message) {
     restartMessage.open();
 }
 
-class AnimationsSettings {
+var AnimationsSettings = class {
     constructor() {
         this._animationsEnabled = true;
         this._handles = new Set();
@@ -985,4 +987,4 @@ class AnimationsSettings {
         this._syncAnimationsEnabled();
         handle.connect('stopped', this._onRemoteAccessHandleStopped.bind(this));
     }
-}
+};

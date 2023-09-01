@@ -1,14 +1,13 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
+/* exported SearchController */
 
-import Clutter from 'gi://Clutter';
-import GObject from 'gi://GObject';
-import St from 'gi://St';
+const { Clutter, GObject, St } = imports.gi;
 
-import * as Main from './main.js';
-import * as Search from './search.js';
-import * as ShellEntry from './shellEntry.js';
+const Main = imports.ui.main;
+const Search = imports.ui.search;
+const ShellEntry = imports.ui.shellEntry;
 
-const FocusTrap = GObject.registerClass(
+var FocusTrap = GObject.registerClass(
 class FocusTrap extends St.Widget {
     vfunc_navigate_focus(from, direction) {
         if (direction === St.DirectionType.TAB_FORWARD ||
@@ -25,7 +24,7 @@ function getTermsForSearchString(searchString) {
     return searchString.split(/\s+/);
 }
 
-export const SearchController = GObject.registerClass({
+var SearchController = GObject.registerClass({
     Properties: {
         'search-active': GObject.ParamSpec.boolean(
             'search-active', 'search-active', 'search-active',
@@ -91,7 +90,7 @@ export const SearchController = GObject.registerClass({
         // Since the entry isn't inside the results container we install this
         // dummy widget as the last results container child so that we can
         // include the entry in the keynav tab path
-        this._focusTrap = new FocusTrap({can_focus: true});
+        this._focusTrap = new FocusTrap({ can_focus: true });
         this._focusTrap.connect('key-focus-in', () => {
             this._entry.grab_key_focus();
         });
@@ -319,28 +318,6 @@ export const SearchController = GObject.registerClass({
         }
 
         return Clutter.EVENT_PROPAGATE;
-    }
-
-    /**
-     * addProvider:
-     *
-     * Add a search provider to the controller.
-     *
-     * @param {object} provider - a search provider implementation
-     */
-    addProvider(provider) {
-        this._searchResults._registerProvider(provider);
-    }
-
-    /**
-     * removeProvider:
-     *
-     * Remove a search provider from the controller.
-     *
-     * @param {object} provider - a search provider implementation
-     */
-    removeProvider(provider) {
-        this._searchResults._unregisterProvider(provider);
     }
 
     get searchActive() {

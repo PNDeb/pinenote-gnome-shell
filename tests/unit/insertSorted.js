@@ -2,43 +2,61 @@
 
 // Test cases for Util.insertSorted
 
+const JsUnit = imports.jsUnit;
+
 // Needed so that Util can bring some UI stuff
 // we don't actually use
-import 'resource:///org/gnome/shell/ui/environment.js';
+const Environment = imports.ui.environment;
+Environment.init();
+const Util = imports.misc.util;
 
-import * as Assertions from '../common/assertions.js';
+function assertArrayEquals(errorMessage, array1, array2) {
+    JsUnit.assertEquals(errorMessage + ' length',
+                        array1.length, array2.length);
+    for (let j = 0; j < array1.length; j++) {
+        JsUnit.assertEquals(errorMessage + ' item ' + j,
+                            array1[j], array2[j]);
+    }
+}
 
-import * as Util from 'resource:///org/gnome/shell/misc/util.js';
+function cmp(one, two) {
+    return one-two;
+}
 
 let arrayInt = [1, 2, 3, 5, 6];
-Util.insertSorted(arrayInt, 4, (one, two) => one - two);
+Util.insertSorted(arrayInt, 4, cmp);
 
-Assertions.assertArrayEquals('first test', [1, 2, 3, 4, 5, 6], arrayInt);
+assertArrayEquals('first test', [1,2,3,4,5,6], arrayInt);
 
 // no comparator, integer sorting is implied
 Util.insertSorted(arrayInt, 3);
 
-Assertions.assertArrayEquals('second test', [1, 2, 3, 3, 4, 5, 6], arrayInt);
+assertArrayEquals('second test', [1,2,3,3,4,5,6], arrayInt);
 
-let obj1 = {a: 1};
-let obj2 = {a: 2, b: 0};
-let obj3 = {a: 2, b: 1};
-let obj4 = {a: 3};
+let obj1 = { a: 1 };
+let obj2 = { a: 2, b: 0 };
+let obj3 = { a: 2, b: 1 };
+let obj4 = { a: 3 };
+
+function objCmp(one, two) {
+    return one.a - two.a;
+}
 
 let arrayObj = [obj1, obj3, obj4];
 
 // obj2 compares equivalent to obj3, should be
 // inserted before
-Util.insertSorted(arrayObj, obj2, (one, two) => one.a - two.a);
+Util.insertSorted(arrayObj, obj2, objCmp);
 
-Assertions.assertArrayEquals('object test', [obj1, obj2, obj3, obj4], arrayObj);
+assertArrayEquals('object test', [obj1, obj2, obj3, obj4], arrayObj);
 
-const checkedCmp = (one, two) => {
-    if (typeof one != 'number' || typeof two != 'number')
+function checkedCmp(one, two) {
+    if (typeof one != 'number' ||
+        typeof two != 'number')
         throw new TypeError('Invalid type passed to checkedCmp');
 
-    return one - two;
-};
+    return one-two;
+}
 
 let arrayEmpty = [];
 
@@ -55,4 +73,4 @@ Util.insertSorted(arrayEmpty, 5, checkedCmp);
 Util.insertSorted(arrayEmpty, 2, checkedCmp);
 Util.insertSorted(arrayEmpty, 1, checkedCmp);
 
-Assertions.assertArrayEquals('checkedCmp test', [1, 2, 3, 4, 5], arrayEmpty);
+assertArrayEquals('checkedCmp test', [1, 2, 3, 4, 5], arrayEmpty);

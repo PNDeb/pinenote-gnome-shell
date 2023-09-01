@@ -1,17 +1,18 @@
-import GObject from 'gi://GObject';
+/* exported TransientSignalHolder, connectObject, disconnectObject */
+const { GObject } = imports.gi;
 
 const destroyableTypes = [];
 
 /**
  * @private
- * @param {object} obj - an object
+ * @param {Object} obj - an object
  * @returns {bool} - true if obj has a 'destroy' GObject signal
  */
 function _hasDestroySignal(obj) {
     return destroyableTypes.some(type => obj instanceof type);
 }
 
-export const TransientSignalHolder = GObject.registerClass(
+var TransientSignalHolder = GObject.registerClass(
 class TransientSignalHolder extends GObject.Object {
     static [GObject.signals] = {
         'destroy': {},
@@ -51,7 +52,7 @@ class SignalManager {
     }
 
     /**
-     * @param {object} obj - object to get signal tracker for
+     * @param {Object} obj - object to get signal tracker for
      * @returns {SignalTracker} - the signal tracker for object
      */
     getSignalTracker(obj) {
@@ -64,7 +65,7 @@ class SignalManager {
     }
 
     /**
-     * @param {object} obj - object to get signal tracker for
+     * @param {Object} obj - object to get signal tracker for
      * @returns {?SignalTracker} - the signal tracker for object if it exists
      */
     maybeGetSignalTracker(obj) {
@@ -72,7 +73,7 @@ class SignalManager {
     }
 
     /*
-     * @param {object} obj - object to remove signal tracker for
+     * @param {Object} obj - object to remove signal tracker for
      * @returns {void}
      */
     removeSignalTracker(obj) {
@@ -82,7 +83,7 @@ class SignalManager {
 
 class SignalTracker {
     /**
-     * @param {object=} owner - object that owns the tracker
+     * @param {Object=} owner - object that owns the tracker
      */
     constructor(owner) {
         if (_hasDestroySignal(owner))
@@ -100,13 +101,13 @@ class SignalTracker {
 
     /**
      * @private
-     * @param {object} obj - a tracked object
+     * @param {Object} obj - a tracked object
      * @returns {SignalData} - signal data for object
      */
     _getSignalData(obj) {
         let data = this._map.get(obj);
         if (data === undefined) {
-            data = {ownerSignals: [], destroyId: 0};
+            data = { ownerSignals: [], destroyId: 0 };
             this._map.set(obj, data);
         }
         return data;
@@ -148,7 +149,7 @@ class SignalTracker {
     }
 
     /**
-     * @param {object} obj - tracked object
+     * @param {Object} obj - tracked object
      * @param {...number} handlerIds - tracked handler IDs
      * @returns {void}
      */
@@ -160,11 +161,11 @@ class SignalTracker {
     }
 
     /**
-     * @param {object} obj - tracked object instance
+     * @param {Object} obj - tracked object instance
      * @returns {void}
      */
     untrack(obj) {
-        const {ownerSignals, destroyId} = this._getSignalData(obj);
+        const { ownerSignals, destroyId } = this._getSignalData(obj);
         this._map.delete(obj);
 
         const ownerProto = this._getObjectProto(this._owner);
@@ -206,7 +207,7 @@ class SignalTracker {
  * with an optional flags value, followed by an object to track
  * @returns {void}
  */
-export function connectObject(thisObj, ...args) {
+function connectObject(thisObj, ...args) {
     const getParams = argArray => {
         const [signalName, handler, arg, ...rest] = argArray;
         if (typeof arg !== 'number')
@@ -249,11 +250,11 @@ export function connectObject(thisObj, ...args) {
  * Disconnect all signals that were connected for
  * the specified tracked object
  *
- * @param {object} thisObj - the emitter object
- * @param {object} obj - the tracked object
+ * @param {Object} thisObj - the emitter object
+ * @param {Object} obj - the tracked object
  * @returns {void}
  */
-export function disconnectObject(thisObj, obj) {
+function disconnectObject(thisObj, obj) {
     SignalManager.getDefault().maybeGetSignalTracker(thisObj)?.untrack(obj);
 }
 
@@ -263,7 +264,7 @@ export function disconnectObject(thisObj, obj) {
  *
  * @param {GObject.Type} gtype - a GObject type
  */
-export function registerDestroyableType(gtype) {
+function registerDestroyableType(gtype) {
     if (!GObject.type_is_a(gtype, GObject.Object))
         throw new Error(`${gtype} is not a GObject subclass`);
 

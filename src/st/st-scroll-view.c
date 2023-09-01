@@ -759,30 +759,27 @@ st_scroll_view_style_changed (StWidget *widget)
 }
 
 static gboolean
-st_scroll_view_scroll_event (ClutterActor *self,
-                             ClutterEvent *event)
+st_scroll_view_scroll_event (ClutterActor       *self,
+                             ClutterScrollEvent *event)
 {
   StScrollViewPrivate *priv = ST_SCROLL_VIEW (self)->priv;
   ClutterTextDirection direction;
-  ClutterScrollDirection scroll_direction;
 
   /* don't handle scroll events if requested not to */
   if (!priv->mouse_scroll)
     return FALSE;
 
-  if (!!(clutter_event_get_flags (event) &
-         CLUTTER_EVENT_FLAG_POINTER_EMULATED))
+  if (clutter_event_is_pointer_emulated ((ClutterEvent *) event))
     return TRUE;
 
   direction = clutter_actor_get_text_direction (self);
-  scroll_direction = clutter_event_get_scroll_direction (event);
 
-  switch (scroll_direction)
+  switch (event->direction)
     {
     case CLUTTER_SCROLL_SMOOTH:
       {
         gdouble delta_x, delta_y;
-        clutter_event_get_scroll_delta (event, &delta_x, &delta_y);
+        clutter_event_get_scroll_delta ((ClutterEvent *)event, &delta_x, &delta_y);
 
         if (direction == CLUTTER_TEXT_DIRECTION_RTL)
           delta_x *= -1;
@@ -793,7 +790,7 @@ st_scroll_view_scroll_event (ClutterActor *self,
       break;
     case CLUTTER_SCROLL_UP:
     case CLUTTER_SCROLL_DOWN:
-      adjust_with_direction (priv->vadjustment, direction);
+      adjust_with_direction (priv->vadjustment, event->direction);
       break;
     case CLUTTER_SCROLL_LEFT:
     case CLUTTER_SCROLL_RIGHT:
@@ -801,13 +798,13 @@ st_scroll_view_scroll_event (ClutterActor *self,
         {
           ClutterScrollDirection dir;
 
-          dir = scroll_direction == CLUTTER_SCROLL_LEFT ? CLUTTER_SCROLL_RIGHT
+          dir = event->direction == CLUTTER_SCROLL_LEFT ? CLUTTER_SCROLL_RIGHT
                                                         : CLUTTER_SCROLL_LEFT;
           adjust_with_direction (priv->hadjustment, dir);
         }
       else
         {
-          adjust_with_direction (priv->hadjustment, direction);
+          adjust_with_direction (priv->hadjustment, event->direction);
         }
       break;
     default:

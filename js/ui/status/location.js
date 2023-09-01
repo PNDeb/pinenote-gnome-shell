@@ -1,18 +1,14 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
+/* exported Indicator */
 
-import Clutter from 'gi://Clutter';
-import Gio from 'gi://Gio';
-import GLib from 'gi://GLib';
-import GObject from 'gi://GObject';
-import Shell from 'gi://Shell';
-import St from 'gi://St';
+const { Clutter, Gio, GLib, GObject, Shell, St } = imports.gi;
 
-import * as Dialog from '../dialog.js';
-import * as ModalDialog from '../modalDialog.js';
-import * as PermissionStore from '../../misc/permissionStore.js';
-import {SystemIndicator} from '../quickSettings.js';
+const Dialog = imports.ui.dialog;
+const ModalDialog = imports.ui.modalDialog;
+const PermissionStore = imports.misc.permissionStore;
+const {SystemIndicator} = imports.ui.quickSettings;
 
-import {loadInterfaceXML} from '../../misc/fileUtils.js';
+const { loadInterfaceXML } = imports.misc.fileUtils;
 
 const LOCATION_SCHEMA = 'org.gnome.system.location';
 const MAX_ACCURACY_LEVEL = 'max-accuracy-level';
@@ -21,8 +17,7 @@ const ENABLED = 'enabled';
 const APP_PERMISSIONS_TABLE = 'location';
 const APP_PERMISSIONS_ID = 'location';
 
-/** @enum {number} */
-const GeoclueAccuracyLevel = {
+var GeoclueAccuracyLevel = {
     NONE: 0,
     COUNTRY: 1,
     CITY: 4,
@@ -33,30 +28,26 @@ const GeoclueAccuracyLevel = {
 
 function accuracyLevelToString(accuracyLevel) {
     for (let key in GeoclueAccuracyLevel) {
-        if (GeoclueAccuracyLevel[key] === accuracyLevel)
+        if (GeoclueAccuracyLevel[key] == accuracyLevel)
             return key;
     }
 
     return 'NONE';
 }
 
-const GeoclueIface = loadInterfaceXML('org.freedesktop.GeoClue2.Manager');
+var GeoclueIface = loadInterfaceXML('org.freedesktop.GeoClue2.Manager');
 const GeoclueManager = Gio.DBusProxy.makeProxyWrapper(GeoclueIface);
 
-const AgentIface = loadInterfaceXML('org.freedesktop.GeoClue2.Agent');
+var AgentIface = loadInterfaceXML('org.freedesktop.GeoClue2.Agent');
 
 let _geoclueAgent = null;
-
-/**
- * @returns {GeoclueAgent} - the GeoclueAgent singleton
- */
-export function getGeoclueAgent() {
+function _getGeoclueAgent() {
     if (_geoclueAgent === null)
         _geoclueAgent = new GeoclueAgent();
     return _geoclueAgent;
 }
 
-const GeoclueAgent = GObject.registerClass({
+var GeoclueAgent = GObject.registerClass({
     Properties: {
         'enabled': GObject.ParamSpec.boolean(
             'enabled', 'Enabled', 'Enabled',
@@ -75,7 +66,7 @@ const GeoclueAgent = GObject.registerClass({
     _init() {
         super._init();
 
-        this._settings = new Gio.Settings({schema_id: LOCATION_SCHEMA});
+        this._settings = new Gio.Settings({ schema_id: LOCATION_SCHEMA });
         this._settings.connectObject(
             `changed::${ENABLED}`, () => this.notify('enabled'),
             `changed::${MAX_ACCURACY_LEVEL}`, () => this._onMaxAccuracyLevelChanged(),
@@ -87,10 +78,10 @@ const GeoclueAgent = GObject.registerClass({
         this.connect('notify::enabled', this._onMaxAccuracyLevelChanged.bind(this));
 
         this._watchId = Gio.bus_watch_name(Gio.BusType.SYSTEM,
-            'org.freedesktop.GeoClue2',
-            0,
-            this._connectToGeoclue.bind(this),
-            this._onGeoclueVanished.bind(this));
+                                           'org.freedesktop.GeoClue2',
+                                           0,
+                                           this._connectToGeoclue.bind(this),
+                                           this._onGeoclueVanished.bind(this));
         this._onMaxAccuracyLevelChanged();
         this._connectToGeoclue();
         this._connectToPermissionStore();
@@ -140,9 +131,9 @@ const GeoclueAgent = GObject.registerClass({
 
         this._connecting = true;
         new GeoclueManager(Gio.DBus.system,
-            'org.freedesktop.GeoClue2',
-            '/org/freedesktop/GeoClue2/Manager',
-            this._onManagerProxyReady.bind(this));
+                           'org.freedesktop.GeoClue2',
+                           '/org/freedesktop/GeoClue2/Manager',
+                           this._onManagerProxyReady.bind(this));
         return true;
     }
 
@@ -210,12 +201,12 @@ const GeoclueAgent = GObject.registerClass({
     }
 });
 
-export const Indicator = GObject.registerClass(
+var Indicator = GObject.registerClass(
 class Indicator extends SystemIndicator {
     _init() {
         super._init();
 
-        this._agent = getGeoclueAgent();
+        this._agent = _getGeoclueAgent();
 
         this._indicator = this._addIndicator();
         this._indicator.icon_name = 'location-services-active-symbolic';
@@ -226,7 +217,7 @@ class Indicator extends SystemIndicator {
     }
 });
 
-class AppAuthorizer {
+var AppAuthorizer = class {
     constructor(desktopId, reqAccuracyLevel, permStoreProxy, maxAccuracyLevel) {
         this.desktopId = desktopId;
         this.reqAccuracyLevel = reqAccuracyLevel;
@@ -279,7 +270,7 @@ class AppAuthorizer {
     _userAuthorizeApp() {
         let name = this._app.get_name();
         let appInfo = this._app.get_app_info();
-        let reason = appInfo.get_locale_string('X-Geoclue-Reason');
+        let reason = appInfo.get_locale_string("X-Geoclue-Reason");
 
         this._dialog =
             new GeolocationDialog(name, reason, this.reqAccuracyLevel);
@@ -296,7 +287,7 @@ class AppAuthorizer {
     }
 
     _completeAuth() {
-        if (this._accuracyLevel !== GeoclueAccuracyLevel.NONE) {
+        if (this._accuracyLevel != GeoclueAccuracyLevel.NONE) {
             this._accuracyLevel = Math.clamp(this._accuracyLevel,
                 0, this._maxAccuracyLevel);
         }
@@ -326,13 +317,13 @@ class AppAuthorizer {
             log(error.message);
         }
     }
-}
+};
 
-export const GeolocationDialog = GObject.registerClass({
-    Signals: {'response': {param_types: [GObject.TYPE_UINT]}},
+var GeolocationDialog = GObject.registerClass({
+    Signals: { 'response': { param_types: [GObject.TYPE_UINT] } },
 }, class GeolocationDialog extends ModalDialog.ModalDialog {
     _init(name, reason, reqAccuracyLevel) {
-        super._init({styleClass: 'geolocation-dialog'});
+        super._init({ styleClass: 'geolocation-dialog' });
         this.reqAccuracyLevel = reqAccuracyLevel;
 
         let content = new Dialog.MessageDialogContent({

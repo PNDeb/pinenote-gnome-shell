@@ -1,56 +1,46 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
+/* exported LookingGlass */
 
-import Clutter from 'gi://Clutter';
-import Cogl from 'gi://Cogl';
-import Gio from 'gi://Gio';
-import GLib from 'gi://GLib';
-import GObject from 'gi://GObject';
-import Graphene from 'gi://Graphene';
-import Meta from 'gi://Meta';
-import Pango from 'gi://Pango';
-import Shell from 'gi://Shell';
-import St from 'gi://St';
-import * as Signals from '../misc/signals.js';
-import System from 'system';
+const {
+    Clutter, Cogl, Gio, GLib, GObject, Graphene, Meta, Pango, Shell, St,
+} = imports.gi;
+const Signals = imports.misc.signals;
+const System = imports.system;
 
-import * as History from '../misc/history.js';
-import {ExtensionState} from '../misc/extensionUtils.js';
-import * as PopupMenu from './popupMenu.js';
-import * as ShellEntry from './shellEntry.js';
-import * as Main from './main.js';
-import * as JsParse from '../misc/jsParse.js';
+const History = imports.misc.history;
+const ExtensionUtils = imports.misc.extensionUtils;
+const PopupMenu = imports.ui.popupMenu;
+const ShellEntry = imports.ui.shellEntry;
+const Main = imports.ui.main;
+const JsParse = imports.misc.jsParse;
+
+const { ExtensionState } = ExtensionUtils;
 
 const CHEVRON = '>>> ';
 
 /* Imports...feel free to add here as needed */
-const commandHeader = `
-    const {Clutter, Gio, GLib, GObject, Meta, Shell, St} = imports.gi;
-    const Main = await import('resource:///org/gnome/shell/ui/main.js');
-
-    /* Utility functions...we should probably be able to use these
-     * in the shell core code too. */
-    const stage = global.stage;
-
-    /* Special lookingGlass functions */
-    const inspect = Main.lookingGlass.inspect.bind(Main.lookingGlass);
-    const it = Main.lookingGlass.getIt();
-    const r = Main.lookingGlass.getResult.bind(Main.lookingGlass);
-    `;
-const AsyncFunction = async function () {}.constructor;
+var commandHeader = 'const { Clutter, Gio, GLib, GObject, Meta, Shell, St } = imports.gi; ' +
+                    'const Main = imports.ui.main; ' +
+                    /* Utility functions...we should probably be able to use these
+                     * in the shell core code too. */
+                    'const stage = global.stage; ' +
+                    /* Special lookingGlass functions */
+                    'const inspect = Main.lookingGlass.inspect.bind(Main.lookingGlass); ' +
+                    'const it = Main.lookingGlass.getIt(); ' +
+                    'const r = Main.lookingGlass.getResult.bind(Main.lookingGlass); ';
 
 const HISTORY_KEY = 'looking-glass-history';
 // Time between tabs for them to count as a double-tab event
-
-const AUTO_COMPLETE_DOUBLE_TAB_DELAY = 500;
-const AUTO_COMPLETE_SHOW_COMPLETION_ANIMATION_DURATION = 200;
-const AUTO_COMPLETE_GLOBAL_KEYWORDS = _getAutoCompleteGlobalKeywords();
+var AUTO_COMPLETE_DOUBLE_TAB_DELAY = 500;
+var AUTO_COMPLETE_SHOW_COMPLETION_ANIMATION_DURATION = 200;
+var AUTO_COMPLETE_GLOBAL_KEYWORDS = _getAutoCompleteGlobalKeywords();
 
 const LG_ANIMATION_TIME = 500;
 
 const CLUTTER_DEBUG_FLAG_CATEGORIES = new Map([
     // Paint debugging can easily result in a non-responsive session
-    ['DebugFlag', {argPos: 0, exclude: ['PAINT']}],
-    ['DrawDebugFlag', {argPos: 1, exclude: []}],
+    ['DebugFlag', { argPos: 0, exclude: ['PAINT'] }],
+    ['DrawDebugFlag', { argPos: 1, exclude: [] }],
     // Exluded due to the only current option likely to result in shooting ones
     // foot
     // ['PickDebugFlag', { argPos: 2, exclude: [] }],
@@ -66,7 +56,7 @@ function _getAutoCompleteGlobalKeywords() {
     return keywords.concat(windowProperties).concat(headerProperties);
 }
 
-class AutoComplete extends Signals.EventEmitter {
+var AutoComplete = class AutoComplete extends Signals.EventEmitter {
     constructor(entry) {
         super();
 
@@ -76,50 +66,51 @@ class AutoComplete extends Signals.EventEmitter {
     }
 
     _processCompletionRequest(event) {
-        if (event.completions.length === 0)
+        if (event.completions.length == 0)
             return;
 
         // Unique match = go ahead and complete; multiple matches + single tab = complete the common starting string;
         // multiple matches + double tab = emit a suggest event with all possible options
-        if (event.completions.length === 1) {
+        if (event.completions.length == 1) {
             this.additionalCompletionText(event.completions[0], event.attrHead);
-            this.emit('completion', {completion: event.completions[0], type: 'whole-word'});
+            this.emit('completion', { completion: event.completions[0], type: 'whole-word' });
         } else if (event.completions.length > 1 && event.tabType === 'single') {
             let commonPrefix = JsParse.getCommonPrefix(event.completions);
 
             if (commonPrefix.length > 0) {
                 this.additionalCompletionText(commonPrefix, event.attrHead);
-                this.emit('completion', {completion: commonPrefix, type: 'prefix'});
-                this.emit('suggest', {completions: event.completions});
+                this.emit('completion', { completion: commonPrefix, type: 'prefix' });
+                this.emit('suggest', { completions: event.completions });
             }
         } else if (event.completions.length > 1 && event.tabType === 'double') {
-            this.emit('suggest', {completions: event.completions});
+            this.emit('suggest', { completions: event.completions });
         }
-    }
-
-    async _handleCompletions(text, time) {
-        const [completions, attrHead] =
-            await JsParse.getCompletions(text, commandHeader, AUTO_COMPLETE_GLOBAL_KEYWORDS);
-
-        const tabType = (time - this._lastTabTime) < AUTO_COMPLETE_DOUBLE_TAB_DELAY
-            ? 'double' : 'single';
-
-        this._processCompletionRequest({
-            tabType,
-            completions,
-            attrHead,
-        });
-        this._lastTabTime = time;
     }
 
     _entryKeyPressEvent(actor, event) {
         let cursorPos = this._entry.clutter_text.get_cursor_position();
         let text = this._entry.get_text();
-        if (cursorPos !== -1)
+        if (cursorPos != -1)
             text = text.slice(0, cursorPos);
 
-        if (event.get_key_symbol() === Clutter.KEY_Tab)
-            this._handleCompletions(text, event.get_time()).catch(logError);
+        if (event.get_key_symbol() == Clutter.KEY_Tab) {
+            let [completions, attrHead] = JsParse.getCompletions(text, commandHeader, AUTO_COMPLETE_GLOBAL_KEYWORDS);
+            let currTime = global.get_current_time();
+            if ((currTime - this._lastTabTime) < AUTO_COMPLETE_DOUBLE_TAB_DELAY) {
+                this._processCompletionRequest({
+                    tabType: 'double',
+                    completions,
+                    attrHead,
+                });
+            } else {
+                this._processCompletionRequest({
+                    tabType: 'single',
+                    completions,
+                    attrHead,
+                });
+            }
+            this._lastTabTime = currTime;
+        }
         return Clutter.EVENT_PROPAGATE;
     }
 
@@ -131,10 +122,11 @@ class AutoComplete extends Signals.EventEmitter {
 
         this._entry.clutter_text.insert_text(additionalCompletionText, cursorPos);
     }
-}
+};
 
-const Notebook = GObject.registerClass({
-    Signals: {'selection': {param_types: [Clutter.Actor.$gtype]}},
+
+var Notebook = GObject.registerClass({
+    Signals: { 'selection': { param_types: [Clutter.Actor.$gtype] } },
 }, class Notebook extends St.BoxLayout {
     _init() {
         super._init({
@@ -142,7 +134,7 @@ const Notebook = GObject.registerClass({
             y_expand: true,
         });
 
-        this.tabControls = new St.BoxLayout({style_class: 'labels'});
+        this.tabControls = new St.BoxLayout({ style_class: 'labels' });
 
         this._selectedIndex = -1;
         this._tabs = [];
@@ -154,7 +146,7 @@ const Notebook = GObject.registerClass({
             reactive: true,
             track_hover: true,
         });
-        let label = new St.Button({label: name});
+        let label = new St.Button({ label: name });
         label.connect('clicked', () => {
             this.selectChild(child);
             return true;
@@ -162,7 +154,7 @@ const Notebook = GObject.registerClass({
         labelBox.add_child(label);
         this.tabControls.add(labelBox);
 
-        let scrollview = new St.ScrollView({y_expand: true});
+        let scrollview = new St.ScrollView({ y_expand: true });
         scrollview.get_hscroll_bar().hide();
         scrollview.add_actor(child);
 
@@ -181,7 +173,7 @@ const Notebook = GObject.registerClass({
         vAdjust.connect('changed', () => this._onAdjustScopeChanged(tabData));
         vAdjust.connect('notify::value', () => this._onAdjustValueChanged(tabData));
 
-        if (this._selectedIndex === -1)
+        if (this._selectedIndex == -1)
             this.selectIndex(0);
     }
 
@@ -195,7 +187,7 @@ const Notebook = GObject.registerClass({
     }
 
     selectIndex(index) {
-        if (index === this._selectedIndex)
+        if (index == this._selectedIndex)
             return;
         if (index < 0) {
             this._unselect();
@@ -222,7 +214,7 @@ const Notebook = GObject.registerClass({
         } else {
             for (let i = 0; i < this._tabs.length; i++) {
                 let tabData = this._tabs[i];
-                if (tabData.child === child) {
+                if (tabData.child == child) {
                     this.selectIndex(i);
                     return;
                 }
@@ -266,7 +258,7 @@ const Notebook = GObject.registerClass({
 });
 
 function objectToString(o) {
-    if (typeof o === typeof objectToString) {
+    if (typeof o == typeof objectToString) {
         // special case this since the default is way, way too verbose
         return '<js function>';
     } else if (o && o.toString === undefined) {
@@ -279,7 +271,7 @@ function objectToString(o) {
     }
 }
 
-const ObjLink = GObject.registerClass(
+var ObjLink = GObject.registerClass(
 class ObjLink extends St.Button {
     _init(lookingGlass, o, title) {
         let text;
@@ -307,22 +299,22 @@ class ObjLink extends St.Button {
     }
 });
 
-const Result = GObject.registerClass(
+var Result = GObject.registerClass(
 class Result extends St.BoxLayout {
     _init(lookingGlass, command, o, index) {
-        super._init({vertical: true});
+        super._init({ vertical: true });
 
         this.index = index;
         this.o = o;
 
         this._lookingGlass = lookingGlass;
 
-        let cmdTxt = new St.Label({text: command});
+        let cmdTxt = new St.Label({ text: command });
         cmdTxt.clutter_text.ellipsize = Pango.EllipsizeMode.END;
         this.add(cmdTxt);
         let box = new St.BoxLayout({});
         this.add(box);
-        let resultTxt = new St.Label({text: `r(${index}) = `});
+        let resultTxt = new St.Label({ text: `r(${index}) = ` });
         resultTxt.clutter_text.ellipsize = Pango.EllipsizeMode.END;
         box.add(resultTxt);
         let objLink = new ObjLink(this._lookingGlass, o);
@@ -330,10 +322,10 @@ class Result extends St.BoxLayout {
     }
 });
 
-const WindowList = GObject.registerClass({
+var WindowList = GObject.registerClass({
 }, class WindowList extends St.BoxLayout {
     _init(lookingGlass) {
-        super._init({name: 'Windows', vertical: true, style: 'spacing: 8px'});
+        super._init({ name: 'Windows', vertical: true, style: 'spacing: 8px' });
         let tracker = Shell.WindowTracker.get_default();
         this._updateId = Main.initializeDeferredWork(this, this._updateWindowList.bind(this));
         global.display.connect('window-created', this._updateWindowList.bind(this));
@@ -356,24 +348,24 @@ const WindowList = GObject.registerClass({
                 metaWindow.connect('unmanaged', this._updateWindowList.bind(this));
                 metaWindow._lookingGlassManaged = true;
             }
-            let box = new St.BoxLayout({vertical: true});
+            let box = new St.BoxLayout({ vertical: true });
             this.add(box);
             let windowLink = new ObjLink(this._lookingGlass, metaWindow, metaWindow.title);
             box.add_child(windowLink);
-            let propsBox = new St.BoxLayout({vertical: true, style: 'padding-left: 6px;'});
+            let propsBox = new St.BoxLayout({ vertical: true, style: 'padding-left: 6px;' });
             box.add(propsBox);
-            propsBox.add(new St.Label({text: `wmclass: ${metaWindow.get_wm_class()}`}));
+            propsBox.add(new St.Label({ text: `wmclass: ${metaWindow.get_wm_class()}` }));
             let app = tracker.get_window_app(metaWindow);
             if (app != null && !app.is_window_backed()) {
                 let icon = app.create_icon_texture(22);
-                let propBox = new St.BoxLayout({style: 'spacing: 6px; '});
+                let propBox = new St.BoxLayout({ style: 'spacing: 6px; ' });
                 propsBox.add(propBox);
-                propBox.add_child(new St.Label({text: 'app: '}));
+                propBox.add_child(new St.Label({ text: 'app: ' }));
                 let appLink = new ObjLink(this._lookingGlass, app, app.get_id());
                 propBox.add_child(appLink);
                 propBox.add_child(icon);
             } else {
-                propsBox.add(new St.Label({text: '<untracked>'}));
+                propsBox.add(new St.Label({ text: '<untracked>' }));
             }
         }
     }
@@ -383,11 +375,11 @@ const WindowList = GObject.registerClass({
     }
 });
 
-const ObjInspector = GObject.registerClass(
+var ObjInspector = GObject.registerClass(
 class ObjInspector extends St.ScrollView {
     _init(lookingGlass) {
         super._init({
-            pivot_point: new Graphene.Point({x: 0.5, y: 0.5}),
+            pivot_point: new Graphene.Point({ x: 0.5, y: 0.5 }),
         });
 
         this._obj = null;
@@ -417,7 +409,7 @@ class ObjInspector extends St.ScrollView {
 
         this._container.destroy_all_children();
 
-        let hbox = new St.BoxLayout({style_class: 'lg-obj-inspector-title'});
+        let hbox = new St.BoxLayout({ style_class: 'lg-obj-inspector-title' });
         this._container.add_actor(hbox);
         let label = new St.Label({
             text: `Inspecting: ${typeof obj}: ${objectToString(obj)}`,
@@ -425,12 +417,12 @@ class ObjInspector extends St.ScrollView {
         });
         label.single_line_mode = true;
         hbox.add_child(label);
-        let button = new St.Button({label: 'Insert', style_class: 'lg-obj-inspector-button'});
+        let button = new St.Button({ label: 'Insert', style_class: 'lg-obj-inspector-button' });
         button.connect('clicked', this._onInsert.bind(this));
         hbox.add(button);
 
         if (this._previousObj != null) {
-            button = new St.Button({label: 'Back', style_class: 'lg-obj-inspector-button'});
+            button = new St.Button({ label: 'Back', style_class: 'lg-obj-inspector-button' });
             button.connect('clicked', this._onBack.bind(this));
             hbox.add(button);
         }
@@ -441,7 +433,7 @@ class ObjInspector extends St.ScrollView {
         });
         button.connect('clicked', this.close.bind(this));
         hbox.add(button);
-        if (typeof obj === typeof {}) {
+        if (typeof obj == typeof {}) {
             let properties = [];
             for (let propName in obj)
                 properties.push(propName);
@@ -454,10 +446,10 @@ class ObjInspector extends St.ScrollView {
                     let prop = obj[propName];
                     link = new ObjLink(this._lookingGlass, prop);
                 } catch (e) {
-                    link = new St.Label({text: '<error>'});
+                    link = new St.Label({ text: '<error>' });
                 }
                 let box = new St.BoxLayout();
-                box.add(new St.Label({text: `${propName}: `}));
+                box.add(new St.Label({ text: `${propName}: ` }));
                 box.add(link);
                 this._container.add_actor(box);
             }
@@ -468,7 +460,7 @@ class ObjInspector extends St.ScrollView {
         if (this._open)
             return;
 
-        const grab = Main.pushModal(this, {actionMode: Shell.ActionMode.LOOKING_GLASS});
+        const grab = Main.pushModal(this, { actionMode: Shell.ActionMode.LOOKING_GLASS });
         if (grab.get_seat_state() !== Clutter.GrabState.ALL) {
             Main.popModal(grab);
             return;
@@ -502,13 +494,13 @@ class ObjInspector extends St.ScrollView {
         this._obj = null;
     }
 
-    vfunc_key_press_event(event) {
-        const symbol = event.get_key_symbol();
+    vfunc_key_press_event(keyPressEvent) {
+        const symbol = keyPressEvent.keyval;
         if (symbol === Clutter.KEY_Escape) {
             this.close();
             return Clutter.EVENT_STOP;
         }
-        return super.vfunc_key_press_event(event);
+        return super.vfunc_key_press_event(keyPressEvent);
     }
 
     _onInsert() {
@@ -522,7 +514,7 @@ class ObjInspector extends St.ScrollView {
     }
 });
 
-const RedBorderEffect = GObject.registerClass(
+var RedBorderEffect = GObject.registerClass(
 class RedBorderEffect extends Clutter.Effect {
     _init() {
         super._init();
@@ -574,14 +566,14 @@ class RedBorderEffect extends Clutter.Effect {
     }
 });
 
-const Inspector = GObject.registerClass({
+var Inspector = GObject.registerClass({
     Signals: {
         'closed': {},
-        'target': {param_types: [Clutter.Actor.$gtype, GObject.TYPE_DOUBLE, GObject.TYPE_DOUBLE]},
+        'target': { param_types: [Clutter.Actor.$gtype, GObject.TYPE_DOUBLE, GObject.TYPE_DOUBLE] },
     },
 }, class Inspector extends Clutter.Actor {
     _init(lookingGlass) {
-        super._init({width: 0, height: 0});
+        super._init({ width: 0, height: 0 });
 
         Main.uiGroup.add_actor(this);
 
@@ -592,7 +584,7 @@ const Inspector = GObject.registerClass({
         });
         this._eventHandler = eventHandler;
         this.add_actor(eventHandler);
-        this._displayText = new St.Label({x_expand: true});
+        this._displayText = new St.Label({ x_expand: true });
         eventHandler.add_child(this._displayText);
 
         eventHandler.connect('key-press-event', this._onKeyPressEvent.bind(this));
@@ -671,11 +663,11 @@ const Inspector = GObject.registerClass({
 
         case Clutter.ScrollDirection.DOWN:
             // select child
-            if (this._target !== this._pointerTarget) {
+            if (this._target != this._pointerTarget) {
                 let child = this._pointerTarget;
                 while (child) {
                     let parent = child.get_parent();
-                    if (parent === this._target)
+                    if (parent == this._target)
                         break;
                     child = parent;
                 }
@@ -699,10 +691,11 @@ const Inspector = GObject.registerClass({
 
     _update(event) {
         let [stageX, stageY] = event.get_coords();
-        let target = global.stage.get_actor_at_pos(
-            Clutter.PickMode.ALL, stageX, stageY);
+        let target = global.stage.get_actor_at_pos(Clutter.PickMode.ALL,
+                                                   stageX,
+                                                   stageY);
 
-        if (target !== this._pointerTarget)
+        if (target != this._pointerTarget)
             this._target = target;
         this._pointerTarget = target;
 
@@ -714,10 +707,10 @@ const Inspector = GObject.registerClass({
     }
 });
 
-const Extensions = GObject.registerClass({
+var Extensions = GObject.registerClass({
 }, class Extensions extends St.BoxLayout {
     _init(lookingGlass) {
-        super._init({vertical: true, name: 'lookingGlassExtensions'});
+        super._init({ vertical: true, name: 'lookingGlassExtensions' });
 
         this._lookingGlass = lookingGlass;
         this._noExtensions = new St.Label({
@@ -737,7 +730,7 @@ const Extensions = GObject.registerClass({
         });
 
         Main.extensionManager.connect('extension-loaded',
-            this._loadExtension.bind(this));
+                                      this._loadExtension.bind(this));
     }
 
     _loadExtension(o, uuid) {
@@ -748,11 +741,11 @@ const Extensions = GObject.registerClass({
             return;
 
         let extensionDisplay = this._createExtensionDisplay(extension);
-        if (this._numExtensions === 0)
+        if (this._numExtensions == 0)
             this._extensionsList.remove_actor(this._noExtensions);
 
         this._numExtensions++;
-        const {name} = extension.metadata;
+        const { name } = extension.metadata;
         const pos = [...this._extensionsList].findIndex(
             dsp => dsp._extension.metadata.name.localeCompare(name) > 0);
         this._extensionsList.insert_child_at_index(extensionDisplay, pos);
@@ -777,23 +770,23 @@ const Extensions = GObject.registerClass({
 
         if (shouldShow) {
             let errors = extension.errors;
-            let errorDisplay = new St.BoxLayout({vertical: true});
+            let errorDisplay = new St.BoxLayout({ vertical: true });
             if (errors && errors.length) {
                 for (let i = 0; i < errors.length; i++)
-                    errorDisplay.add(new St.Label({text: errors[i]}));
+                    errorDisplay.add(new St.Label({ text: errors[i] }));
             } else {
                 /* Translators: argument is an extension UUID. */
-                let message = _('%s has not emitted any errors.').format(extension.uuid);
-                errorDisplay.add(new St.Label({text: message}));
+                let message = _("%s has not emitted any errors.").format(extension.uuid);
+                errorDisplay.add(new St.Label({ text: message }));
             }
 
             actor._errorDisplay = errorDisplay;
             actor._parentBox.add(errorDisplay);
-            actor.label = _('Hide Errors');
+            actor.label = _("Hide Errors");
         } else {
             actor._errorDisplay.destroy();
             actor._errorDisplay = null;
-            actor.label = _('Show Errors');
+            actor.label = _("Show Errors");
         }
 
         actor._isShowing = shouldShow;
@@ -821,7 +814,7 @@ const Extensions = GObject.registerClass({
     }
 
     _createExtensionDisplay(extension) {
-        let box = new St.BoxLayout({style_class: 'lg-extension', vertical: true});
+        let box = new St.BoxLayout({ style_class: 'lg-extension', vertical: true });
         box._extension = extension;
         let name = new St.Label({
             style_class: 'lg-extension-name',
@@ -836,7 +829,7 @@ const Extensions = GObject.registerClass({
         });
         box.add_child(description);
 
-        let metaBox = new St.BoxLayout({style_class: 'lg-extension-meta'});
+        let metaBox = new St.BoxLayout({ style_class: 'lg-extension-meta' });
         box.add(metaBox);
         const state = new St.Label({
             style_class: 'lg-extension-state',
@@ -883,7 +876,7 @@ const Extensions = GObject.registerClass({
 });
 
 
-const ActorLink = GObject.registerClass({
+var ActorLink = GObject.registerClass({
     Signals: {
         'inspect-actor': {},
     },
@@ -894,7 +887,7 @@ const ActorLink = GObject.registerClass({
             icon_size: 8,
             x_align: Clutter.ActorAlign.CENTER,
             y_align: Clutter.ActorAlign.CENTER,
-            pivot_point: new Graphene.Point({x: 0.5, y: 0.5}),
+            pivot_point: new Graphene.Point({ x: 0.5, y: 0.5 }),
         });
 
         const label = new St.Label({
@@ -936,7 +929,7 @@ const ActorLink = GObject.registerClass({
     }
 });
 
-const ActorTreeViewer = GObject.registerClass(
+var ActorTreeViewer = GObject.registerClass(
 class ActorTreeViewer extends St.BoxLayout {
     _init(lookingGlass) {
         super._init();
@@ -1001,7 +994,7 @@ class ActorTreeViewer extends St.BoxLayout {
             this._lookingGlass.inspectObject(actor, button);
         });
 
-        const mainContainer = new St.BoxLayout({vertical: true});
+        const mainContainer = new St.BoxLayout({ vertical: true });
         const childrenContainer = new St.BoxLayout({
             vertical: true,
             style: 'padding: 0 0 0 18px',
@@ -1063,7 +1056,7 @@ class ActorTreeViewer extends St.BoxLayout {
     }
 });
 
-const DebugFlag = GObject.registerClass({
+var DebugFlag = GObject.registerClass({
     GTypeFlags: GObject.TypeFlags.ABSTRACT,
 }, class DebugFlag extends St.Button {
     _init(label) {
@@ -1128,7 +1121,7 @@ const DebugFlag = GObject.registerClass({
 });
 
 
-const ClutterDebugFlag = GObject.registerClass(
+var ClutterDebugFlag = GObject.registerClass(
 class ClutterDebugFlag extends DebugFlag {
     _init(categoryName, flagName) {
         super._init(flagName);
@@ -1157,7 +1150,7 @@ class ClutterDebugFlag extends DebugFlag {
     }
 });
 
-const MutterPaintDebugFlag = GObject.registerClass(
+var MutterPaintDebugFlag = GObject.registerClass(
 class MutterPaintDebugFlag extends DebugFlag {
     _init(flagName) {
         super._init(flagName);
@@ -1178,7 +1171,7 @@ class MutterPaintDebugFlag extends DebugFlag {
     }
 });
 
-const MutterTopicDebugFlag = GObject.registerClass(
+var MutterTopicDebugFlag = GObject.registerClass(
 class MutterTopicDebugFlag extends DebugFlag {
     _init(flagName) {
         super._init(flagName);
@@ -1199,7 +1192,7 @@ class MutterTopicDebugFlag extends DebugFlag {
     }
 });
 
-const UnsafeModeDebugFlag = GObject.registerClass(
+var UnsafeModeDebugFlag = GObject.registerClass(
 class UnsafeModeDebugFlag extends DebugFlag {
     _init() {
         super._init('unsafe-mode');
@@ -1218,7 +1211,7 @@ class UnsafeModeDebugFlag extends DebugFlag {
     }
 });
 
-const DebugFlags = GObject.registerClass(
+var DebugFlags = GObject.registerClass(
 class DebugFlags extends St.BoxLayout {
     _init() {
         super._init({
@@ -1275,7 +1268,7 @@ class DebugFlags extends St.BoxLayout {
 });
 
 
-export const LookingGlass = GObject.registerClass(
+var LookingGlass = GObject.registerClass(
 class LookingGlass extends St.BoxLayout {
     _init() {
         super._init({
@@ -1297,25 +1290,25 @@ class LookingGlass extends St.BoxLayout {
         // Sort of magic, but...eh.
         this._maxItems = 150;
 
-        this._interfaceSettings = new Gio.Settings({schema_id: 'org.gnome.desktop.interface'});
+        this._interfaceSettings = new Gio.Settings({ schema_id: 'org.gnome.desktop.interface' });
         this._interfaceSettings.connect('changed::monospace-font-name',
-            this._updateFont.bind(this));
+                                        this._updateFont.bind(this));
         this._updateFont();
 
         // We want it to appear to slide out from underneath the panel
         Main.uiGroup.add_actor(this);
         Main.uiGroup.set_child_below_sibling(this,
-            Main.layoutManager.panelBox);
+                                             Main.layoutManager.panelBox);
         Main.layoutManager.panelBox.connect('notify::allocation',
-            this._queueResize.bind(this));
+                                            this._queueResize.bind(this));
         Main.layoutManager.keyboardBox.connect('notify::allocation',
-            this._queueResize.bind(this));
+                                               this._queueResize.bind(this));
 
         this._objInspector = new ObjInspector(this);
         Main.uiGroup.add_actor(this._objInspector);
         this._objInspector.hide();
 
-        let toolbar = new St.BoxLayout({name: 'Toolbar'});
+        let toolbar = new St.BoxLayout({ name: 'Toolbar' });
         this.add_actor(toolbar);
         const inspectButton = new St.Button({
             style_class: 'lg-toolbar-button',
@@ -1359,11 +1352,11 @@ class LookingGlass extends St.BoxLayout {
         this._notebook = notebook;
         this.add_child(notebook);
 
-        let emptyBox = new St.Bin({x_expand: true});
+        let emptyBox = new St.Bin({ x_expand: true });
         toolbar.add_child(emptyBox);
         toolbar.add_actor(notebook.tabControls);
 
-        this._evalBox = new St.BoxLayout({name: 'EvalBox', vertical: true});
+        this._evalBox = new St.BoxLayout({ name: 'EvalBox', vertical: true });
         notebook.appendPage('Evaluator', this._evalBox);
 
         this._resultsArea = new St.BoxLayout({
@@ -1379,7 +1372,7 @@ class LookingGlass extends St.BoxLayout {
         });
         this._evalBox.add_actor(this._entryArea);
 
-        let label = new St.Label({text: CHEVRON});
+        let label = new St.Label({ text: CHEVRON });
         this._entryArea.add(label);
 
         this._entry = new St.Entry({
@@ -1409,7 +1402,7 @@ class LookingGlass extends St.BoxLayout {
             // Ensure we don't get newlines in the command; the history file is
             // newline-separated.
             text = text.replace('\n', ' ');
-            this._evaluate(text).catch(logError);
+            this._evaluate(text);
             return true;
         });
 
@@ -1425,7 +1418,7 @@ class LookingGlass extends St.BoxLayout {
         // If a completion is completed unambiguously, the currently-displayed completion
         // suggestions become irrelevant.
         this._autoComplete.connect('completion', (a, e) => {
-            if (e.type === 'whole-word')
+            if (e.type == 'whole-word')
                 this._hideCompletions();
         });
 
@@ -1478,7 +1471,7 @@ class LookingGlass extends St.BoxLayout {
 
     _showCompletions(completions) {
         if (!this._completionActor) {
-            this._completionActor = new St.Label({name: 'LookingGlassAutoCompletionText', style_class: 'lg-completions-text'});
+            this._completionActor = new St.Label({ name: 'LookingGlassAutoCompletionText', style_class: 'lg-completions-text' });
             this._completionActor.clutter_text.ellipsize = Pango.EllipsizeMode.NONE;
             this._completionActor.clutter_text.line_wrap = true;
             this._evalBox.insert_child_below(this._completionActor, this._entryArea);
@@ -1525,7 +1518,7 @@ class LookingGlass extends St.BoxLayout {
         }
     }
 
-    async _evaluate(command) {
+    _evaluate(command) {
         command = this._history.addItem(command); // trims command
         if (!command)
             return;
@@ -1537,7 +1530,7 @@ class LookingGlass extends St.BoxLayout {
 
         let resultObj;
         try {
-            resultObj = await AsyncFunction(fullCmd)();
+            resultObj = Function(fullCmd)();
         } catch (e) {
             resultObj = `<exception ${e}>`;
         }
@@ -1589,9 +1582,8 @@ class LookingGlass extends St.BoxLayout {
         this.width = myWidth;
         this.height = myHeight;
         this._objInspector.set_size(Math.floor(myWidth * 0.8), Math.floor(myHeight * 0.8));
-        this._objInspector.set_position(
-            this.x + Math.floor(myWidth * 0.1),
-            this._targetY + Math.floor(myHeight * 0.1));
+        this._objInspector.set_position(this.x + Math.floor(myWidth * 0.1),
+                                        this._targetY + Math.floor(myHeight * 0.1));
     }
 
     insertObject(obj) {
@@ -1604,27 +1596,27 @@ class LookingGlass extends St.BoxLayout {
     }
 
     // Handle key events which are relevant for all tabs of the LookingGlass
-    vfunc_key_press_event(event) {
-        let symbol = event.get_key_symbol();
-        if (symbol === Clutter.KEY_Escape) {
+    vfunc_key_press_event(keyPressEvent) {
+        let symbol = keyPressEvent.keyval;
+        if (symbol == Clutter.KEY_Escape) {
             this.close();
             return Clutter.EVENT_STOP;
         }
         // Ctrl+PgUp and Ctrl+PgDown switches tabs in the notebook view
-        if (event.get_state() & Clutter.ModifierType.CONTROL_MASK) {
-            if (symbol === Clutter.KEY_Page_Up)
+        if (keyPressEvent.modifier_state & Clutter.ModifierType.CONTROL_MASK) {
+            if (symbol == Clutter.KEY_Page_Up)
                 this._notebook.prevTab();
-            else if (symbol === Clutter.KEY_Page_Down)
+            else if (symbol == Clutter.KEY_Page_Down)
                 this._notebook.nextTab();
         }
-        return super.vfunc_key_press_event(event);
+        return super.vfunc_key_press_event(keyPressEvent);
     }
 
     open() {
         if (this._open)
             return;
 
-        let grab = Main.pushModal(this, {actionMode: Shell.ActionMode.LOOKING_GLASS});
+        let grab = Main.pushModal(this, { actionMode: Shell.ActionMode.LOOKING_GLASS });
         if (grab.get_seat_state() !== Clutter.GrabState.ALL) {
             Main.popModal(grab);
             return;
@@ -1663,9 +1655,8 @@ class LookingGlass extends St.BoxLayout {
         this.setBorderPaintTarget(null);
 
         let settings = St.Settings.get();
-        let duration = Math.min(
-            LG_ANIMATION_TIME / settings.slow_down_factor,
-            LG_ANIMATION_TIME);
+        let duration = Math.min(LG_ANIMATION_TIME / settings.slow_down_factor,
+                                LG_ANIMATION_TIME);
         this.ease({
             y: this._hiddenY,
             duration,

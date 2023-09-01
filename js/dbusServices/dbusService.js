@@ -1,13 +1,14 @@
-import Gio from 'gi://Gio';
-import GLib from 'gi://GLib';
+/* exported DBusService, ServiceImplementation */
 
-import {programArgs} from 'system';
+const { Gio, GLib } = imports.gi;
 
 const Signals = imports.signals;
 
 const IDLE_SHUTDOWN_TIME = 2; // s
 
-export class ServiceImplementation {
+const { programArgs } = imports.system;
+
+var ServiceImplementation = class {
     constructor(info, objectPath) {
         this._objectPath = objectPath;
         this._dbusImpl = Gio.DBusExportedObject.wrapJSObject(info, this);
@@ -59,11 +60,12 @@ export class ServiceImplementation {
     }
 
     /**
-     * Complete @invocation with an appropriate error if @error is set;
-     * useful for implementing early returns from method implementations.
-     *
+     * _handleError:
      * @param {Gio.DBusMethodInvocation}
      * @param {Error}
+     *
+     * Complete @invocation with an appropriate error if @error is set;
+     * useful for implementing early returns from method implementations.
      *
      * @returns {bool} - true if @invocation was completed
      */
@@ -135,7 +137,7 @@ export class ServiceImplementation {
     }
 
     _injectTracking(methodName) {
-        const {prototype} = Gio.DBusMethodInvocation;
+        const { prototype } = Gio.DBusMethodInvocation;
         const origMethod = prototype[methodName];
         const that = this;
 
@@ -148,10 +150,10 @@ export class ServiceImplementation {
             that._queueShutdownCheck();
         };
     }
-}
+};
 Signals.addSignalMethods(ServiceImplementation.prototype);
 
-export class DBusService {
+var DBusService = class {
     constructor(name, service) {
         this._name = name;
         this._service = service;
@@ -160,7 +162,7 @@ export class DBusService {
         this._service.connect('shutdown', () => this._loop.quit());
     }
 
-    async runAsync() {
+    run() {
         // Bail out when not running under gnome-shell
         Gio.DBus.watch_name(Gio.BusType.SESSION,
             'org.gnome.Shell',
@@ -181,6 +183,6 @@ export class DBusService {
             null,
             () => this._loop.quit());
 
-        await this._loop.runAsync();
+        this._loop.run();
     }
-}
+};

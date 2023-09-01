@@ -1,10 +1,11 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
+/* exported getAppFavorites */
 
-import Shell from 'gi://Shell';
-import * as ParentalControlsManager from '../misc/parentalControlsManager.js';
-import * as Signals from '../misc/signals.js';
+const Shell = imports.gi.Shell;
+const ParentalControlsManager = imports.misc.parentalControlsManager;
+const Signals = imports.misc.signals;
 
-import * as Main from './main.js';
+const Main = imports.ui.main;
 
 // In alphabetical order
 const RENAMED_DESKTOP_IDS = {
@@ -149,7 +150,7 @@ class AppFavorites extends Signals.EventEmitter {
             return false;
 
         let ids = this._getIds();
-        if (pos === -1)
+        if (pos == -1)
             ids.push(appId);
         else
             ids.splice(pos, 0, appId);
@@ -183,7 +184,7 @@ class AppFavorites extends Signals.EventEmitter {
         if (!(appId in this._favorites))
             return false;
 
-        let ids = this._getIds().filter(id => id !== appId);
+        let ids = this._getIds().filter(id => id != appId);
         global.settings.set_strv(this.FAVORITE_APPS_KEY, ids);
         return true;
     }
@@ -205,11 +206,7 @@ class AppFavorites extends Signals.EventEmitter {
 }
 
 var appFavoritesInstance = null;
-
-/**
- * @returns {AppFavorites}
- */
-export function getAppFavorites() {
+function getAppFavorites() {
     if (appFavoritesInstance == null)
         appFavoritesInstance = new AppFavorites();
     return appFavoritesInstance;

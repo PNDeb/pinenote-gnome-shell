@@ -16,14 +16,18 @@
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
-import GObject from 'gi://GObject';
-import St from 'gi://St';
+/* exported init */
 
-import {Extension, gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
-import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
-import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
+const GETTEXT_DOMAIN = 'my-indicator-extension';
 
-import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+const { GObject, St } = imports.gi;
+
+const ExtensionUtils = imports.misc.extensionUtils;
+const Main = imports.ui.main;
+const PanelMenu = imports.ui.panelMenu;
+const PopupMenu = imports.ui.popupMenu;
+
+const _ = ExtensionUtils.gettext;
 
 const Indicator = GObject.registerClass(
 class Indicator extends PanelMenu.Button {
@@ -43,14 +47,24 @@ class Indicator extends PanelMenu.Button {
     }
 });
 
-export default class IndicatorExampleExtension extends Extension {
+class Extension {
+    constructor(uuid) {
+        this._uuid = uuid;
+
+        ExtensionUtils.initTranslations(GETTEXT_DOMAIN);
+    }
+
     enable() {
         this._indicator = new Indicator();
-        Main.panel.addToStatusArea(this.uuid, this._indicator);
+        Main.panel.addToStatusArea(this._uuid, this._indicator);
     }
 
     disable() {
         this._indicator.destroy();
         this._indicator = null;
     }
+}
+
+function init(meta) {
+    return new Extension(meta.uuid);
 }

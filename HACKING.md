@@ -66,7 +66,7 @@ library. These headers are not installed, distributed or introspected.
 Use UpperCamelCase when importing modules to distinguish them from ordinary
 variables, e.g.
 ```javascript
-    import GLib from 'gi://GLib';
+    const GLib = imports.gi.GLib;
 ```
 Imports should be categorized into one of two places. The top-most import block
 should contain only "environment imports". These are either modules from
@@ -74,18 +74,16 @@ gobject-introspection or modules added by gjs itself.
 
 The second block of imports should contain only "application imports". These
 are the JS code that is in the gnome-shell codebase,
-e.g. `'./popupMenu.js'`.
+e.g. `imports.ui.popupMenu`.
 
 Each import block should be sorted alphabetically. Don't import modules you
 don't use.
 ```javascript
-    import GLib from 'gi://GLib';
-    import Gio from 'gi://Gio';
-    import St from 'gi://St';
+    const { GLib, Gio, St } = imports.gi;
 
-    import * as Main from './main.js';
-    import * as Params from '../misc/params.js';
-    import * as Util from '../misc/util.js';
+    const Main = imports.ui.main;
+    const Params = imports.misc.params;
+    const Util = imports.misc.util;
 ```
 The alphabetical ordering should be done independently of the location of the
 location. Never reference `imports` in actual code.
@@ -120,7 +118,7 @@ See [What's new in JavaScript 1.7](https://developer.mozilla.org/en/JavaScript/N
 There are many approaches to classes in JavaScript. We use standard ES6 classes
 whenever possible, that is when not inheriting from GObjects.
 ```javascript
-    export class IconLabelMenuItem extends PopupMenu.PopupMenuBaseItem {
+    var IconLabelMenuItem = class extends PopupMenu.PopupMenuBaseItem {
         constructor(icon, label) {
             super({ reactive: false });
             this.actor.add_child(icon);
@@ -136,7 +134,7 @@ whenever possible, that is when not inheriting from GObjects.
 For GObject inheritance, we use the GObject.registerClass() function provided
 by gjs.
 ```javascript
-    export const MyActor = GObject.registerClass(
+    var MyActor = GObject.registerClass(
     class MyActor extends Clutter.Actor {
         _init(params) {
             super._init(params);
@@ -152,7 +150,7 @@ GObject Introspection is a powerful feature that allows us to have native
 bindings for almost any library built around GObject. If a library requires
 you to inherit from a type to use it, you can do so:
 ```javascript
-    export const MyClutterActor = GObject.registerClass(
+    var MyClutterActor = GObject.registerClass(
     class MyClutterActor extends Clutter.Actor {
 
         vfunc_get_preferred_width(forHeight) {
@@ -203,7 +201,7 @@ wrapper class the "delegate".
 We sometimes use expando properties to set a property called `_delegate` on
 the actor itself:
 ```javascript
-    export const MyActor = GObject.registerClass(
+    var MyActor = GObject.registerClass(
     class MyActor extends Clutter.Actor {
         _init(params) {
             super._init(params);
@@ -214,7 +212,7 @@ the actor itself:
 
 Or using the deprecated `actor`:
 ```javascript
-    export class MyClass {
+    var MyClass = class {
         constructor() {
             this.actor = new St.Button({ text: "This is a button" });
             this.actor._delegate = this;
@@ -259,10 +257,10 @@ notation.
 A more realistic example would be connecting to a signal on a method of a
 prototype:
 ```javascript
-    import * as FnorbLib from './fborbLib.js';
+    const FnorbLib = imports.fborbLib;
 
-    export class MyClass {
-        constructor() {
+    var MyClass = class {
+        _init() {
             let fnorb = new FnorbLib.Fnorb();
             fnorb.connect('frobate', this._onFnorbFrobate.bind(this));
         }
