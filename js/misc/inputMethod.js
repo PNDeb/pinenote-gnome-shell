@@ -12,6 +12,8 @@ Gio._promisify(IBus.InputContext.prototype,
 
 var HIDE_PANEL_TIME = 50;
 
+const HAVE_REQUIRE_SURROUNDING_TEXT = GObject.signal_lookup('require-surrounding-text', IBus.InputContext);
+
 var InputMethod = GObject.registerClass({
     Signals: {
         'surrounding-text-set': {},
@@ -76,13 +78,15 @@ var InputMethod = GObject.registerClass({
 
         this._context.set_client_commit_preedit(true);
         this._context.connect('commit-text', this._onCommitText.bind(this));
-        this._context.connect('require-surrounding-text', this._onRequireSurroundingText.bind(this));
         this._context.connect('delete-surrounding-text', this._onDeleteSurroundingText.bind(this));
         this._context.connect('update-preedit-text-with-mode', this._onUpdatePreeditText.bind(this));
         this._context.connect('show-preedit-text', this._onShowPreeditText.bind(this));
         this._context.connect('hide-preedit-text', this._onHidePreeditText.bind(this));
         this._context.connect('forward-key-event', this._onForwardKeyEvent.bind(this));
         this._context.connect('destroy', this._clear.bind(this));
+
+        if (HAVE_REQUIRE_SURROUNDING_TEXT)
+            this._context.connect('require-surrounding-text', this._onRequireSurroundingText.bind(this));
 
         Main.keyboard.connectObject('visibility-changed', () => this._updateCapabilities());
 
@@ -180,6 +184,7 @@ var InputMethod = GObject.registerClass({
     vfunc_focus_in(focus) {
         this._currentFocus = focus;
         if (this._context) {
+            this.update();
             this._context.focus_in();
             this._emitRequestSurrounding();
         }
@@ -363,7 +368,6 @@ var InputMethod = GObject.registerClass({
     _fullReset() {
         this._context.set_content_type(0, 0);
         this._context.set_cursor_location(0, 0, 0, 0);
-        this._context.set_capabilities(0);
         this._context.reset();
     }
 
@@ -372,9 +376,11 @@ var InputMethod = GObject.registerClass({
             return;
         this._updateCapabilities();
         this._context.set_content_type(this._purpose, this._hints);
-        this._context.set_cursor_location(
-            this._cursorRect.x, this._cursorRect.y,
-            this._cursorRect.width, this._cursorRect.height);
+        if (this._cursorRect) {
+            this._context.set_cursor_location(
+                this._cursorRect.x, this._cursorRect.y,
+                this._cursorRect.width, this._cursorRect.height);
+        }
         this._emitRequestSurrounding();
     }
 });
