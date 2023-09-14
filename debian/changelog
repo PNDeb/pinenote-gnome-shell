@@ -1,6 +1,9 @@
-gnome-shell (43.7-2~deb12u1) UNRELEASED; urgency=medium
+gnome-shell (43.8-0+deb12u1) UNRELEASED; urgency=medium
 
-  * Rebuild for bookworm (Closes: #1038972)
+  * d/control.in, d/gbp.conf: Use debian/bookworm branch
+  * Apply 43.7-2 changes to bookworm (Closes: #1038972)
+  * New upstream stable release 43.8
+    - TODO
 
  -- Simon McVittie <smcv@debian.org>  Sun, 20 Aug 2023 13:20:00 +0100
 
