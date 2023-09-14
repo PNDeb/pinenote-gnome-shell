@@ -29,6 +29,9 @@ gnome-shell (43.8-0+deb12u1) UNRELEASED; urgency=medium
     - Upstream CI adjustments not relevant to Debian
     - All other changes were already in 43.7-1 or 43.7-2
   * d/patches: Drop patches that were included in the new upstream release
+  * d/p/Update-Czech-translation.patch:
+    Translation update from upstream
+    (this brings us up to upstream gnome-43 branch commit 43.8-1-gacae9894f)
 
  -- Simon McVittie <smcv@debian.org>  Sun, 20 Aug 2023 13:20:00 +0100
 
