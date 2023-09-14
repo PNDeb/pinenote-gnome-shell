@@ -3,7 +3,32 @@ gnome-shell (43.8-0+deb12u1) UNRELEASED; urgency=medium
   * d/control.in, d/gbp.conf: Use debian/bookworm branch
   * Apply 43.7-2 changes to bookworm (Closes: #1038972)
   * New upstream stable release 43.8
-    - TODO
+    - Allow notifications to be dismissed with backspace key in addition to
+      delete key, for easier use on laptops where the delete key might be
+      missing or hard to reach (gnome-shell#5789)
+    - Update subprojects/gvc subproject to the same version used in 44.4
+      (gnome-shell#6842)
+      + Fix duplicate devices shown when reconnecting to PulseAudio
+      + Fix possible use-after-free crashes on PulseAudio/Pipewire restart
+      + Improve choice of default icons
+      + Performance improvements
+    - Avoid sliders in quick settings (volume, etc.) being reported to
+      accessibility tools as their own parent object (gnome-shell#6686)
+    - Better compatibility with Debian 12's version of ibus
+      (gnome-shell#6405)
+    - Report focus events to ibus when using Wayland (gnome-shell#6415)
+    - In the "looking glass" debug interface, cope with objects that
+      cannot be converted to string
+    - When showing weather, avoid getting meaningless location names like
+      "WiFi" or "GeoIP" from GeoClue >= 2.7
+    - Improve GNOME Shell app grid performance by avoiding repainting
+      monitors other than the one it is displayed on (gnome-shell#6819)
+    - Align scrolled viewports to the pixel grid to avoid jitter visible
+      during scrolling (gnome-shell#6835)
+    - Support translated strings in more files
+    - Upstream CI adjustments not relevant to Debian
+    - All other changes were already in 43.7-1 or 43.7-2
+  * d/patches: Drop patches that were included in the new upstream release
 
  -- Simon McVittie <smcv@debian.org>  Sun, 20 Aug 2023 13:20:00 +0100
 
