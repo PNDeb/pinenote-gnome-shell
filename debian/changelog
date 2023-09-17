@@ -28,11 +28,16 @@ gnome-shell (43.9-1) UNRELEASED; urgency=medium
     - Support translated strings in more files
     - Upstream CI adjustments not relevant to Debian
     - All other changes were already in 43.7-1 or 43.7-2
-  * d/patches: Drop patches that were included in the new upstream release
-  * d/p/Update-Czech-translation.patch:
-    Translation update from upstream
-    (this brings us up to upstream gnome-43 branch commit 43.8-1-gacae9894f)
-  * New upstream release
+  * New upstream stable release 43.9
+    - Fix exposing window previews on lock screen via keyboard shortcuts
+      (Closes: #1052067, CVE-2023-43090, gnome-shell#6990)
+    - Improve handling of latched vs. locked modes in on-screen keyboard
+      (gnome-shell#5763)
+    - Reverse slider direction in RTL locales (gnome-shell#5107)
+    - Add missing environment variables required to launch ibus-daemon
+      (gnome-shell#6998)
+    - Translation updates
+  * d/patches: Drop patches that were included in the new upstream releases
 
  -- Simon McVittie <smcv@debian.org>  Sun, 17 Sep 2023 16:36:01 +0100
 
