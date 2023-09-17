@@ -1,5 +1,2 @@
-Update-Czech-translation.patch
-screenshot-Do-not-wrongly-enable-window-button.patch
-screenshot-Only-handle-mode-switch-shortcut-when-supporte.patch
 debian/gnome-shell-extension-prefs-Give-Debian-specific-advice.patch
 debian/Revert-build-Port-to-gcr4.patch
