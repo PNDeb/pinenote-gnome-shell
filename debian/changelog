@@ -1,5 +1,6 @@
-gnome-shell (44.5-1) UNRELEASED; urgency=medium
+gnome-shell (44.5-1) unstable; urgency=high
 
+  * Team upload
   * New upstream release
     - Fix exposing window previews on lock screen via keyboard shortcuts
       (Closes: #1052067, CVE-2023-43090, gnome-shell#6990)
@@ -10,7 +11,7 @@ gnome-shell (44.5-1) UNRELEASED; urgency=medium
       (gnome-shell#6998)
     - Translation updates
 
- -- Simon McVittie <smcv@debian.org>  Sun, 17 Sep 2023 13:49:46 +0100
+ -- Simon McVittie <smcv@debian.org>  Sun, 17 Sep 2023 13:50:52 +0100
 
 gnome-shell (44.4-1) unstable; urgency=medium
 
