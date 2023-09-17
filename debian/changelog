@@ -1,7 +1,6 @@
-gnome-shell (43.9-1) UNRELEASED; urgency=medium
+gnome-shell (43.9-0+deb12u1) UNRELEASED; urgency=medium
 
   * d/control.in, d/gbp.conf: Use debian/bookworm branch
-  * Apply 43.7-2 changes to bookworm (Closes: #1038972)
   * New upstream stable release 43.8
     - Allow notifications to be dismissed with backspace key in addition to
       delete key, for easier use on laptops where the delete key might be
@@ -29,8 +28,9 @@ gnome-shell (43.9-1) UNRELEASED; urgency=medium
     - Upstream CI adjustments not relevant to Debian
     - All other changes were already in 43.7-1 or 43.7-2
   * New upstream stable release 43.9
-    - Fix exposing window previews on lock screen via keyboard shortcuts
-      (Closes: #1052067, CVE-2023-43090, gnome-shell#6990)
+    - Avoid exposing window previews on lock screen via keyboard shortcuts
+      (CVE-2023-43090, gnome-shell#6990; previously fixed for bookworm via
+      patches in 43.6-1~deb12u2)
     - Improve handling of latched vs. locked modes in on-screen keyboard
       (gnome-shell#5763)
     - Reverse slider direction in RTL locales (gnome-shell#5107)
