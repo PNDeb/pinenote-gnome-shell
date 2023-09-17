@@ -1,9 +1,10 @@
-gnome-shell (43.6-1~deb12u2) UNRELEASED; urgency=medium
+gnome-shell (43.6-1~deb12u2) bookworm-security; urgency=high
 
+  * Team upload
   * Avoid exposing window previews on lock screen via keyboard shortcuts
     (Closes: #1052067, CVE-2023-43090, gnome-shell#6990)
 
- -- Simon McVittie <smcv@debian.org>  Sun, 17 Sep 2023 17:08:21 +0100
+ -- Simon McVittie <smcv@debian.org>  Sun, 17 Sep 2023 17:18:49 +0100
 
 gnome-shell (43.6-1~deb12u1) bookworm; urgency=medium
 
