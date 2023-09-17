@@ -1492,6 +1492,7 @@ var Keyboard = GObject.registerClass({
 
             let layout = new KeyContainer();
             layout.shiftKeys = [];
+            layout.mode = currentLevel.mode;
 
             this._loadRows(currentLevel, level, levels.length, layout);
             layers[level] = layout;
@@ -1527,7 +1528,10 @@ var Keyboard = GObject.registerClass({
 
             if (key.action !== 'modifier') {
                 button.connect('commit', (_actor, keyval, str) => {
-                    this._commitAction(keyval, str);
+                    this._commitAction(keyval, str).then(() => {
+                        if (layout.mode === 'latched' && !this._latched)
+                            this._setActiveLayer(0);
+                    });
                 });
             }
 
@@ -1607,9 +1611,6 @@ var Keyboard = GObject.registerClass({
                 });
             }
         }
-
-        if (!this._latched)
-            this._setActiveLayer(0);
     }
 
     _previousWordPosition(text, cursor) {
