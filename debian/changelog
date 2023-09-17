@@ -1,4 +1,4 @@
-gnome-shell (43.8-0+deb12u1) UNRELEASED; urgency=medium
+gnome-shell (43.9-1) UNRELEASED; urgency=medium
 
   * d/control.in, d/gbp.conf: Use debian/bookworm branch
   * Apply 43.7-2 changes to bookworm (Closes: #1038972)
@@ -32,8 +32,9 @@ gnome-shell (43.8-0+deb12u1) UNRELEASED; urgency=medium
   * d/p/Update-Czech-translation.patch:
     Translation update from upstream
     (this brings us up to upstream gnome-43 branch commit 43.8-1-gacae9894f)
+  * New upstream release
 
- -- Simon McVittie <smcv@debian.org>  Sun, 20 Aug 2023 13:20:00 +0100
+ -- Simon McVittie <smcv@debian.org>  Sun, 17 Sep 2023 16:36:01 +0100
 
 gnome-shell (43.7-2) unstable; urgency=medium
 
