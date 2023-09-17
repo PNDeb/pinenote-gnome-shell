@@ -1,6 +1,14 @@
 gnome-shell (44.5-1) UNRELEASED; urgency=medium
 
   * New upstream release
+    - Fix exposing window previews on lock screen via keyboard shortcuts
+      (Closes: #1052067, CVE-2023-43090, gnome-shell#6990)
+    - Improve handling of latched vs. locked modes in on-screen keyboard
+      (gnome-shell#5763)
+    - Reverse slider direction in RTL locales (gnome-shell#5107)
+    - Add missing environment variables required to launch ibus-daemon
+      (gnome-shell#6998)
+    - Translation updates
 
  -- Simon McVittie <smcv@debian.org>  Sun, 17 Sep 2023 13:49:46 +0100
 
