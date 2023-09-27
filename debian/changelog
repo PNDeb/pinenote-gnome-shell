@@ -32,14 +32,20 @@ gnome-shell (43.9-0+deb12u1) UNRELEASED; urgency=medium
       (CVE-2023-43090, gnome-shell#6990; previously fixed for bookworm via
       patches in 43.6-1~deb12u2)
     - Improve handling of latched vs. locked modes in on-screen keyboard
-      (gnome-shell#5763)
-    - Reverse slider direction in RTL locales (gnome-shell#5107)
+      (gnome-shell#5763, also fixed in 44.5)
+    - Reverse slider direction in RTL locales
+      (gnome-shell#5107, also fixed in 44.5)
     - Add missing environment variables required to launch ibus-daemon
-      (gnome-shell#6998)
+      (gnome-shell#6998, also fixed in 44.5)
     - Translation updates
   * d/patches: Drop patches that were included in the new upstream releases
+  * d/patches: Update to upstream gnome-43 branch commit 43.9-1-g3b921ba0c
+    - d/p/overview-Handle-unredirection-in-OverviewShown-state-mach.patch:
+      Improve performance for most full-screen applications by ensuring
+      that a fast-path for them stays enabled when it should be.
+      (mutter#2994 upstream; also fixed in 44.5-2)
 
- -- Simon McVittie <smcv@debian.org>  Sun, 17 Sep 2023 16:36:01 +0100
+ -- Simon McVittie <smcv@debian.org>  Wed, 27 Sep 2023 17:38:34 +0100
 
 gnome-shell (43.7-2) unstable; urgency=medium
 
