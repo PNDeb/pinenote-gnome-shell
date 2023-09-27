@@ -1,0 +1,75 @@
+From: "robert.mader@collabora.com" <robert.mader@collabora.com>
+Date: Wed, 27 Sep 2023 01:10:45 +0200
+Subject: overview: Handle unredirection in OverviewShown state machine
+
+Under certain unknown circumstances currently not every
+`disable_unredirect_for_display()` gets matched with an
+`enable_unredirect_for_display()` when closing the overview.
+
+As we only want to not disable unredirection when hidden and we nowadays
+have a state machine that ensures we transition to and from one state to
+another only once, handle unredirection en-/disablement as part of the
+state transition.
+
+(cherry picked from commit a94fcee9616ef52d0f1d6453515a104d69c6cb92)
+
+Bug: https://gitlab.gnome.org/GNOME/mutter/-/issues/2994
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2970
+Applied-upstream: 43.10, commit:3b921ba0cb28c38ff5b7faba2dfe446cbc845bb4
+---
+ js/ui/overview.js | 14 +++++---------
+ 1 file changed, 5 insertions(+), 9 deletions(-)
+
+diff --git a/js/ui/overview.js b/js/ui/overview.js
+index 757a8e4..bf3ffca 100644
+--- a/js/ui/overview.js
++++ b/js/ui/overview.js
+@@ -296,6 +296,11 @@ var Overview = class extends Signals.EventEmitter {
+                 `${this._shownState} to ${state}`);
+         }
+ 
++        if (this._shownState === OverviewShownState.HIDDEN)
++            Meta.disable_unredirect_for_display(global.display);
++        else if (state === OverviewShownState.HIDDEN)
++            Meta.enable_unredirect_for_display(global.display);
++
+         this._shownState = state;
+         this.emit(OVERVIEW_SHOWN_TRANSITIONS[state].signal);
+     }
+@@ -402,8 +407,6 @@ var Overview = class extends Signals.EventEmitter {
+ 
+     _gestureUpdate(tracker, progress) {
+         if (!this._shown) {
+-            Meta.disable_unredirect_for_display(global.display);
+-
+             this._shown = true;
+             this._visible = true;
+             this._visibleTarget = true;
+@@ -559,8 +562,6 @@ var Overview = class extends Signals.EventEmitter {
+         this._visibleTarget = true;
+         this._activationTime = GLib.get_monotonic_time() / GLib.USEC_PER_SEC;
+ 
+-        Meta.disable_unredirect_for_display(global.display);
+-
+         Main.layoutManager.overviewGroup.set_child_above_sibling(
+             this._coverPane, null);
+         this._coverPane.show();
+@@ -627,9 +628,6 @@ var Overview = class extends Signals.EventEmitter {
+     }
+ 
+     _hideDone() {
+-        // Re-enable unredirection
+-        Meta.enable_unredirect_for_display(global.display);
+-
+         this._coverPane.hide();
+ 
+         this._visible = false;
+@@ -679,8 +677,6 @@ var Overview = class extends Signals.EventEmitter {
+         // the animation because of a race in the xserver where the grab
+         // fails when requested very early during startup.
+ 
+-        Meta.disable_unredirect_for_display(global.display);
+-
+         this._changeShownState(OverviewShownState.SHOWING);
+ 
+         this._overview.runStartupAnimation(() => {
