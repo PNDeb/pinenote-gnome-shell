@@ -1,4 +1,4 @@
-gnome-shell (43.9-0+deb12u1) UNRELEASED; urgency=medium
+gnome-shell (43.9-0+deb12u1) bookworm; urgency=medium
 
   * d/control.in, d/gbp.conf: Use debian/bookworm branch
   * New upstream stable release 43.8
@@ -45,7 +45,7 @@ gnome-shell (43.9-0+deb12u1) UNRELEASED; urgency=medium
       that a fast-path for them stays enabled when it should be.
       (mutter#2994 upstream; also fixed in 44.5-2)
 
- -- Simon McVittie <smcv@debian.org>  Wed, 27 Sep 2023 17:38:34 +0100
+ -- Simon McVittie <smcv@debian.org>  Tue, 10 Oct 2023 09:50:35 +0100
 
 gnome-shell (43.7-2) unstable; urgency=medium
 
