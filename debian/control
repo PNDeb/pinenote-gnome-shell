@@ -6,7 +6,7 @@ Source: gnome-shell
 Section: gnome
 Priority: optional
 Maintainer: Debian GNOME Maintainers <pkg-gnome-maintainers@lists.alioth.debian.org>
-Uploaders: Marco Trevisan (Treviño) <marco@ubuntu.com>
+Uploaders: Jeremy Bicha <jbicha@ubuntu.com>
 Build-Depends: appstream,
                asciidoc-base,
                bash-completion,
