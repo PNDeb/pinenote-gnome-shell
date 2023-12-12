@@ -1,8 +1,11 @@
-gnome-shell (44.7-1) UNRELEASED; urgency=medium
+gnome-shell (44.7-1) unstable; urgency=medium
 
+  * Team upload
   * New upstream release
+  * d/p/overview-Handle-unredirection-in-OverviewShown-state-mach.patch:
+    Drop a patch that was included in the upstream release
 
- -- Simon McVittie <smcv@debian.org>  Tue, 12 Dec 2023 13:20:01 +0000
+ -- Simon McVittie <smcv@debian.org>  Tue, 12 Dec 2023 13:30:06 +0000
 
 gnome-shell (44.5-2) unstable; urgency=medium
 
