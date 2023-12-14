@@ -1,0 +1,23 @@
+Index: gnome-shell/js/ui/windowManager.js
+===================================================================
+--- gnome-shell.orig/js/ui/windowManager.js
++++ gnome-shell/js/ui/windowManager.js
+@@ -83,6 +83,18 @@ class DisplayChangeDialog extends ModalD
+         GLib.Source.set_name_by_id(this._timeoutId, '[gnome-shell] this._tick');
+     }
+ 
++    open() {
++
++	const be_silent = GLib.getenv('SilentDisplayChange');
++	// if (be_silent == 1){
++		this._wm.complete_display_change(true);
++		this.close();
++		return;
++	// }
++	super.open();
++
++    }
++
+     close(timestamp) {
+         if (this._timeoutId > 0) {
+             GLib.source_remove(this._timeoutId);

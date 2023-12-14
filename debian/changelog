@@ -1,3 +1,12 @@
+gnome-shell (44.8-1+pinenote) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * PineNote-related change: add environment variable SilentDisplayChange
+    that can prevent the opening of the confirmation dialog for mode changes
+    (on the PineNote, we know that registered modes work!)
+
+ -- Maximilian Weigand <mweigand@mweigand.net>  Sat, 24 Feb 2024 21:33:11 +0100
+
 gnome-shell (44.8-1) unstable; urgency=medium
 
   * Team upload
