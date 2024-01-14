@@ -63,7 +63,7 @@ Build-Depends: appstream,
                mutter (>= 44.2) <!nocheck>,
                pkg-config,
                sassc,
-               systemd [linux-any],
+               systemd-dev [linux-any],
                xauth <!nocheck>,
                xvfb <!nocheck>,
                xwayland <!nocheck>
