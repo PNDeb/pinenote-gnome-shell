@@ -1,3 +1,20 @@
+gnome-shell (44.7-2) unstable; urgency=medium
+
+  * Team upload
+
+  [ Jeremy Bícha ]
+  * Stop using debian/control.in and dh_gnome_clean
+  * Drop evolution .desktop lintian override: not needed since 44
+
+  [ Simon McVittie ]
+  * Build-depend on systemd-dev instead of systemd (Closes: #1060607)
+  * d/gnome-shell.lintian-overrides: Remove unused override
+  * d/gnome-shell.lintian-overrides: Tidy up whitespace
+  * d/g-s-common.lintian-overrides: /usr/share/g-s/modes is intentionally
+    empty
+
+ -- Simon McVittie <smcv@debian.org>  Sun, 14 Jan 2024 19:32:07 +0000
+
 gnome-shell (44.7-1) unstable; urgency=medium
 
   * Team upload
