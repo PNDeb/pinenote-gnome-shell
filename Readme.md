@@ -5,4 +5,4 @@
 	 apt build-dep gnome-shell
 	 cd pinenote-gnome-shell
 	 origtargz -d
-	 dpkg-buildpackage -us -uc
+	 DEB_BUILD_OPTIONS="nocheck parallel=4" dpkg-buildpackage -us -uc
